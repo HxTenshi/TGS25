@@ -1,5 +1,4 @@
-//#include "$temp$.h"
-#include "ScriptTemplate.h"
+#include "$temp$.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
