@@ -61,6 +61,8 @@ void Actor::Finish(){
 }
 
 void Actor::EngineUpdateComponent(float deltaTime){
+	Update(deltaTime);
+
 	mTransform->EngineUpdate();
 	for (const auto& cmp : mComponents.mComponent){
 		if (cmp.second.Get() == mTransform.Get())continue;
@@ -106,32 +108,19 @@ void Actor::CreateInspector(){
 		if (mTreeViewPtr)
 			Window::ChangeTreeViewName(mTreeViewPtr,name);
 	};
+	std::function<void(std::string)> collbackpre = [&](std::string name){
+		mPrefab = name;
+		AssetDataBase::Instance(mPrefab.c_str(), mPrefabAsset);
+	};
 	auto data = Window::CreateInspector();
 	Window::AddInspector(new TemplateInspectorDataSet<std::string>("Name", &mName, collback), data);
+	Window::AddInspector(new TemplateInspectorDataSet<std::string>("Prefab", &mPrefab, collbackpre), data);
 	Window::ViewInspector("Actor",NULL,data);
 	for (const auto& cmp : mComponents.mComponent){
 		cmp.second->CreateInspector();
 	}
 }
 
-
-void Actor::CopyData(Actor* post, Actor* base){
-
-	for (const auto& cmp : base->mComponents.mComponent){
-		Component* basecmp = cmp.second.Get();
-		Component* postcmp;
-		auto postcmpite = post->GetComponent(cmp.first);
-		if (postcmpite){
-			postcmp = postcmpite.Get();
-		}
-		else{
-			auto c = ComponentFactory::Create(cmp.second->ClassName());
-			post->mComponents.AddComponent_NotInitialize(c);
-			postcmp = c.Get();
-		}
-		postcmp->CopyData(postcmp, basecmp);
-	}
-}
 void Actor::ExportSceneDataStart(const std::string& pass, File& sceneFile){
 	for (auto child : mTransform->Children()){
 		child->ExportSceneData(pass, sceneFile);
@@ -147,33 +136,22 @@ void Actor::ExportSceneData(const std::string& pass, File& sceneFile){
 
 void Actor::ExportData(const std::string& path, const std::string& fileName){
 
-	if (!mUniqueID){
-		mUniqueID = gUniqueIDGenerator.CreateUniqueID();
+	shared_ptr<I_InputHelper> prefab_io(NULL);
+	if (mPrefabAsset && path != "Assets"){
+		auto& d = mPrefabAsset->GetFileData();
+		prefab_io = d.GetData();
+		//prefab_io = new FileInputHelper(mPrefab);
+		//if (prefab_io->error){
+		//	delete prefab_io;
+		//}
 	}
 
-#define _KEY(x) io->func( x , #x)
-	I_ioHelper* io = new FileOutputHelper(path + "/" + fileName + ".json");
+	I_ioHelper* io = new FileOutputHelper(path + "/" + fileName + ".json", prefab_io.Get());
 
-	_KEY(mUniqueID);
-	_KEY(mName);
+	_ExportData(io);
 
-
-	io->pushObject();
-
-	for (const auto& cmp : mComponents.mComponent){
-		io->pushObject();
-
-		cmp.second->IO_Data(io);
-
-		auto obj = io->popObject();
-		io->func(obj, cmp.second->ClassName().c_str());
-	}
-
-	auto obj = io->popObject();
-	io->func(obj, "components");
 
 	delete io;
-#undef _KEY
 }
 void Actor::ExportData(const std::string& path){
 
@@ -185,33 +163,113 @@ void Actor::ExportData(const std::string& path){
 
 void Actor::ExportData(picojson::value& json){
 
+	shared_ptr<I_InputHelper> prefab_io(NULL);
+	if (mPrefabAsset){
+		auto& d = mPrefabAsset->GetFileData();
+		prefab_io = d.GetData();
+	}
+
+
+	I_ioHelper* io = new MemoryOutputHelper(json, prefab_io.Get());
+
+	_ExportData(io);
+
+	delete io;
+}
+
+
+void Actor::_ExportData(I_ioHelper* io){
+
 	if (!mUniqueID){
-		mUniqueID = gUniqueIDGenerator.CreateUniqueID();
+		CreateNewID();
 	}
 
 #define _KEY(x) io->func( x , #x)
-	I_ioHelper* io = new MemoryOutputHelper(json);
+#define _KEY_COMPEL(x) io->func( x , #x,true)
 
-	_KEY(mUniqueID);
-	_KEY(mName);
+	_KEY_COMPEL(mUniqueID);
+	_KEY_COMPEL(mName);
+	_KEY_COMPEL(mPrefab);
 
 
-	io->pushObject();
+	io->pushObject("components");
 
 	for (const auto& cmp : mComponents.mComponent){
-		io->pushObject();
+		io->pushObject(cmp.second->ClassName());
 
 		cmp.second->IO_Data(io);
+		io->popObject();
 
-		auto obj = io->popObject();
-		io->func(obj, cmp.second->ClassName().c_str());
+	}
+	io->popObject();
+
+#undef _KEY
+#undef _KEY_COMPEL
+}
+
+
+void Actor::PastePrefabParam(picojson::value& json){
+
+	mComponents.RunFinish();
+
+	picojson::value param;
+	auto filter = new MemoryInputHelper(json,NULL);
+	auto io_out = new MemoryOutputHelper(param, filter, true);
+
+
+	_ExportData(io_out);
+
+	delete io_out;
+	delete filter;
+
+
+
+	MemoryInputHelper* io_in = NULL;
+	MemoryInputHelper* filter_in = NULL;
+	if (mPrefabAsset){
+		auto& d = mPrefabAsset->GetFileData();
+		auto val = *d.GetParam();
+
+		filter_in = new MemoryInputHelper(param, NULL);
+		io_in = new MemoryInputHelper(val, filter_in);
 	}
 
-	auto obj = io->popObject();
-	io->func(obj, "components");
 
-	delete io;
-#undef _KEY
+	if (io_in){
+		picojson::object components;
+		io_in->func(components, "components");
+
+		io_in->pushObject("components");
+
+		for (auto com : components){
+			io_in->pushObject(com.first);
+
+			auto component = mComponents.GetComponent(com.first);
+			bool create = false;
+			if (!component){
+				component = ComponentFactory::Create(com.first);
+				create = true;
+			}
+
+			if (component){
+				component->IO_Data(io_in);
+				if (create){
+					mComponents.AddComponent_NotInitialize(component);
+
+				}
+			}
+
+			io_in->popObject();
+		}
+
+		//_ImportData(io_in);
+
+
+		delete filter_in;
+		delete io_in;
+	}
+	mComponents.RunInitialize();
+	mComponents.RunStart();
 }
 
 
@@ -222,7 +280,7 @@ bool Actor::ImportDataAndNewID(const std::string& fileName){
 		return false;
 	}
 
-	mUniqueID = gUniqueIDGenerator.CreateUniqueID();
+	CreateNewID();
 
 	return true;
 }
@@ -234,79 +292,120 @@ void Actor::CreateNewID(){
 
 void Actor::ImportData(const std::string& fileName){
 
-	mComponents.mComponent.clear();
-
-#define _KEY(x) io->func( x , #x)
-	I_ioHelper* io = new FileInputHelper(fileName);
+	I_ioHelper* io = new FileInputHelper(fileName, NULL);
 	if (io->error){
 		delete io;
-		io = new FileInputHelper(fileName + ".json");
-		if (io->error)return;
-	}
-
-	_KEY(mUniqueID);
-	_KEY(mName);
-
-
-	picojson::object components;
-	io->func(components, "components");
-
-	for (auto com : components){
-		//if (!f.In(&temp))break;
-		io->pushObject(com.second.get<picojson::object>());
-
-		if (auto p = ComponentFactory::Create(com.first)){
-			//p->ImportData(f);
-			p->IO_Data(io);
-			mComponents.AddComponent_NotInitialize(p);
-			if (dynamic_cast<TransformComponent*>(p.Get())){
-				mTransform = p;
-			}
+		io = new FileInputHelper(fileName + ".json", NULL);
+		if (io->error){
+			delete io;
+			return;
 		}
-
-		io->popObject();
 	}
+
+
+	_ImportData(io);
 
 	delete io;
-#undef _KEY
 }
-void Actor::ImportDataAndNewID(picojson::value& json){
 
-	mComponents.mComponent.clear();
+void Actor::ImportData(picojson::value& json){
 
-#define _KEY(x) io->func( x , #x)
-	I_ioHelper* io = new MemoryInputHelper(json);
+	I_ioHelper* io = new MemoryInputHelper(json, NULL);
 	if (io->error){
+		delete io;
 		return;
 	}
 
+	_ImportData(io);
+
+	delete io;
+}
+
+void Actor::ImportDataAndNewID(picojson::value& json){
+
+	I_ioHelper* io = new MemoryInputHelper(json, NULL);
+	if (io->error){
+		delete io;
+		return;
+	}
+
+	_ImportData(io);
+
+	CreateNewID();
+
+	delete io;
+}
+
+void Actor::_ImportData(I_ioHelper* io){
+
+	mComponents.mComponent.clear();
+
+#define _KEY(x) io->func( x , #x)
+
 	_KEY(mUniqueID);
-	mUniqueID = gUniqueIDGenerator.CreateUniqueID();
 	_KEY(mName);
+	_KEY(mPrefab);
+
+	if (mPrefab!=""){
+		AssetDataBase::Instance(mPrefab.c_str(), mPrefabAsset);
+		if (mPrefabAsset){
+			auto prefab_io = mPrefabAsset->GetFileData().GetData();
+			if (!prefab_io->error){
+
+				picojson::object components;
+				prefab_io->func(components, "components");
+
+				prefab_io->pushObject("components");
+
+				for (auto com : components){
+					prefab_io->pushObject(com.first);
+
+					if (auto component = ComponentFactory::Create(com.first)){
+						component->IO_Data(prefab_io.Get());
+						mComponents.AddComponent_NotInitialize(component);
+					}
+
+					prefab_io->popObject();
+				}
+
+			}
+		}
+	}
 
 
 	picojson::object components;
 	io->func(components, "components");
 
-	for (auto com : components){
-		//if (!f.In(&temp))break;
-		io->pushObject(com.second.get<picojson::object>());
+	io->pushObject("components");
 
-		if (auto p = ComponentFactory::Create(com.first)){
-			//p->ImportData(f);
-			p->IO_Data(io);
-			mComponents.AddComponent_NotInitialize(p);
-			if (dynamic_cast<TransformComponent*>(p.Get())){
-				mTransform = p;
+	for (auto com : components){
+		io->pushObject(com.first);
+
+		auto component = mComponents.GetComponent(com.first);
+		bool create = false;
+		if (!component){
+			component = ComponentFactory::Create(com.first);
+			create = true;
+		}
+
+		if (component){
+			component->IO_Data(io);
+			if (create){
+				mComponents.AddComponent_NotInitialize(component);
+
 			}
 		}
 
 		io->popObject();
 	}
 
-	delete io;
+	mTransform = mComponents.GetComponent<TransformComponent>();
+	
+
 #undef _KEY
+
 }
+
 
 //https://github.com/satoruhiga/ofxEulerAngles/blob/master/src/ofxEulerAngles.h
 XMVECTOR toEulerXYZ(const XMMATRIX &m)

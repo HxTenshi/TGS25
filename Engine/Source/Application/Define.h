@@ -10,7 +10,10 @@ enum class MyWindowMessage{
 	ScriptCompile,
 	SaveScene,
 
+	SelectAsset,
 	OpenAsset,
+
+	CreateScriptFile,
 
 	PlayGame,
 	StopGame,
