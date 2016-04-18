@@ -25,7 +25,9 @@ public:
 	virtual void Start(){}
 	virtual void Update(){}
 	virtual void Finish(){}
-	virtual void OnCollide(Actor* target){ (void)target; }
+	virtual void OnCollideBegin(Actor* target){ (void)target; }
+	virtual void OnCollideEnter(Actor* target){ (void)target; }
+	virtual void OnCollideExit(Actor* target){ (void)target; }
 
 	Actor* gameObject;
 protected:

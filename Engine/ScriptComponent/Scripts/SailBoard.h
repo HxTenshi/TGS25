@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class $temp$ :public IDllScriptComponent{
+class SailBoard :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;

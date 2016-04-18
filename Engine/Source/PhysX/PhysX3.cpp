@@ -25,21 +25,8 @@ class TestOn : public physx::PxSimulationEventCallback{
 	{
 		for (PxU32 i = 0; i < nbPairs; i++)
 		{
-			const PxContactPair& cp = pairs[i];
-			if (cp.events & PxPairFlag::eTRIGGER_DEFAULT)
-			{
-				Actor* act0 = (Actor*)pairHeader.actors[0]->userData;
-				Actor* act1 = (Actor*)pairHeader.actors[1]->userData;
-				if (!(act0&&act1))continue;
-				auto script0 = act0->GetComponent<ScriptComponent>();
-				auto script1 = act1->GetComponent<ScriptComponent>();
-				if (script0)
-					script0->OnCollide(act1);
-				if (script1)
-					script1->OnCollide(act0);
 
-				break;
-			}
+			const PxContactPair& cp = pairs[i];
 			if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND)
 			{
 				Actor* act0 = (Actor*)pairHeader.actors[0]->userData;
@@ -66,6 +53,20 @@ class TestOn : public physx::PxSimulationEventCallback{
 				//	break;
 				//}
 			}
+			if (cp.events & PxPairFlag::eNOTIFY_TOUCH_LOST)
+			{
+				Actor* act0 = (Actor*)pairHeader.actors[0]->userData;
+				Actor* act1 = (Actor*)pairHeader.actors[1]->userData;
+				if (!(act0&&act1))continue;
+				auto script0 = act0->GetComponent<ScriptComponent>();
+				auto script1 = act1->GetComponent<ScriptComponent>();
+				if (script0)
+					script0->LostCollide(act1);
+				if (script1)
+					script1->LostCollide(act0);
+
+				break;
+			}
 		}
 	}
 	void onTrigger(PxTriggerPair *pairs, PxU32 count) override{
@@ -88,15 +89,15 @@ class TestOn : public physx::PxSimulationEventCallback{
 			}
 			if (cp.status & PxPairFlag::eNOTIFY_TOUCH_LOST)
 			{
-				//Actor* act0 = (Actor*)cp.triggerActor->userData;
-				//Actor* act1 = (Actor*)cp.otherActor->userData;
-				//if (!(act0&&act1))continue;
-				//auto script0 = act0->GetComponent<ScriptComponent>();
-				//auto script1 = act1->GetComponent<ScriptComponent>();
-				//if (script0)
-				//	script0->OnCollide(act1);
-				//if (script1)
-				//	script1->OnCollide(act0);
+				Actor* act0 = (Actor*)cp.triggerActor->userData;
+				Actor* act1 = (Actor*)cp.otherActor->userData;
+				if (!(act0&&act1))continue;
+				auto script0 = act0->GetComponent<ScriptComponent>();
+				auto script1 = act1->GetComponent<ScriptComponent>();
+				if (script0)
+					script0->LostCollide(act1);
+				if (script1)
+					script1->LostCollide(act0);
 
 				break;
 
@@ -118,8 +119,9 @@ PxFilterFlags SampleSubmarineFilterShader(
 		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
 	}
 	else{
-		pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+		pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eTRIGGER_DEFAULT;
 	}
+
 	bool kinematic0 = PxFilterObjectIsKinematic(attributes0);
 	bool kinematic1 = PxFilterObjectIsKinematic(attributes1);
 

@@ -312,6 +312,7 @@ ScriptComponent::ScriptComponent(){
 ScriptComponent::~ScriptComponent(){
 }
 void ScriptComponent::Initialize(){
+	mCollideMap.clear();
 	Load();
 	actors.mList.push_back(this);
 	mEndInitialize = true;
@@ -358,7 +359,13 @@ void ScriptComponent::Update(){
 
 	if (pDllClass){
 		pDllClass->Update();
+
+		for (auto& tar : mCollideMap){
+
+			pDllClass->OnCollideEnter(tar.second);
+		}
 	}
+
 }
 void ScriptComponent::Finish(){
 
@@ -369,8 +376,17 @@ void ScriptComponent::Finish(){
 }
 
 void ScriptComponent::OnCollide(Actor* target){
+	mCollideMap[(int)target] = target;
+
 	if (pDllClass){
-		pDllClass->OnCollide(target);
+		pDllClass->OnCollideBegin(target);
+	}
+}
+
+void ScriptComponent::LostCollide(Actor* target){
+	mCollideMap.erase((int)target);
+	if (pDllClass){
+		pDllClass->OnCollideExit(target);
 	}
 }
 
