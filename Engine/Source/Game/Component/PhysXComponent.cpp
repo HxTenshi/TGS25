@@ -41,6 +41,7 @@ void PhysXComponent::Start(){
 	//}
 }
 void PhysXComponent::Finish(){
+	mRigidActor->userData = NULL;
 	if (mRigidActor){
 		if (mIsEngineMode){
 			Game::RemovePhysXActorEngine(mRigidActor);
@@ -82,7 +83,7 @@ void PhysXComponent::SetTransform(){
 
 	if (mChengeTransformFlag&(char)PhysXChangeTransformFlag::Rotate){
 		auto rotate = gameObject->mTransform->Rotate();
-		rotate = XMQuaternionRotationRollPitchYawFromVector(rotate);
+		//rotate = XMQuaternionRotationRollPitchYawFromVector(rotate);
 		t.q = physx::PxQuat(rotate.x, rotate.y, rotate.z, rotate.w);
 	}
 	if (mChengeTransformFlag){

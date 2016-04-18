@@ -65,9 +65,13 @@ bool create_cmd_process(HWND hWnd){
 	sa.bInheritHandle = TRUE;
 	sa.lpSecurityDescriptor = NULL;
 	if (CreatePipe(&readPipe, &writePipe, &sa, 0) == 0){
-		MessageBox(0, "パイプが作成できませんでした", "エラー", MB_OK);
+		Window::AddLog("パイプが作成できませんでした");
 		return false;
 	}
+
+
+	Window::AddLog("コンパイル開始...");
+
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 	ZeroMemory(&si, sizeof(si));
@@ -84,7 +88,7 @@ bool create_cmd_process(HWND hWnd){
 #endif
 	//	プロセスの起動(cmd.exe)
 	if (CreateProcess(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi) == 0){
-		MessageBox(0, "プロセスの作成に失敗しました", "エラー", MB_OK);
+		Window::AddLog("プロセスの作成に失敗しました");
 		return false;
 	}
 	HANDLE childProcess = pi.hProcess;
@@ -114,15 +118,23 @@ bool create_cmd_process(HWND hWnd){
 			//SendMessage(hWnd, WM_VSCROLL, SB_BOTTOM, 0);	//	スクロールバーを一番下へ移動させる
 			if (totalLen>len)	//	プロセスは終了しているがまだデータがーが残っているので終了を保留
 				end = false;
+
+			{
+				auto out = forward_than_find_first_of(outConsole, "\n");
+				if (out == "")continue;
+				outConsole = behind_than_find_first_of(outConsole, "\n");
+				out.pop_back();
+				Window::AddLog(out);
+			}
 		}
 	} while (end == false);
 
 	if (CloseHandle(writePipe) == 0){
-		MessageBox(0, "パイプを閉じることができませんでした。", "エラー", MB_OK);
+		Window::AddLog("パイプを閉じることができませんでした。");
 		return false;
 	}
 	if (CloseHandle(readPipe) == 0){
-		MessageBox(0, "パイプを閉じることができませんでした。", "エラー", MB_OK);
+		Window::AddLog("パイプを閉じることができませんでした。");
 		return false;
 	}
 	CloseHandle(pi.hProcess);

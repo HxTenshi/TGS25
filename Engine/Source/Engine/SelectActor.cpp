@@ -195,9 +195,9 @@ void SelectActor::Initialize(){
 
 		}
 
-		mVectorBox[0].mTransform->Rotate(XMVectorSet(0, 0, -XM_PI / 2, 1));
-		mVectorBox[1].mTransform->Rotate(XMVectorSet(0, 0, 0, 1));
-		mVectorBox[2].mTransform->Rotate(XMVectorSet(XM_PI / 2, 0, 0, 1));
+		mVectorBox[0].mTransform->Rotate(XMQuaternionRotationRollPitchYawFromVector(XMVectorSet(0, 0, -XM_PI / 2, 1)));
+		mVectorBox[1].mTransform->Rotate(XMQuaternionRotationRollPitchYawFromVector(XMVectorSet(0, 0, 0, 1)));
+		mVectorBox[2].mTransform->Rotate(XMQuaternionRotationRollPitchYawFromVector(XMVectorSet(XM_PI / 2, 0, 0, 1)));
 
 		auto mate = mVectorBox[0].GetComponent<MaterialComponent>();
 		if (mate){

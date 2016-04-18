@@ -1,5 +1,6 @@
 
 #include "TransformComponent.h"
+
 #include "Window/Window.h"
 
 #include "Game/Actor.h"
@@ -92,12 +93,17 @@ const XMVECTOR& TransformComponent::Up() const{
 }
 
 const XMMATRIX& TransformComponent::GetMatrix() const{
+
+
 	if (!mFixMatrixFlag){
 
 		mFixMatrixFlag = true;
 
+
+		auto physx = gameObject->GetComponent<PhysXComponent>();
+
 		//クォータニオンで計算
-		if (mRotate.w != 1.0f){
+		if (physx){
 			mMatrix = XMMatrixMultiply(
 				XMMatrixMultiply(
 				XMMatrixScalingFromVector(mScale),
