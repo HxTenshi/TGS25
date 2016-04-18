@@ -135,11 +135,18 @@ void PhysXComponent::SetKinematic(bool flag){
 	}
 }
 
-void PhysXComponent::AddForce(const XMVECTOR& force){
+XMVECTOR PhysXComponent::GetForceVelocity(){
 	PxRigidDynamic* a = (PxRigidDynamic*)mRigidActor;
-	a->addForce(PxVec3(force.x, force.y, force.z));
+	auto v = a->getLinearVelocity();
+	return XMVectorSet(v.x, v.y, v.z, 1);
 }
-void PhysXComponent::AddTorque(const XMVECTOR& force){
+
+void PhysXComponent::AddForce(const XMVECTOR& force, ForceMode::Enum forceMode){
 	PxRigidDynamic* a = (PxRigidDynamic*)mRigidActor;
-	a->addTorque(PxVec3(force.x, force.y, force.z));
+	a->addForce(PxVec3(force.x, force.y, force.z),(physx::PxForceMode::Enum)forceMode);
+}
+
+void PhysXComponent::AddTorque(const XMVECTOR& force, ForceMode::Enum forceMode){
+	PxRigidDynamic* a = (PxRigidDynamic*)mRigidActor;
+	a->addTorque(PxVec3(force.x, force.y, force.z), (physx::PxForceMode::Enum)forceMode);
 }

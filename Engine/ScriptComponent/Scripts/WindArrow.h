@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class Wind :public IDllScriptComponent{
+class WindArrow :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -13,9 +13,6 @@ public:
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
 
-	XMVECTOR GetWindVelocity();
-
 private:
 	//ƒƒ“ƒo•Ï”
-	XMVECTOR mWindVelocity;
 };

@@ -6,10 +6,12 @@
 #include <list>
 #include "PhysXComponent.h"
 #include "IComponent.h"
+#include "Type/ForceMode.h"
 
 class Actor;
 class Game;
 class TransformComponent;
+
 
 class ITransformComponent :public Component{
 public:
@@ -34,8 +36,8 @@ public:
 	virtual const XMVECTOR& Left() const = 0;
 	virtual const XMVECTOR& Up() const = 0;
 
-	virtual void AddForce(const XMVECTOR& force) = 0;
-	virtual void AddTorque(const XMVECTOR& force) = 0;
+	virtual void AddForce(const XMVECTOR& force, ForceMode::Enum forceMode = ForceMode::eFORCE) = 0;
+	virtual void AddTorque(const XMVECTOR& force, ForceMode::Enum forceMode = ForceMode::eFORCE) = 0;
 	virtual const XMMATRIX& GetMatrix() const = 0;
 
 	virtual std::list<Actor*>& Children() = 0;
@@ -80,8 +82,8 @@ public:
 	void EngineUpdate() override;
 	void Update() override;
 
-	void AddForce(const XMVECTOR& force) override;
-	void AddTorque(const XMVECTOR& force) override;
+	void AddForce(const XMVECTOR& force, ForceMode::Enum forceMode = ForceMode::eFORCE) override;
+	void AddTorque(const XMVECTOR& force, ForceMode::Enum forceMode = ForceMode::eFORCE) override;
 
 	const XMMATRIX& GetMatrix() const override;
 	void CreateInspector() override;

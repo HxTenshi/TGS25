@@ -55,6 +55,10 @@ void CreateScriptFileExtension(const std::string& classNmae, const std::string& 
 
 
 
+#include <shlwapi.h>
+
+#pragma comment(lib, "shlwapi.lib")
+
 std::string outConsole;
 bool create_cmd_process(HWND hWnd){
 	//	パイプの作成
@@ -68,7 +72,6 @@ bool create_cmd_process(HWND hWnd){
 		Window::AddLog("パイプが作成できませんでした");
 		return false;
 	}
-
 
 	Window::AddLog("コンパイル開始...");
 
@@ -86,6 +89,12 @@ bool create_cmd_process(HWND hWnd){
 #else
 	char cmd[] = "cmd.exe /K \".\\ScriptComponent\\createdll_auto.bat\"";
 #endif
+
+	if (!PathFileExists("ScriptComponent\\createdll_auto.bat")){
+		Window::AddLog("コンパイル失敗");
+		return false;
+	}
+
 	//	プロセスの起動(cmd.exe)
 	if (CreateProcess(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi) == 0){
 		Window::AddLog("プロセスの作成に失敗しました");
@@ -104,8 +113,10 @@ bool create_cmd_process(HWND hWnd){
 		if (PeekNamedPipe(readPipe, NULL, 0, NULL, &totalLen, NULL) == 0)
 			break;
 		if (0 < totalLen){
-			if (ReadFile(readPipe, readBuf, sizeof(readBuf) - 1, &len, NULL) == 0)
+			if (ReadFile(readPipe, readBuf, sizeof(readBuf) - 1, &len, NULL) == 0){
+				Window::AddLog("エラー");
 				return false;
+			}
 			readBuf[len] = 0;
 
 			//if (sizeof(mem) - 1<memSz + len){	//メモリがあふれないようにクリアする
@@ -145,6 +156,7 @@ bool create_cmd_process(HWND hWnd){
 		out.pop_back();
 		Window::AddLog(out);
 	}
+	Window::AddLog("コンパイル終了");
 	return true;
 }
 
@@ -170,14 +182,14 @@ public:
 
 		CreateIncludeClassFile();
 
-		char cdir[255];
-		GetCurrentDirectory(255, cdir);
-		std::string  pass = cdir;
-#ifdef _DEBUG
-		pass += "/ScriptComponent/createdll_auto_d.bat";
-#else
-		pass += "/ScriptComponent/createdll_auto.bat";
-#endif
+//		char cdir[255];
+//		GetCurrentDirectory(255, cdir);
+//		std::string  pass = cdir;
+//#ifdef _DEBUG
+//		pass += "/ScriptComponent/createdll_auto_d.bat";
+//#else
+//		pass += "/ScriptComponent/createdll_auto.bat";
+//#endif
 
 		//SHELLEXECUTEINFO	sei = { 0 };
 		////構造体のサイズ
@@ -203,7 +215,9 @@ public:
 		//CloseHandle(sei.hProcess);
 
 
-		create_cmd_process(Window::GetMainHWND());
+		if (!create_cmd_process(Window::GetMainHWND())){
+			MessageBox(Window::GetMainHWND(), "ビルドを手動で行って下さい。", "DLL読み込み", MB_OK);
+		}
 
 		DllLoad();
 

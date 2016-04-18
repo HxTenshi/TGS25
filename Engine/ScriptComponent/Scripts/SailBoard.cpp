@@ -4,6 +4,7 @@
 #include "Game/Actor.h"
 #include "Game/Script/IGame.h"
 #include "Game/Component/TransformComponent.h"
+#include "Game/Component/PhysXComponent.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Initialize(){
@@ -49,6 +50,13 @@ void SailBoard::Update(){
 	power = 8.0f;
 	auto v = XMVectorSet(0, 1, 0, 1);
 	gameObject->mTransform->AddForce(v*power);
+
+	auto physx = gameObject->GetComponent<PhysXComponent>();
+	if (physx){
+		auto v = physx->GetForceVelocity();
+		v *= -0.5f;
+		gameObject->mTransform->AddForce(v);
+	}
 
 	//auto rot = gameObject->mTransform->Rotate();
 	//rot.y = 0;

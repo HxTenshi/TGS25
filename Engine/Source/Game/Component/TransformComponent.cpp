@@ -249,15 +249,15 @@ void TransformComponent::UpdatePhysX(PhysXChangeTransformFlag flag){
 }
 
 
-void TransformComponent::AddForce(const XMVECTOR& force){
+void TransformComponent::AddForce(const XMVECTOR& force, ForceMode::Enum forceMode){
 	auto c = gameObject->GetComponent<PhysXComponent>();
 	if (c)
-		c->AddForce(force);
+		c->AddForce(force, forceMode);
 }
-void TransformComponent::AddTorque(const XMVECTOR& force){
+void TransformComponent::AddTorque(const XMVECTOR& force, ForceMode::Enum forceMode){
 	auto c = gameObject->GetComponent<PhysXComponent>();
 	if (c)
-		c->AddTorque(force);
+		c->AddTorque(force, forceMode);
 }
 
 std::list<Actor*>& TransformComponent::Children(){

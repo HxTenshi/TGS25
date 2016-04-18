@@ -7,6 +7,8 @@
 //生成時に呼ばれます（エディター中も呼ばれます）
 void Wind::Initialize(){
 
+	mWindVelocity = XMVectorSet(1, 0, 0, 1);
+
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -20,7 +22,7 @@ void Wind::Update()
 	auto obj = game->FindActor("Board");
 	if (obj)
 	{
-		obj->mTransform->AddForce(XMVectorSet(1, 0, 0, 1));
+		obj->mTransform->AddForce(mWindVelocity);
 	}
 }
 
@@ -42,4 +44,8 @@ void Wind::OnCollideEnter(Actor* target){
 //コライダーとのロスト時に呼ばれます
 void Wind::OnCollideExit(Actor* target){
 	(void)target;
+}
+
+XMVECTOR Wind::GetWindVelocity(){
+	return mWindVelocity;
 }
