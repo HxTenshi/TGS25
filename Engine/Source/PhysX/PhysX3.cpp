@@ -580,10 +580,10 @@ void PhysX3Main::RemoveActorEngine(PxActor* act){
 	act->release();
 }
 
-Actor* PhysX3Main::Raycast(const XMVECTOR& pos,const XMVECTOR& dir){
+Actor* PhysX3Main::Raycast(const XMVECTOR& pos,const XMVECTOR& dir,float distance){
 	PxVec3 ori(pos.x, pos.y, pos.z);
 	PxVec3 _dir(dir.x, dir.y, dir.z);
-	PxReal dis = 100;
+	PxReal dis = distance;
 	PxHitFlags hitflag = PxHitFlag::eDEFAULT;
 	PxRaycastHit hit;
 	if (gScene->raycastSingle(ori, _dir, dis, hitflag, hit)){

@@ -56,8 +56,9 @@
 using namespace physx;
 class Actor;
 class IPolygonsData;
+#include "IPhysXEngine.h"
 
-class PhysX3Main{
+class PhysX3Main : public PhysXEngine{
 public:
 
 	PhysX3Main();
@@ -84,7 +85,7 @@ public:
 	void RemoveActor(PxActor* act);
 	void RemoveActorEngine(PxActor* act);
 
-	Actor* Raycast(const XMVECTOR& pos, const XMVECTOR& dir);
+	Actor* Raycast(const XMVECTOR& pos, const XMVECTOR& dir, float distance) override;
 	Actor* EngineSceneRaycast(const XMVECTOR& pos, const XMVECTOR& dir);
 
 	PxShape* CreateShape();

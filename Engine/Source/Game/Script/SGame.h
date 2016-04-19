@@ -2,6 +2,7 @@
 
 #include "Game/Game.h"
 #include "IGame.h"
+#include "PhysX/PhysX3.h"
 
 //ゲームのスタティック関数の肩代わり
 class SGame : public IGame{
@@ -29,5 +30,9 @@ public:
 
 	void LoadScene(const std::string& FilePath) override{
 		Game::LoadScene(FilePath);
+	}
+
+	PhysXEngine* PhysX() override{
+		return Game::GetPhysXEngine();
 	}
 };

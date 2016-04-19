@@ -55,6 +55,7 @@ public:
 	static PxRigidActor* CreateRigitBody();
 	static PxRigidActor* CreateRigitBodyEngine();
 	static PhysX3Main* GetPhysX();
+	static PhysXEngine* GetPhysXEngine();
 	static void RemovePhysXActor(PxActor* act);
 	static void RemovePhysXActorEngine(PxActor* act);
 	static void AllDestroyObject();

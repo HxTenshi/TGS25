@@ -1,5 +1,6 @@
 #pragma once
 class Actor;
+class PhysXEngine;
 class IGame{
 public:
 	virtual Actor* CreateActor(const char* prefab) = 0;
@@ -7,4 +8,5 @@ public:
 	virtual void AddObject(Actor* actor) = 0;
 	virtual void DestroyObject(Actor* actor) = 0;
 	virtual void LoadScene(const std::string& FilePath) = 0;
+	virtual PhysXEngine* PhysX() = 0;
 };

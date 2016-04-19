@@ -420,6 +420,9 @@ PxRigidActor* Game::CreateRigitBodyEngine(){
 PhysX3Main* Game::GetPhysX(){
 	return gpPhysX3Main;
 }
+PhysXEngine* Game::GetPhysXEngine(){
+	return gpPhysX3Main;
+}
 void Game::RemovePhysXActor(PxActor* act){
 	return gpPhysX3Main->RemoveActor(act);
 }
@@ -671,7 +674,7 @@ void Game::GameStop(){
 			XMVECTOR vect = mCamera.PointRayVector(point);
 			XMVECTOR pos = mCamera.GetPosition();
 
-			auto act = mPhysX3Main->Raycast(pos, vect);
+			auto act = mPhysX3Main->Raycast(pos, vect,1000);
 			mSelectActor.SetSelect(act);
 		}
 	}
