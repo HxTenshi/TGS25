@@ -68,6 +68,7 @@ public:
 	static CameraComponent* GetMainCamera();
 	static RenderTarget GetMainViewRenderTarget();
 	static bool IsGamePlay();
+	static void LoadScene(const std::string& FilePath);
 
 	void ChangePlayGame(bool isPlay);
 	void SaveScene();
@@ -117,7 +118,7 @@ private:
 	DeferredRendering m_DeferredRendering;
 	PostEffectRendering mPostEffectRendering;
 
-	Scene m_Scene;
+	static Scene m_Scene;
 
 	bool mIsPlay;
 

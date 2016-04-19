@@ -182,41 +182,43 @@ public:
 
 		CreateIncludeClassFile();
 
-//		char cdir[255];
-//		GetCurrentDirectory(255, cdir);
-//		std::string  pass = cdir;
-//#ifdef _DEBUG
-//		pass += "/ScriptComponent/createdll_auto_d.bat";
-//#else
-//		pass += "/ScriptComponent/createdll_auto.bat";
-//#endif
 
-		//SHELLEXECUTEINFO	sei = { 0 };
-		////構造体のサイズ
-		//sei.cbSize = sizeof(SHELLEXECUTEINFO);
-		////起動側のウインドウハンドル
-		//sei.hwnd = Window::GetMainHWND();
-		////起動後の表示状態
-		//sei.nShow = SW_SHOWNORMAL;
-		////このパラメータが重要で、セットしないとSHELLEXECUTEINFO構造体のhProcessメンバがセットされない。
-		//sei.fMask = SEE_MASK_NOCLOSEPROCESS;
-		////起動プログラム
-		//sei.lpFile = pass.c_str();
-		////プロセス起動
-		//if (!ShellExecuteEx(&sei) || (const int)sei.hInstApp <= 32){
-		//	MessageBox(Window::GetMainHWND(), "ファイルを開けませんでした", "失敗", MB_OK);
-		//	return;
-		//}
-		//
-		//
-		////終了を待つ
-		//WaitForSingleObject(sei.hProcess, INFINITE);
-		//
-		//CloseHandle(sei.hProcess);
 
 
 		if (!create_cmd_process(Window::GetMainHWND())){
-			MessageBox(Window::GetMainHWND(), "ビルドを手動で行って下さい。", "DLL読み込み", MB_OK);
+			//MessageBox(Window::GetMainHWND(), "ビルドを手動で行って下さい。", "DLL読み込み", MB_OK);
+
+					char cdir[255];
+					GetCurrentDirectory(255, cdir);
+					std::string  pass = cdir;
+			#ifdef _DEBUG
+					pass += "/ScriptComponent/createdll_auto_d.bat";
+			#else
+					pass += "/ScriptComponent/createdll_auto_.bat";
+			#endif
+
+			SHELLEXECUTEINFO	sei = { 0 };
+			//構造体のサイズ
+			sei.cbSize = sizeof(SHELLEXECUTEINFO);
+			//起動側のウインドウハンドル
+			sei.hwnd = Window::GetMainHWND();
+			//起動後の表示状態
+			sei.nShow = SW_SHOWNORMAL;
+			//このパラメータが重要で、セットしないとSHELLEXECUTEINFO構造体のhProcessメンバがセットされない。
+			sei.fMask = SEE_MASK_NOCLOSEPROCESS;
+			//起動プログラム
+			sei.lpFile = pass.c_str();
+			//プロセス起動
+			if (!ShellExecuteEx(&sei) || (const int)sei.hInstApp <= 32){
+				MessageBox(Window::GetMainHWND(), "ファイルを開けませんでした", "失敗", MB_OK);
+				return;
+			}
+			
+			
+			//終了を待つ
+			WaitForSingleObject(sei.hProcess, INFINITE);
+			
+			CloseHandle(sei.hProcess);
 		}
 
 		DllLoad();

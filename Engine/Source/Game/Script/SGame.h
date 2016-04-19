@@ -25,4 +25,9 @@ public:
 		Game::DestroyObject(actor);
 
 	}
+
+
+	void LoadScene(const std::string& FilePath) override{
+		Game::LoadScene(FilePath);
+	}
 };

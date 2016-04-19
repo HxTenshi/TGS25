@@ -6,4 +6,5 @@ public:
 	virtual Actor* FindActor(const char* name) = 0;
 	virtual void AddObject(Actor* actor) = 0;
 	virtual void DestroyObject(Actor* actor) = 0;
+	virtual void LoadScene(const std::string& FilePath) = 0;
 };

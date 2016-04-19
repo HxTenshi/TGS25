@@ -18,6 +18,7 @@ static CameraComponent** gMainCamera;
 Actor* Game::mRootObject;
 Actor* Game::mEngineRootObject;
 Game* mGame = NULL;
+Scene Game::m_Scene;
 
 static bool gIsPlay;
 
@@ -114,7 +115,7 @@ Game::Game(){
 
 	mSelectActor.Initialize();
 
-	m_Scene.LoadScene("./Assets/Scene_.scene");
+	LoadScene("./Assets/Scene_.scene");
 	
 	mSoundPlayer.Play();
 	
@@ -295,9 +296,7 @@ Game::Game(){
 
 		if ((*s).find(".scene\0") != (*s).npos){
 			ChangePlayGame(false);
-			TransformComponent* t = (TransformComponent*)mRootObject->mTransform.Get();
-			t->AllChildrenDestroy();
-			m_Scene.LoadScene(*s);
+			LoadScene(*s);
 		}
 		Window::Deleter(s);
 	});
@@ -472,6 +471,12 @@ RenderTarget Game::GetMainViewRenderTarget(){
 
 bool Game::IsGamePlay(){
 	return gIsPlay;
+}
+
+void Game::LoadScene(const std::string& FilePath){
+
+	AllDestroyObject();
+	m_Scene.LoadScene(FilePath);
 }
 
 
@@ -692,7 +697,12 @@ void Game::PlayDrawList(DrawStage Stage){
 
 void Game::AllDestroyObject(){
 	TransformComponent* t = (TransformComponent*)mRootObject->mTransform.Get();
-	t->AllChildrenDestroy();
+	//t->AllChildrenDestroy();
+
+	auto children = t->Children();
+	for (auto child : children){
+		Game::DestroyObject(child);
+	}
 }
 
 
