@@ -296,6 +296,7 @@ Game::Game(){
 
 		if ((*s).find(".scene\0") != (*s).npos){
 			ChangePlayGame(false);
+			AllDestroyObject();
 			LoadScene(*s);
 		}
 		Window::Deleter(s);
@@ -475,7 +476,14 @@ bool Game::IsGamePlay(){
 
 void Game::LoadScene(const std::string& FilePath){
 
-	AllDestroyObject();
+	TransformComponent* t = (TransformComponent*)mRootObject->mTransform.Get();
+	//t->AllChildrenDestroy();
+
+	auto children = t->Children();
+	for (auto child : children){
+		Game::DestroyObject(child);
+	}
+
 	m_Scene.LoadScene(FilePath);
 }
 
@@ -697,12 +705,7 @@ void Game::PlayDrawList(DrawStage Stage){
 
 void Game::AllDestroyObject(){
 	TransformComponent* t = (TransformComponent*)mRootObject->mTransform.Get();
-	//t->AllChildrenDestroy();
-
-	auto children = t->Children();
-	for (auto child : children){
-		Game::DestroyObject(child);
-	}
+	t->AllChildrenDestroy();
 }
 
 
