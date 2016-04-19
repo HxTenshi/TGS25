@@ -231,6 +231,9 @@ public:
 	static void CreateContextMenu_AddComponent(const std::string& ComponentName){
 		mMainWindow_WPF.CreateContextMenu_AddComponent(ComponentName);
 	}
+	static void CreateContextMenu_CreateObject(const std::string& ObjectName, const std::string& FilePath){
+		mMainWindow_WPF.CreateContextMenu_CreateObject(ObjectName, FilePath);
+	}
 
 	static void SetMouseEvents(bool* focus,bool* l, bool* r, int* x, int* y, int *wx, int *wy){
 		mMainWindow_WPF.SetMouseEvents(focus,l, r, x, y, wx, wy);

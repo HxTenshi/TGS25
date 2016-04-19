@@ -68,6 +68,9 @@ Game::Game(){
 	gIsPlay = mIsPlay;
 
 
+	Window::CreateContextMenu_CreateObject("Box", "EngineResource/box.prefab");
+	Window::CreateContextMenu_CreateObject("Texture", "EngineResource/new Texture");
+
 
 	DWORD start = GetTickCount();
 

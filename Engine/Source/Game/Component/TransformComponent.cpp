@@ -103,7 +103,7 @@ const XMMATRIX& TransformComponent::GetMatrix() const{
 		auto physx = gameObject->GetComponent<PhysXComponent>();
 
 		//クォータニオンで計算
-		if (physx){
+		if (physx || mRotate.w != 1){
 			mMatrix = XMMatrixMultiply(
 				XMMatrixMultiply(
 				XMMatrixScalingFromVector(mScale),
