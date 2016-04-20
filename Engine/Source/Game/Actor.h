@@ -5,6 +5,9 @@
 #include <functional>
 #include <queue>
 #include "Game/Component/ComponentList.h"
+
+#include "Engine/AssetDataBase.h"
+
 class ITransformComponent;
 class File;
 class PrefabAssetData;
@@ -122,7 +125,7 @@ private:
 	std::string mName;
 
 	std::string mPrefab;
-	shared_ptr<PrefabAssetData> mPrefabAsset;
+	PrefabAssetDataPtr mPrefabAsset;
 
 	UINT mUniqueID;
 };

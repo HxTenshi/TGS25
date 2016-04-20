@@ -9,6 +9,8 @@
 
 #include "MySTL/ioHelper.h"
 
+#include "Engine/AssetFile/Prefab/PrefabFileData.h"
+
 class UniqueIDGenerator{
 public:
 	UniqueIDGenerator(const char* file)
@@ -138,8 +140,7 @@ void Actor::ExportData(const std::string& path, const std::string& fileName){
 
 	shared_ptr<I_InputHelper> prefab_io(NULL);
 	if (mPrefabAsset && path != "Assets"){
-		auto& d = mPrefabAsset->GetFileData();
-		prefab_io = d.GetData();
+		prefab_io = mPrefabAsset->GetFileData()->GetData();
 		//prefab_io = new FileInputHelper(mPrefab);
 		//if (prefab_io->error){
 		//	delete prefab_io;
@@ -165,8 +166,7 @@ void Actor::ExportData(picojson::value& json){
 
 	shared_ptr<I_InputHelper> prefab_io(NULL);
 	if (mPrefabAsset){
-		auto& d = mPrefabAsset->GetFileData();
-		prefab_io = d.GetData();
+		prefab_io = mPrefabAsset->GetFileData()->GetData();
 	}
 
 
@@ -227,8 +227,7 @@ void Actor::PastePrefabParam(picojson::value& json){
 	MemoryInputHelper* io_in = NULL;
 	MemoryInputHelper* filter_in = NULL;
 	if (mPrefabAsset){
-		auto& d = mPrefabAsset->GetFileData();
-		auto val = *d.GetParam();
+		auto val = *mPrefabAsset->GetFileData()->GetParam();
 
 		filter_in = new MemoryInputHelper(param, NULL);
 		io_in = new MemoryInputHelper(val, filter_in);
@@ -349,7 +348,7 @@ void Actor::_ImportData(I_ioHelper* io){
 	if (mPrefab!=""){
 		AssetDataBase::Instance(mPrefab.c_str(), mPrefabAsset);
 		if (mPrefabAsset){
-			auto prefab_io = mPrefabAsset->GetFileData().GetData();
+			auto prefab_io = mPrefabAsset->GetFileData()->GetData();
 			if (!prefab_io->error){
 
 				picojson::object components;

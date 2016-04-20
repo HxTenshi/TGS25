@@ -28,7 +28,7 @@ void CreateScriptFileExtension(const std::string& classNmae, const std::string& 
 	auto outfilename = "ScriptComponent/Scripts/"+ classNmae + extension;
 	outFile.open(outfilename, std::ios::out);
 
-	int length = file.tellg();
+	int length = (int)file.tellg();
 	file.seekg(0, file.beg);//ファイルポインタを最初に戻す
 	char * buf = new char[length+1];
 
@@ -60,7 +60,7 @@ void CreateScriptFileExtension(const std::string& classNmae, const std::string& 
 #pragma comment(lib, "shlwapi.lib")
 
 std::string outConsole;
-bool create_cmd_process(HWND hWnd){
+bool create_cmd_process(){
 	//	パイプの作成
 	HANDLE readPipe;
 	HANDLE writePipe;
@@ -185,7 +185,7 @@ public:
 
 
 
-		if (!create_cmd_process(Window::GetMainHWND())){
+		if (!create_cmd_process()){
 			//MessageBox(Window::GetMainHWND(), "ビルドを手動で行って下さい。", "DLL読み込み", MB_OK);
 
 					char cdir[255];

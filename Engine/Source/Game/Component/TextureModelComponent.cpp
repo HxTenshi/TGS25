@@ -54,6 +54,7 @@ void TextureModelComponent::Update(){
 
 
 	if (!mModel)return;
+	if (mTextureName == "")return;
 
 	Game::AddDrawList(DrawStage::Init, std::function<void()>([&](){
 		SetMatrix();
@@ -69,10 +70,10 @@ void TextureModelComponent::Finish(){
 void TextureModelComponent::SetMatrix(){
 	if (!mModel)return;
 	
-	float h = WindowState::mHeight;
-	float w = WindowState::mWidth;
-	float hh = WindowState::mHeight / 2;
-	float wh = WindowState::mWidth / 2;
+	float h = (float)WindowState::mHeight;
+	float w = (float)WindowState::mWidth;
+	float hh = (float)WindowState::mHeight / 2.0f;
+	float wh = (float)WindowState::mWidth / 2.0f;
 
 	auto s = gameObject->mTransform->Scale();
 	float sx = s.x / w;

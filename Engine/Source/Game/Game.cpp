@@ -7,6 +7,8 @@
 
 #include <stack>
 
+#include "Engine/AssetFile/Prefab/PrefabFileData.h"
+
 static std::stack<int> gIntPtrStack;
 
 static std::map<UINT,Actor*>* gpList;
@@ -39,7 +41,6 @@ std::function<void()> CreateSetParentTreeViewItemColl(Actor* par, Actor* chil){
 #include "Engine/AssetLoader.h"
 
 Game::Game(){
-
 	mGame = this;
 	mIsPlay = false;
 
@@ -80,24 +81,6 @@ Game::Game(){
 		delete act;
 
 	}
-
-	DWORD end = GetTickCount();
-	Window::AddLog("new:" + std::to_string(end - start));
-
-	BYTE b[sizeof(Actor) * 1000];
-	start = GetTickCount();
-
-	for (int i = 0; i < 1000; i++){
-#pragma push_macro("new")
-#undef new
-		volatile auto act = new(&b[sizeof(Actor)*i]) Actor();
-		act->~Actor();
-
-#pragma pop_macro("new")
-	}
-
-	end = GetTickCount();
-	Window::AddLog("placement new:"+std::to_string(end - start));
 
 	mRootObject = new Actor();
 	mRootObject->mTransform = mRootObject->AddComponent<TransformComponent>();
@@ -285,7 +268,10 @@ Game::Game(){
 		PrefabAssetDataPtr data;
 		AssetDataBase::Instance(s->c_str(), data);
 		if (data){
-			mSelectActor.SetSelectAsset(data->GetFileData().GetActor(), s->c_str());
+			mSelectActor.SetSelectAsset(data->GetFileData()->GetActor(), s->c_str());
+		}
+		else{
+			mSelectActor.SetSelectAsset(NULL, s->c_str());
 		}
 		Window::Deleter(s);
 	});
@@ -599,12 +585,26 @@ void Game::Draw(){
 	mPostEffectRendering.Rendering();
 
 	PlayDrawList(DrawStage::Engine);
-	PlayDrawList(DrawStage::UI);
-
-	ClearDrawList();
-
 	Device::mpImmediateContext->OMSetDepthStencilState(NULL, 0);
 	if (pDS)pDS->Release();
+
+	{
+		D3D11_DEPTH_STENCIL_DESC descDS = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
+		descDS.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		descDS.DepthFunc = D3D11_COMPARISON_ALWAYS;
+		ID3D11DepthStencilState* pDS = NULL;
+		Device::mpd3dDevice->CreateDepthStencilState(&descDS, &pDS);
+		Device::mpImmediateContext->OMSetDepthStencilState(pDS, 0);
+
+		PlayDrawList(DrawStage::UI);
+
+		Device::mpImmediateContext->OMSetDepthStencilState(NULL, 0);
+		if (pDS)pDS->Release();
+	}
+
+
+
+	ClearDrawList();
 
 	SetMainCamera(NULL);
 

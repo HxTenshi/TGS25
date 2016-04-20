@@ -11,6 +11,8 @@
 
 #include "Engine/AssetDataBase.h"
 
+#include "Engine/AssetFile/Mesh/MeshFileData.h"
+
 PhysXColliderComponent::PhysXColliderComponent(){
 	mIsSphere = false;
 	mShape = NULL;
@@ -219,7 +221,7 @@ void PhysXColliderComponent::CreateMesh(){
 	MeshAssetDataPtr data;
 	AssetDataBase::Instance(mMeshFile.c_str(),data);
 	if (!data)return;
-	auto shape = Game::GetPhysX()->CreateTriangleMesh(data->GetFileData().GetPolygonsData());
+	auto shape = Game::GetPhysX()->CreateTriangleMesh(data->GetFileData()->GetPolygonsData());
 
 	ShapeAttach(shape);
 }

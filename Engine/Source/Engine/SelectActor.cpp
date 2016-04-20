@@ -490,7 +490,7 @@ void SelectActor::SetSelectAsset(Actor* select,const char* filename){
 	}
 
 	Window::ClearInspector();
-	if (mSelects.SelectNum() == 1){
+	if (mSelects.SelectNum() <= 1){
 		AssetDataBase::CreateInspector(filename);
 	}
 }
