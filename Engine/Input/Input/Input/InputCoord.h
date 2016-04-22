@@ -302,3 +302,50 @@ enum class KeyCoord{
 ,Key_MEDIASELECT     //0xED
 ,Count
 };
+
+enum class PAD_DS4_KeyCoord{
+	Button_UP,
+	Button_DOWN,
+	Button_LEFT,
+	Button_RIGHT,
+	Button_TRIANGLE,
+	Button_CIRCLE,
+	Button_SQUARE,
+	Button_CROSS,
+	Button_L1,
+	Button_L2,
+	Button_L3,
+	Button_R1,
+	Button_R2,
+	Button_R3,
+	Button_PS,
+	Button_SHARE,
+	Button_OPTIONS,
+	Button_LTOUCH,
+	Button_RTOUCH,
+	Button_1stTOUCH,
+	Button_2ndTOUCH,
+	Count,
+};
+//2
+enum class PAD_DS4_LevelCoord{
+	Level_L2,
+	Level_R2,
+	Count,
+};
+
+//8
+enum class PAD_DS4_Velo2Coord{
+	Velo2_LStick,
+	Velo2_RStick,
+	Velo2_1stTOUCH,
+	Velo2_2ndTOUCH,
+	Count,
+};
+
+//6
+enum class PAD_DS4_Velo3Coord{
+	Velo3_Angular,
+	Velo3_Acceleration,
+	Count,
+};
