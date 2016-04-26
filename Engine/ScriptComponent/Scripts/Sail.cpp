@@ -4,6 +4,7 @@
 #include "Input/Input.h"
 #include "Game/Component/TransformComponent.h"
 #include "Engine\DebugEngine.h"
+#include "SailBoard.h"
 
 #include"Wind.h"
 
@@ -56,9 +57,9 @@ void Sail::OnCollideExit(Actor* target){
 //•—‚ÌŒü‚«{ƒZƒCƒ‹‚Å„i—Í‚ÌŒvŽZ
 float Sail::MovePower()
 {
-	auto wind = game->FindActor("Wind");
-	auto windscr = wind->GetScript<Wind>();
-	mWindvec = windscr->GetWindVelocity();
+	auto wind = gameObject->mTransform->GetParent()->GetScript<SailBoard>();
+	if (!wind)return 0.0f;
+	auto mWindvec = wind->mWindVector;
 	mWindvec.y = 0;
 
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mRotateY);
@@ -67,7 +68,10 @@ float Sail::MovePower()
 	auto temprotate = gameObject->mTransform->Left();
 
 	temprotate = XMVector3Normalize(temprotate);
-	mWindvec = XMVector3Normalize(mWindvec);
+	if (XMVector3Length(mWindvec).x < 0.000000001f) {
+		return 0.0f;
+	}
+		mWindvec = XMVector3Normalize(mWindvec);
 
 	auto rad = XMVector3Dot(mWindvec, temprotate);
 
