@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class Sail :public IDllScriptComponent{
+class CameraController :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -16,10 +16,9 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
-	float mRotateY;
-	XMVECTOR mWindvec;
+	Actor* mTarget;
+	XMVECTOR mPosition;
 
 private:
-	float MovePower();
-
+	void Look();
 };

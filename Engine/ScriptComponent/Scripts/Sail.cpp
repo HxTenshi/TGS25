@@ -5,6 +5,7 @@
 #include "Game/Component/TransformComponent.h"
 #include "Engine\DebugEngine.h"
 #include "SailBoard.h"
+#include"Game\Component\MaterialComponent.h"
 
 #include"Wind.h"
 
@@ -17,17 +18,21 @@ void Sail::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void Sail::Start(){
 	mRotateY = 0.00f;
+	
 }
 
 //毎フレーム呼ばれます
 void Sail::Update(){
 
-	if (Input::Down(KeyCoord::Key_A)) {
+	if (Input::Down(KeyCoord::Key_O) && mRotateY > -1.5f) {
 		mRotateY -= 0.05f;
 	}
-	if (Input::Down(KeyCoord::Key_D)) {
+	if (Input::Down(KeyCoord::Key_P) && mRotateY < 1.5f) {
 		mRotateY += 0.05f;
 	}
+	
+
+	if(Input::Trigger(KeyCoord::Key_H)) game->Debug()->Log(std::to_string(typeid(PhysXComponent).hash_code()));
 	
 	auto parent = gameObject->mTransform->GetParent();
 	parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);
@@ -57,6 +62,7 @@ void Sail::OnCollideExit(Actor* target){
 //風の向き＋セイルで推進力の計算
 float Sail::MovePower()
 {
+
 	auto wind = gameObject->mTransform->GetParent()->GetScript<SailBoard>();
 	if (!wind)return 0.0f;
 	auto mWindvec = wind->mWindVector;

@@ -18,7 +18,11 @@ public:
 private:
 	//ƒƒ“ƒo•Ï”
 	float mRotateY;
+	bool isGround;
+	float zRotate;
+	float yRotate;
 
 private:
 	void RotationBoard();
+	void Trick();
 };
