@@ -80,9 +80,7 @@ private:
 	static BYTE						diKeyState[256];		// キーボード情報
 
 	static DS4* ds4;
-	static BYTE						diDS4State[21];
-	static float					mDS4Analog[16];
-	static int mDS4Input[21];
+	static int mDS4Input[(int)PAD_DS4_KeyCoord::Count];
 
 	static bool mDIKeyboardDeviceLost;
 

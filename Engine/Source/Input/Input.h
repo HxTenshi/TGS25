@@ -91,7 +91,7 @@ public:
 	static XMVECTOR Analog(PAD_DS4_Velo3Coord key){
 		float x,y,z;
 		DLLInput::DS4Analog3(key, &x,&y,&z);
-		return XMVectorSet(x, y, x, 1);
+		return XMVectorSet(x, y, z, 1);
 	}
 
 

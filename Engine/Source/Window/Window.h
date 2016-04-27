@@ -20,12 +20,6 @@ public:
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 
-#ifdef _DEBUG
-#pragma comment(lib, "Debug/CppWPFdll.lib")
-#else
-#pragma comment(lib, "Release/CppWPFdll.lib")
-#endif
-
 #include "../CppWPFdll/CppWPFdll.h"
 
 class Component;

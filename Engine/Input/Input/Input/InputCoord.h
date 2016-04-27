@@ -321,8 +321,7 @@ enum class PAD_DS4_KeyCoord{
 	Button_PS,
 	Button_SHARE,
 	Button_OPTIONS,
-	Button_LTOUCH,
-	Button_RTOUCH,
+	Button_TOUCHPAD,
 	Button_1stTOUCH,
 	Button_2ndTOUCH,
 	Count,
@@ -331,6 +330,20 @@ enum class PAD_DS4_KeyCoord{
 enum class PAD_DS4_LevelCoord{
 	Level_L2,
 	Level_R2,
+	Level_LStickX,
+	Level_LStickY,
+	Level_RStickX,
+	Level_RStickY,
+	Velo2_1stTouchX,
+	Velo2_1stTouchY,
+	Velo2_2ndTouchX,
+	Velo2_2ndTouchY,
+	Velo3_AngularX,
+	Velo3_AngularY,
+	Velo3_AngularZ,
+	Velo3_AccelerationX,
+	Velo3_AccelerationY,
+	Velo3_AccelerationZ,
 	Count,
 };
 
@@ -338,8 +351,8 @@ enum class PAD_DS4_LevelCoord{
 enum class PAD_DS4_Velo2Coord{
 	Velo2_LStick,
 	Velo2_RStick,
-	Velo2_1stTOUCH,
-	Velo2_2ndTOUCH,
+	Velo2_1stTouch,
+	Velo2_2ndTouch,
 	Count,
 };
 

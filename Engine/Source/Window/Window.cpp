@@ -5,6 +5,12 @@
 
 #include "../resource/resource.h"
 
+#ifdef _DEBUG
+#pragma comment(lib, "Debug/CppWPFdll.lib")
+#else
+#pragma comment(lib, "Release/CppWPFdll.lib")
+#endif
+
 
 UINT WindowState::mWidth = 1200;
 UINT WindowState::mHeight = 800;

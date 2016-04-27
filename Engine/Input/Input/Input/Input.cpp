@@ -5,6 +5,7 @@
 
 #define _EXPORTING
 #include "Input.h"
+#include "../DS4.h"
 
 //Input* DLLInput::GetInput(){
 //	static Input input;
@@ -62,17 +63,17 @@ bool DLLInput::DS4Up(PAD_DS4_KeyCoord key){
 
 
 void DLLInput::DS4Analog1(PAD_DS4_LevelCoord coord, float* x){
-	*x = InputManager::mDS4Analog[(int)coord];
+	*x = InputManager::ds4->Level(coord);
 }
 void DLLInput::DS4Analog2(PAD_DS4_Velo2Coord coord, float* x, float* y){
 	int c = 2 + (int)coord * 2;
-	*x = InputManager::mDS4Analog[c];
-	*y = InputManager::mDS4Analog[c+1];
+	*x = InputManager::ds4->Level((PAD_DS4_LevelCoord)c);
+	*y = InputManager::ds4->Level((PAD_DS4_LevelCoord)(c+1));
 
 }
 void DLLInput::DS4Analog3(PAD_DS4_Velo3Coord coord, float* x, float* y, float* z){
 	int c = 2 + 8 + (int)coord * 3;
-	*x = InputManager::mDS4Analog[c];
-	*y = InputManager::mDS4Analog[c + 1];
-	*z = InputManager::mDS4Analog[c + 2];
+	*x = InputManager::ds4->Level((PAD_DS4_LevelCoord)c);
+	*y = InputManager::ds4->Level((PAD_DS4_LevelCoord)(c + 1));
+	*z = InputManager::ds4->Level((PAD_DS4_LevelCoord)(c + 2));
 }

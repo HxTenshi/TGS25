@@ -14,6 +14,9 @@ typedef void(__cdecl *DeleteInstance_)(IDllScriptComponent*);
 
 typedef decltype(Reflection::map) (__cdecl *GetReflectionData_)();
 
+typedef void(__cdecl *IDllFunction0)(IDllScriptComponent*,IDllScriptComponent::Func0);
+typedef void(__cdecl *IDllFunction1)(IDllScriptComponent*,IDllScriptComponent::Func1, Actor*);
+
 #include "Game/Script/SGame.h"
 SGame gSGame;
 
@@ -168,6 +171,8 @@ public:
 		mCreate = NULL;
 		mDelete = NULL;
 		mGetReflect = NULL;
+		mFunction0 = NULL;
+		mFunction1 = NULL;
 
 	}
 	~UseScriptActors(){
@@ -262,6 +267,8 @@ public:
 		mCreate = NULL;
 		mDelete = NULL;
 		mGetReflect = NULL;
+		mFunction0 = NULL;
+		mFunction1 = NULL;
 		Reflection::map = NULL;
 	}
 	void DllLoad(){
@@ -301,6 +308,18 @@ public:
 			return;
 		}
 
+		mFunction0 = (IDllFunction0)GetProcAddress(hModule, "Function0");
+		if (mFunction0 == NULL)
+		{
+			UnLoad();
+			return;
+		}
+		mFunction1 = (IDllFunction0)GetProcAddress(hModule, "Function1");
+		if (mFunction1 == NULL)
+		{
+			UnLoad();
+			return;
+		}
 		Reflection::map = ((GetReflectionData_)mGetReflect)();
 	}
 	IDllScriptComponent* Create(const std::string& ClassName){
@@ -312,10 +331,18 @@ public:
 	void Deleter(IDllScriptComponent* script){
 		((DeleteInstance_)mDelete)(script);
 	}
+	void Function(IDllScriptComponent* com,IDllScriptComponent::Func0 func){
+		((IDllFunction0)mFunction0)(com,func);
+	}
+	void Function(IDllScriptComponent* com,IDllScriptComponent::Func1 func, Actor* tar){
+		((IDllFunction1)mFunction1)(com,func, tar);
+	}
 	std::list<ScriptComponent*> mList;
 	void* mCreate;
 	void* mDelete;
 	void* mGetReflect;
+	void* mFunction0;
+	void* mFunction1;
 	HMODULE hModule;
 
 };
@@ -332,6 +359,18 @@ void ScriptManager::CreateScriptFile(const std::string& className){
 	CreateScriptFileExtension(className, ".cpp");
 }
 
+
+#define _Exception(x,y) \
+	try{ \
+		pDllClass->x(y); \
+	} \
+	catch (...){ \
+		Window::AddLog(mClassName + " "+#x+":"); \
+	} 
+
+
+//Window::AddLog(mClassName + " "+#x+":" + text);
+
 ScriptComponent::ScriptComponent(){
 	mEndInitialize = false;
 	mEndStart = false;
@@ -345,7 +384,8 @@ void ScriptComponent::Initialize(){
 	actors.mList.push_back(this);
 	mEndInitialize = true;
 	if (pDllClass){
-		pDllClass->Initialize();
+		actors.Function(pDllClass,&IDllScriptComponent::Initialize);
+
 	}
 }
 void ScriptComponent::Load(){
@@ -358,14 +398,16 @@ void ScriptComponent::Load(){
 		pDllClass->game = &gSGame;
 		pDllClass->gameObject = gameObject;
 
-		if (mEndInitialize)pDllClass->Initialize();
-		if (mEndStart)pDllClass->Start();
+		if (mEndInitialize)
+			actors.Function(pDllClass, &IDllScriptComponent::Initialize);
+		if (mEndStart)
+			actors.Function(pDllClass, &IDllScriptComponent::Start);
 	}
 }
 void ScriptComponent::Unload(){
 
 	if (pDllClass){
-		pDllClass->Finish();
+		actors.Function(pDllClass, &IDllScriptComponent::Finish);
 		actors.Deleter(pDllClass);
 	}
 
@@ -380,17 +422,17 @@ void ScriptComponent::ReCompile(){
 void ScriptComponent::Start(){
 	mEndStart = true;
 	if (pDllClass){
-		pDllClass->Start();
+		actors.Function(pDllClass, &IDllScriptComponent::Start);
 	}
 }
 void ScriptComponent::Update(){
 
 	if (pDllClass){
-		pDllClass->Update();
+		actors.Function(pDllClass, &IDllScriptComponent::Update);
 
 		for (auto& tar : mCollideMap){
 
-			pDllClass->OnCollideEnter(tar.second);
+			actors.Function(pDllClass, &IDllScriptComponent::OnCollideEnter, tar.second);
 		}
 	}
 
@@ -407,14 +449,14 @@ void ScriptComponent::OnCollide(Actor* target){
 	mCollideMap[(int)target] = target;
 
 	if (pDllClass){
-		pDllClass->OnCollideBegin(target);
+		actors.Function(pDllClass, &IDllScriptComponent::OnCollideBegin, target);
 	}
 }
 
 void ScriptComponent::LostCollide(Actor* target){
 	mCollideMap.erase((int)target);
 	if (pDllClass){
-		pDllClass->OnCollideExit(target);
+		actors.Function(pDllClass, &IDllScriptComponent::OnCollideExit, target);
 	}
 }
 
