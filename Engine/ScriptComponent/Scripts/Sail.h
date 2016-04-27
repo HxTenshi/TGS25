@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class SailBoard :public IDllScriptComponent{
+class Sail :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -12,13 +12,13 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
-	XMVECTOR GetWind();
 
-	XMVECTOR mWindVector;
 private:
 	//ƒƒ“ƒo•Ï”
 	float mRotateY;
+	XMVECTOR mWindvec;
 
 private:
-	void RotationBoard();
+	float MovePower();
+
 };
