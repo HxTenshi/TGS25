@@ -129,7 +129,7 @@ void SailBoard::RotationBoard()
 	}
 
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mRotateY);
-	gameObject->mTransform->Rotate(rotatey);
+	gameObject->mTransform->Quaternion(rotatey);
 }
 
 void SailBoard::Trick()

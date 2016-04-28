@@ -24,10 +24,10 @@ void Sail::Start(){
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
 void Sail::Update(){
 
-	if (Input::Down(KeyCoord::Key_O) && mRotateY > -1.5f) {
+	if (Input::Down(KeyCoord::Key_O) && mRotateY > -XM_PI / 2) {
 		mRotateY -= 0.05f;
 	}
-	if (Input::Down(KeyCoord::Key_P) && mRotateY < 1.5f) {
+	if (Input::Down(KeyCoord::Key_P) && mRotateY < XM_PI / 2) {
 		mRotateY += 0.05f;
 	}
 	
@@ -66,7 +66,7 @@ float Sail::MovePower()
 	mWindvec.y = 0;
 
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mRotateY);
-	gameObject->mTransform->Rotate(rotatey);
+	gameObject->mTransform->Quaternion(rotatey);
 
 	auto temprotate = gameObject->mTransform->Left();
 
