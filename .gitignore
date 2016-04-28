@@ -18,13 +18,15 @@
 #img/*.*
 #!.png
 
-Debug/
-Release/
-*.sdf
-*.suo
-ipch/
-*.vcxproj.user
-
+*/Debug/
+*/Release/*.*
+!MyInput.lib
+!MyInput.dll
+*/*.sdf
+*/*.suo
+*/ipch/
+*/*.vcxproj.user
+*/ScriptComponent/System/
 UniqueID.txt
 
 
