@@ -91,6 +91,9 @@ public:
 	PxShape* CreateShape();
 	PxShape* CreateShapeSphere();
 	PxShape* CreateTriangleMesh(const IPolygonsData* poly);
+	PxPhysics* GetSDK(){
+		return gPhysicsSDK;
+	};
 
 private:
 	void getColumnMajor(PxMat33& m, PxVec3& t, float* mat);

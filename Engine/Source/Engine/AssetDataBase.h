@@ -12,6 +12,7 @@ enum class AssetFileType{
 	Shader,
 	Vmd,
 	Image,
+	PhysxMaterial,
 	Count,
 };
 
@@ -337,6 +338,12 @@ class TextureFileData;
 using TextureAssetDataPtr = shared_ptr < AssetDataTemplate<TextureFileData> >;
 const AssetFileType AssetDataTemplate<TextureFileData>::_AssetFileType = AssetFileType::Image;
 void AssetDataTemplate<TextureFileData>::CreateInspector(){}
+
+
+class PhysxMaterialFileData;
+using PhysxMaterialAssetDataPtr = shared_ptr < AssetDataTemplate<PhysxMaterialFileData> >;
+const AssetFileType AssetDataTemplate<PhysxMaterialFileData>::_AssetFileType = AssetFileType::PhysxMaterial;
+void AssetDataTemplate<PhysxMaterialFileData>::CreateInspector();
 
 template <class T>
 const AssetFileType AssetDataTemplate<T>::_AssetFileType = AssetFileType::None;

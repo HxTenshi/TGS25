@@ -106,10 +106,6 @@ public:
 
 	shared_ptr<ITransformComponent> mTransform;
 
-
-	//PhysXテスト用
-	void SetTransform(physx::PxTransform* t);
-
 	void* mTreeViewPtr;
 
 protected:

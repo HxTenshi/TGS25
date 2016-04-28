@@ -12,6 +12,7 @@
 #include "Engine/AssetDataBase.h"
 
 #include "Engine/AssetFile/Mesh/MeshFileData.h"
+#include "Engine/AssetFile/Physx/PhysxMaterialFileData.h"
 
 PhysXColliderComponent::PhysXColliderComponent(){
 	mIsSphere = false;
@@ -33,6 +34,9 @@ void PhysXColliderComponent::Initialize(){
 		if (!mShape){
 			ChangeShape();
 		}
+	}
+	if (mPhysicsMaterialFile != ""){
+		ChangeMaterial();
 	}
 }
 
@@ -193,8 +197,7 @@ void PhysXColliderComponent::UpdatePose(){
 	}
 	else if (g.getType() == PxGeometryType::eTRIANGLEMESH){
 
-		auto rotate = gameObject->mTransform->Rotate();
-		rotate = XMQuaternionRotationRollPitchYawFromVector(rotate);
+		auto rotate = gameObject->mTransform->Quaternion();
 		auto q = physx::PxQuat(rotate.x, rotate.y, rotate.z, rotate.w);
 
 		g.triangleMesh().scale = PxMeshScale(PxVec3( scale.x, scale.y, scale.z),q);
@@ -214,6 +217,13 @@ void PhysXColliderComponent::ChangeShape(){
 	}
 
 	ShapeAttach(shape);
+}
+void PhysXColliderComponent::ChangeMaterial(){
+	
+	PhysxMaterialAssetDataPtr mate;
+	AssetDataBase::Instance(mPhysicsMaterialFile.c_str(), mate);
+	auto pxmate = mate->GetFileData()->GetMaterial();
+	mShape->setMaterials(&pxmate, 1);
 }
 
 void PhysXColliderComponent::CreateMesh(){
@@ -265,10 +275,15 @@ void PhysXColliderComponent::CreateInspector() {
 		//mIsTrigger = value;
 		SetIsTrigger(value);
 	};
+	std::function<void(std::string)> collbackmatepath = [&](std::string name){
+		mPhysicsMaterialFile = name;
+		ChangeMaterial();
+	};
 
 	Window::AddInspector(new TemplateInspectorDataSet<std::string>("Mesh", &mMeshFile, collbackpath), data);
 	Window::AddInspector(new TemplateInspectorDataSet<bool>("IsSphere", &mIsSphere, collback), data);
 	Window::AddInspector(new TemplateInspectorDataSet<bool>("IsTrigger", &mIsTrigger, collbacktri), data);
+	Window::AddInspector(new TemplateInspectorDataSet<std::string>("PhysxMaterial", &mPhysicsMaterialFile, collbackmatepath), data);
 	Window::ViewInspector("Collider", this, data);
 }
 
@@ -277,6 +292,7 @@ void PhysXColliderComponent::IO_Data(I_ioHelper* io){
 	_KEY(mMeshFile);
 	_KEY(mIsSphere);
 	_KEY(mIsTrigger);
+	_KEY(mPhysicsMaterialFile);
 
 #undef _KEY
 }

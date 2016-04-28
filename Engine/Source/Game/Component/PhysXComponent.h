@@ -48,7 +48,7 @@ public:
 		mChengeTransformFlag |= (char)flag;
 	}
 
-	void SetTransform();
+	void SetTransform(bool RebirthSet);
 
 	void AddShape(physx::PxShape& shape);
 	void RemoveShape(physx::PxShape& shape);

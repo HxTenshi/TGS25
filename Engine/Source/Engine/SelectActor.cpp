@@ -242,7 +242,7 @@ Actor* SelectActor::GetSelectOne(){
 }
 
 void SelectActor::UpdateInspector(){
-	if (mSelects.SelectNum() != 1)return;
+	if (mSelects.SelectNum() != 1 && !mSelectAsset)return;
 
 	static unsigned long time_start = timeGetTime();
 	unsigned long current_time = timeGetTime();
