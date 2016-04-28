@@ -15,4 +15,5 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	Actor* mPlayer;
 };

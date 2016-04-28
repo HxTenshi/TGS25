@@ -31,9 +31,6 @@ void Sail::Update(){
 		mRotateY += 0.05f;
 	}
 	
-
-	if(Input::Trigger(KeyCoord::Key_H)) game->Debug()->Log(std::to_string(typeid(PhysXComponent).hash_code()));
-	
 	auto parent = gameObject->mTransform->GetParent();
 	parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);
 

@@ -7,7 +7,7 @@
 //生成時に呼ばれます（エディター中も呼ばれます）
 void Wind::Initialize(){
 
-	mWindVelocity = XMVectorSet(1, 0, 0, 1);
+	mWindVelocity = XMVectorSet(0, 0, 1, 1);
 
 }
 

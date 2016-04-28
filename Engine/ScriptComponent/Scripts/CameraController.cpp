@@ -56,8 +56,6 @@ void CameraController::Look()
 	auto SubVector = gameObject->mTransform->Position() - mTarget->mTransform->Position();
 
 	auto Angel = atan2(-SubVector.x, -SubVector.z);
-	if (Input::Down(KeyCoord::Key_F))
-	game->Debug()->Log(std::to_string(Angel));
 
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), Angel);
 	auto vec = XMVectorSet(0, Angel, 0, 1);

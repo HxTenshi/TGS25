@@ -105,6 +105,12 @@ void SailBoard::OnCollideExit(Actor* target){
 	{
 		isGround = false;
 	}
+
+	if (target->Name() == "Wind")
+	{
+		mWindVector = XMVectorSet(1, 0, 0, 1);
+
+	}
 }
 
 XMVECTOR SailBoard::GetWind()
