@@ -18,13 +18,17 @@
 #img/*.*
 #!.png
 
-Debug/
-Release/
-*.sdf
-*.suo
-ipch/
-*.vcxproj.user
-
+*/ScriptComponent/Debug/
+*/ScriptComponent/Release/*.*
+!MyInput.lib
+!MyInput.dll
+*/ScriptComponent/*.sdf
+*/ScriptComponent/*.suo
+*/ScriptComponent/ipch/
+*/ScriptComponent/*.vcxproj.user
+*/ScriptComponent/*.vcxproj.filters
+*/ScriptComponent/*.opensdf
+*/ScriptComponent/System/
 UniqueID.txt
 
 
