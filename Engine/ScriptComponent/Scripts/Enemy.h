@@ -9,11 +9,12 @@ public:
 	void Start()override;
 	void Update()override;
 	void Finish()override;
+	void PlayerSearch();
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
 
-private:
+protected:
 	//ƒƒ“ƒo•Ï”
 	float mSpeed;
 	float mSize;

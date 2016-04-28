@@ -14,12 +14,6 @@ void Enemy::Initialize(){
 	mSize = 4;
 	mIsHit = false;
 	mIsSearchRange = false;
-
-	/*auto color = gameObject->GetComponent<MaterialComponent>()->mAlbedo;
-	color = (0, 0, 0, 0);*/
-
-
-	//gameObject->GetComponent<MaterialComponent>()->mAlbedo = color;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -34,6 +28,17 @@ void Enemy::Start(){
 
 //毎フレーム呼ばれます
 void Enemy::Update(){
+	
+
+	PlayerSearch();
+}
+
+//開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
+void Enemy::Finish(){
+
+}
+
+void Enemy::PlayerSearch() {
 	// 色の設定
 	auto color = XMFLOAT4(1, 1, 1, 1);
 	// 一定距離内だと色の値を変える
@@ -51,17 +56,19 @@ void Enemy::Update(){
 
 	// プレイヤーの捜索
 	auto obj = game->FindActor("Board");
-	if (!obj) return;	
+	if (!obj) return;
 
 	auto target = ((obj->mTransform->Position()) - gameObject->mTransform->Position());
 	auto targetRange = XMVector3Length(obj->mTransform->Position() - gameObject->mTransform->Position());
-	
+
 	target = XMVector3Normalize(target);
 	//target.y = 0;
 
 	// 移動
 	if (mIsHit == true) {
-		gameObject->mTransform->AddForce(target * 0);
+		//gameObject->mTransform->AddForce(target * 0);
+		gameObject->mTransform->Forward() * 0;
+		//gameObject->mTransform->Position() -= target;
 	}
 	else {
 		//game->Debug()->Log(std::to_string(targetRange.x));
@@ -74,11 +81,6 @@ void Enemy::Update(){
 			mIsSearchRange = false;
 		}
 	}
-}
-
-//開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
-void Enemy::Finish(){
-
 }
 
 //コライダーとのヒット時に呼ばれます
