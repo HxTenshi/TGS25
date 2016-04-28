@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class Sail :public IDllScriptComponent{
+class Enemy :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -13,13 +13,10 @@ public:
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
 
-
 private:
 	//ƒƒ“ƒo•Ï”
-	float mRotateY;
-	XMVECTOR mWindvec;
-
-private:
-	float MovePower();
-
+	float mSpeed;
+	float mSize;
+	bool mIsHit;
+	bool mIsSearchRange;
 };
