@@ -5,6 +5,7 @@
 #include "Game/Component/TransformComponent.h"
 #include "Engine\DebugEngine.h"
 #include<math.h>
+#include"SailBoard.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -22,13 +23,21 @@ void CameraController::Start(){
 //毎フレーム呼ばれます
 void CameraController::Update()
 {
-	Look();
-
-	mPosition = mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -3) + XMVectorSet(0,1,0,1);
-
-	//mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 0);
-	gameObject->mTransform->Position(mPosition);
-	//gameObject->mTransform->Rotate(XMQuaternionRotationMatrix(mat));
+	if (mTarget)
+	{
+		Look();
+		if (!mTarget->GetScript<SailBoard>()->GetIsJump())
+		{
+			mPosition = mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -3) + XMVectorSet(0, 1, 0, 1);
+		}
+		else
+		{
+			mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1);
+		}
+		//mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 0);
+		gameObject->mTransform->Position(mPosition);
+		//gameObject->mTransform->Rotate(XMQuaternionRotationMatrix(mat));
+	}
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -51,6 +60,7 @@ void CameraController::OnCollideExit(Actor* target){
 	(void)target;
 }
 
+//プレイヤーを見る
 void CameraController::Look()
 {
 	auto SubVector = gameObject->mTransform->Position() - mTarget->mTransform->Position();

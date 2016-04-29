@@ -12,27 +12,23 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void Sail::Initialize(){
-
+	mRotateY = 0.00f;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void Sail::Start(){
-	mRotateY = 0.00f;
+	
 	
 }
 
 //毎フレーム呼ばれます
 void Sail::Update(){
 
-	if (Input::Down(KeyCoord::Key_O) && mRotateY > -XM_PI / 2) {
-		mRotateY -= 0.05f;
-	}
-	if (Input::Down(KeyCoord::Key_P) && mRotateY < XM_PI / 2) {
-		mRotateY += 0.05f;
-	}
-	
+	SailRotate();
+
 	auto parent = gameObject->mTransform->GetParent();
-	parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);
+	parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 15);        //PS4
+	//parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);         //PC
 
 }
 
@@ -79,4 +75,20 @@ float Sail::MovePower()
 	auto rad = XMVector3Dot(mWindvec, temprotate);
 
 	return abs(rad.x);
+}
+
+void Sail::SailRotate()
+{
+	if (Input::Down(KeyCoord::Key_O) && mRotateY > -XM_PI / 2) {
+		mRotateY -= 0.05f;
+	}
+	if (Input::Down(KeyCoord::Key_P) && mRotateY < XM_PI / 2) {
+		mRotateY += 0.05f;
+	}
+
+	mRotateY += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).z;
+
+	mRotateY = min(max(mRotateY, -XM_PI / 2), XM_PI / 2);
+
+	if (Input::Down(PAD_DS4_KeyCoord::Button_PS)) mRotateY = 0;
 }

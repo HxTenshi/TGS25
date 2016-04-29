@@ -7,6 +7,8 @@
 #include "Game/Component/TransformComponent.h"
 #include "Game/Component/PhysXComponent.h"
 #include "Engine\DebugEngine.h"
+#include<math.h>
+#include"PhysX\IPhysXEngine.h"
 
 #include"Game\Component\MaterialComponent.h"
 
@@ -15,8 +17,11 @@ void SailBoard::Initialize(){
 
 	mWindVector = XMVectorSet(1,0,0,1);
 	isGround = false;
-	zRotate = 0;
+	isJump = false;
+	xRotate = 0;
 	yRotate = 0;
+	mYRot = 0.0f;
+	mXRot = 0.0f;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -33,23 +38,20 @@ void SailBoard::Update(){
 		gameObject->mTransform->AddForce(v);
 	}
 
-	RotationBoard();
+	auto rotatey = RotationBoard();
+	auto rotatex = Trick();
 
-	if (!isGround)
+	if ((Input::Trigger(KeyCoord::Key_SPACE) || Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z > 0) && isGround)
 	{
-		Trick();
+		Jump();
 	}
 
-	if (Input::Trigger(KeyCoord::Key_SPACE) && isGround)
-	{
-		float power = 300.0f;
-		auto v = XMVectorSet(0, 1, 0, 1);
-		gameObject->mTransform->AddForce(v*power);
-	}
-
-	float power = 4.0f;
+	/*float power = 4.0f;
 	auto v = XMVectorSet(0, 1, 0, 1);
-	gameObject->mTransform->AddForce(v*power);
+	gameObject->mTransform->AddForce(v*power);*/
+
+	gameObject->mTransform->Quaternion(XMQuaternionMultiply(rotatex,rotatey));
+	
 
 }
 
@@ -62,14 +64,14 @@ void SailBoard::Finish(){
 void SailBoard::OnCollideBegin(Actor* target){
 	(void)target;
 
-	/*if (target->Name() == "Air"){
-
+	if (target->Name() == "Air"){
+		isJump = false;
 		auto pos = gameObject->mTransform->Position();
 		
 		float power = 2.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
 		gameObject->mTransform->AddForce(v*power);
-	}*/
+	}
 
 	if (target->Name() == "PointItem"){
 
@@ -84,9 +86,9 @@ void SailBoard::OnCollideEnter(Actor* target){
 	if (target->Name() == "Air")
 	{
 		isGround = true;
-		float power = 1.0f;
+		/*float power = 1.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
-		gameObject->mTransform->AddForce(v*power);
+		gameObject->mTransform->AddForce(v*power);*/
 	}
 
 	if (target->Name() == "Wind")
@@ -104,6 +106,9 @@ void SailBoard::OnCollideExit(Actor* target){
 	if (target->Name() == "Air")
 	{
 		isGround = false;
+		/*float power = 1.0f;
+		auto v = XMVectorSet(0, 1, 0, 1);
+		gameObject->mTransform->AddForce(v*power);*/
 	}
 
 	if (target->Name() == "Wind")
@@ -119,39 +124,56 @@ XMVECTOR SailBoard::GetWind()
 	//return XMVectorSet(1, 0, 0, 1);
 }
 
-void SailBoard::RotationBoard()
+bool SailBoard::GetIsJump()
 {
-	if (Input::Down(KeyCoord::Key_A)) {
-		mRotateY -= 0.05f;
-	}
-	if (Input::Down(KeyCoord::Key_D)) {
-		mRotateY += 0.05f;
-	}
-
-	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mRotateY);
-	gameObject->mTransform->Quaternion(rotatey);
+	return this->isJump;
 }
 
-void SailBoard::Trick()
+//ボードの左右回転
+XMVECTOR SailBoard::RotationBoard()
 {
-	
-	/*if (Input::Down(KeyCoord::Key_D)) {
-		yRotate -= 0.05f;
-	}
 	if (Input::Down(KeyCoord::Key_A)) {
-		yRotate += 0.05f;
-	}*/
-
-	if (Input::Down(KeyCoord::Key_W)) {
-		zRotate -= 0.05f;
+		mRotateY -= 0.01f;
 	}
-	if (Input::Down(KeyCoord::Key_S)) {
-		zRotate += 0.05f;
+	if (Input::Down(KeyCoord::Key_D)) {
+		mRotateY += 0.01f;
 	}
-	
-	/*auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), yRotate);
-	gameObject->mTransform->Rotate(rotatey);*/
+	mRotateY += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x;
+	mYRot += max(min(mRotateY, 5), -5) * 0.01f;
 
-	auto rotatez = XMQuaternionRotationAxis(XMVectorSet(1, 0, 0, 1), zRotate);
-	gameObject->mTransform->Rotate(XMQuaternionMultiply(rotatez, gameObject->mTransform->Rotate()));
+	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mYRot);
+	return rotatey;
+}
+
+//ジャンプ中であれば前後回転が可能になる
+XMVECTOR SailBoard::Trick()
+{
+	if (isJump)
+	{
+		if (Input::Down(KeyCoord::Key_W)) {
+			xRotate -= 0.05f;
+		}
+		if (Input::Down(KeyCoord::Key_S)) {
+			xRotate += 0.05f;
+		}
+		xRotate -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y;
+	}
+	if(!isJump)
+	{
+		mXRot = 0;
+		xRotate = 0;
+	}
+
+	mXRot += max(min(xRotate, 5), -5) * 0.1f;
+
+	auto rotatez = XMQuaternionRotationAxis(XMVectorSet(1, 0, 0, 1), mXRot);
+	return rotatez;
+}
+
+void SailBoard::Jump()
+{
+	isJump = true;
+	float power = 300.0f;
+	auto v = XMVectorSet(0, 1, 0, 1);
+	gameObject->mTransform->AddForce(v*power);
 }

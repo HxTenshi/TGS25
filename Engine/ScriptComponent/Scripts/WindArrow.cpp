@@ -40,9 +40,8 @@ void WindArrow::Update(){
 			windvec = XMVector3Normalize(windvec);
 			auto rpy = XMVector3Dot(f, windvec);
 			auto r = acos(rpy.x);
-			if (Input::Trigger(KeyCoord::Key_H)) game->Debug()->Log(std::to_string(r));
 			auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), r);
-			gameObject->mTransform->Rotate(rotatey);
+			gameObject->mTransform->Quaternion(rotatey);
 
 		}
 	}

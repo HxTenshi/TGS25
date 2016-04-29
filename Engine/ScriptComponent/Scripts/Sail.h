@@ -21,5 +21,6 @@ private:
 
 private:
 	float MovePower();
+	void SailRotate();
 
 };
