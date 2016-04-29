@@ -15,21 +15,23 @@ public:
 	XMVECTOR GetWind();
 	bool GetIsJump();
 
-	XMVECTOR mWindVector;
-private:
-	//メンバ変数
-	float mRotateY;
-	bool isGround;     //地面と接地しているかのチェック
-	bool isJump;       //プレイヤーがジャンプしたかのチェック
-
-	float xRotate;
-	float yRotate;
-
-	float mYRot;
-	float mXRot;
-
 private:
 	XMVECTOR RotationBoard();
 	XMVECTOR Trick();
 	void Jump();
+
+private:
+	//メンバ変数
+	bool isGround;     //地面と接地しているかのチェック
+	bool isJump;       //プレイヤーがジャンプしたかのチェック
+
+	float mRotateX;
+	float mRotateY;
+
+	float mYRot;
+	float mXRot;
+
+	XMVECTOR mWindVector;
+
+
 };

@@ -12,15 +12,15 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+	float MovePower();
 
 
 private:
 	//ƒƒ“ƒo•Ï”
-	float mRotateY;
+	float mSailRotate;
 	XMVECTOR mWindvec;
 
 private:
-	float MovePower();
 	void SailRotate();
 
 };

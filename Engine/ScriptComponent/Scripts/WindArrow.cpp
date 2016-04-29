@@ -28,20 +28,21 @@ void WindArrow::Update(){
 	{
 		gameObject->mTransform->Position(mPlayer->mTransform->Position() + XMVectorSet(0.0f, 1.5f, 0.0f,1.0f));
 	}
-	auto wind = mPlayer->GetScript<SailBoard>();
-	if (wind) {
-		auto windvec = wind->GetWind();
+	auto player = mPlayer->GetScript<SailBoard>();
+	if (player) {
+		auto windvec = player->GetWind();
 		if (XMVector3Length(windvec).x > 0)
 		{
 
-			auto f = XMVectorSet(1, 0, 0, 1);
-			f.y = 0;
-			f = XMVector3Normalize(f);
+			auto temp = XMVectorSet(1, 0, 0, 1);
+
+			temp = XMVector3Normalize(temp);
 			windvec = XMVector3Normalize(windvec);
-			auto rpy = XMVector3Dot(f, windvec);
-			auto r = acos(rpy.x);
-			auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), r);
-			gameObject->mTransform->Quaternion(rotatey);
+
+			auto dot = XMVector3Dot(temp, windvec);
+			auto radian = acos(dot.x);
+			auto rotate = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), radian);
+			gameObject->mTransform->Quaternion(rotate);
 
 		}
 	}

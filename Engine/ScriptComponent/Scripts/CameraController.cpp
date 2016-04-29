@@ -10,8 +10,8 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void CameraController::Initialize(){
-	
-
+	mPrevJump = false;
+	mTimer = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -26,17 +26,24 @@ void CameraController::Update()
 	if (mTarget)
 	{
 		Look();
+
+		//プレイヤーがジャンプしたらカメラの位置変更の準備
+		if (mPrevJump != mTarget->GetScript<SailBoard>()->GetIsJump())
+		{
+			mFromPos = mPosition;
+			mTimer = 0;
+			mPrevJump = mTarget->GetScript<SailBoard>()->GetIsJump();
+		}
+
 		if (!mTarget->GetScript<SailBoard>()->GetIsJump())
 		{
-			mPosition = mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -3) + XMVectorSet(0, 1, 0, 1);
+			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -3) + XMVectorSet(0, 1, 0, 1));
 		}
 		else
 		{
-			mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1);
+			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1));
 		}
-		//mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 0);
 		gameObject->mTransform->Position(mPosition);
-		//gameObject->mTransform->Rotate(XMQuaternionRotationMatrix(mat));
 	}
 }
 
@@ -72,3 +79,11 @@ void CameraController::Look()
 	gameObject->mTransform->Rotate(vec);
 
 }
+
+XMVECTOR CameraController::Lerp(XMVECTOR p1, XMVECTOR p2)
+{
+	mTimer += 0.2f;
+	mTimer = min(1, mTimer);
+	return XMVectorLerp(p1, p2, mTimer);
+}
+
