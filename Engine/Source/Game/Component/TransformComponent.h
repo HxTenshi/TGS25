@@ -27,10 +27,14 @@ public:
 	virtual const XMVECTOR& Scale() const = 0;
 	virtual const XMVECTOR& Rotate() const = 0;
 	virtual const XMVECTOR& Position() const = 0;
+	virtual const XMVECTOR DegreeRotate() const = 0;
+	virtual const XMVECTOR Quaternion() const = 0;
 
 	virtual void Scale(const XMVECTOR& scale) = 0;
 	virtual void Rotate(const XMVECTOR& rotate) = 0;
+	virtual void DegreeRotate(const XMVECTOR& rotate) = 0;
 	virtual void Position(const XMVECTOR& position) = 0;
+	virtual void Quaternion(const XMVECTOR& Quaternion) = 0;
 
 	virtual const XMVECTOR& Forward() const = 0;
 	virtual const XMVECTOR& Left() const = 0;
@@ -68,9 +72,13 @@ public:
 	const XMVECTOR& Scale() const override;
 	const XMVECTOR& Rotate() const override;
 	const XMVECTOR& Position() const override;
+	const XMVECTOR DegreeRotate() const override;
+	const XMVECTOR Quaternion() const override;
 	void Scale(const XMVECTOR& scale) override;
 	void Rotate(const XMVECTOR& rotate) override;
 	void Position(const XMVECTOR& position) override;
+	void DegreeRotate(const XMVECTOR& rotate) override;
+	void Quaternion(const XMVECTOR& Quaternion) override;
 
 	const XMVECTOR& Forward() const override;
 	const XMVECTOR& Left() const override;
@@ -110,6 +118,7 @@ public:
 private:
 	XMVECTOR mScale;
 	XMVECTOR mRotate;
+	XMVECTOR mInspectorRotateDegree;
 	XMVECTOR mPosition;
 	mutable XMMATRIX mMatrix;
 	std::list<Actor*> mChildren;

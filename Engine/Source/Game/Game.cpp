@@ -255,6 +255,22 @@ Game::Game(){
 
 		Window::Deleter(s);
 	});
+	Window::SetWPFCollBack(MyWindowMessage::CreateAssetFile, [&](void* p)
+	{
+		std::string *s = (std::string*)p;
+		if (*s != ""){
+			auto ex = behind_than_find_last_of(*s, ".");
+			if (ex == "pxmaterial"){
+				File f("Assets/"+*s);
+				f.FileCreate();
+				f.Out(0.0f);
+				f.Out(0.0f);
+				f.Out(0.0f);
+			}
+		}
+
+		Window::Deleter(s);
+	});
 	Window::SetWPFCollBack(MyWindowMessage::SaveScene, [&](void* p)
 	{
 		(void)p;
