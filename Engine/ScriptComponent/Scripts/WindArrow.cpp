@@ -4,8 +4,9 @@
 #include "Input/Input.h"
 #include "Game/Component/TransformComponent.h"
 #include "Wind.h"
-
-#include "Engine/DebugEngine.h"
+#include "SailBoard.h"
+#include "Engine\DebugEngine.h"
+#include<math.h>
 
 
 
@@ -15,33 +16,37 @@ void WindArrow::Initialize(){
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
-void WindArrow::Start(){
-
+void WindArrow::Start()
+{
+	mPlayer = game->FindActor("Board");
 }
 
 //毎フレーム呼ばれます
 void WindArrow::Update(){
-	auto wind = game->FindActor("Wind");
-	if (wind){
-		auto windscr = wind->GetScript<Wind>();
-		if (windscr){
-			auto v = windscr->GetWindVelocity();
-			if (XMVector3Length(v).x > 0){
 
-				auto f = gameObject->mTransform->GetParent()->mTransform->Forward();
-				f.y = 0;
-				f = XMVector3Normalize(f);
-				v = XMVector3Normalize(v);
-				auto rpy = XMVector3AngleBetweenNormals(f, v);
-				gameObject->mTransform->Rotate(XMVectorSet(0, rpy.x, 0, 1));
+	if (mPlayer)
+	{
+		gameObject->mTransform->Position(mPlayer->mTransform->Position() + XMVectorSet(0.0f, 1.5f, 0.0f,1.0f));
+	}
+	auto player = mPlayer->GetScript<SailBoard>();
+	if (player) {
+		auto windvec = player->GetWind();
+		if (XMVector3Length(windvec).x > 0)
+		{
 
-			}
+			auto temp = XMVectorSet(1, 0, 0, 1);
+
+			temp = XMVector3Normalize(temp);
+			windvec = XMVector3Normalize(windvec);
+
+			auto dot = XMVector3Dot(temp, windvec);
+			auto radian = acos(dot.x);
+			auto rotate = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), radian);
+			gameObject->mTransform->Quaternion(rotate);
+
 		}
 	}
-	game->Debug()->Log("test1");
-	game->Debug()->Log("test2");
-	game->Debug()->Log("test3");
-	game->Debug()->Log("test4");
+	
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）

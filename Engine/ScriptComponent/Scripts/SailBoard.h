@@ -13,16 +13,25 @@ public:
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
 	XMVECTOR GetWind();
+	bool GetIsJump();
 
-	XMVECTOR mWindVector;
+private:
+	XMVECTOR RotationBoard();
+	XMVECTOR Trick();
+	void Jump();
+
 private:
 	//メンバ変数
-	float mRotateY;
-	bool isGround;
-	float zRotate;
-	float yRotate;
+	bool isGround;     //地面と接地しているかのチェック
+	bool isJump;       //プレイヤーがジャンプしたかのチェック
 
-private:
-	void RotationBoard();
-	void Trick();
+	float mRotateX;
+	float mRotateY;
+
+	float mYRot;
+	float mXRot;
+
+	XMVECTOR mWindVector;
+
+
 };
