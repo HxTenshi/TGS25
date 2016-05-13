@@ -213,11 +213,11 @@ void SailBoard::ReSpawn()
 
 bool SailBoard::Shake()
 {
-	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z);
-	if (f > 0.3f)
+	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y);
+	if (f > mPrevAcceler)
 	{
 		return true;
 	}
-	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
 	return false;
 }

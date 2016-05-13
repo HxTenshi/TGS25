@@ -93,10 +93,12 @@ HRESULT Device::Init(const Window& window)
 		IDXGIFactory1* dxgiFactory;
 		if FAILED(hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (LPVOID*)&dxgiFactory))
 		{
+			Window::AddLog("DXGIFactory作成失敗");
 			return hr;
 		}
 		if FAILED(hr = dxgiFactory->EnumAdapters1(0, &mpAdapter))
 		{
+			Window::AddLog("アダプター作成失敗");
 			return hr;
 		}
 		dxgiFactory->Release();
@@ -112,18 +114,24 @@ HRESULT Device::Init(const Window& window)
 		if (SUCCEEDED(hr))
 			break;
 	}
-	if (FAILED(hr))
+	if (FAILED(hr)){
+		Window::AddLog("D3Dドライバー作成失敗");
 		return hr;
+	}
 
 
 	ID3D11DeviceContext *context;
 	hr = mpd3dDevice->CreateDeferredContext(NULL, &context);
-	if (FAILED(hr))
+	if (FAILED(hr)){
+		Window::AddLog("デファードコンテキスト作成失敗");
 		return hr;
+	}
+
+
 
 	auto render = RenderingSystem::Instance();
-
-	render->PushEngine(new RenderingEngine(context), ContextType::MainDeferrd);
+	render->PushEngine(new RenderingEngine(context), ContextType::Immediate);
+	render->PushEngine(new RenderingEngine(mpImmediateContext), ContextType::MainDeferrd);
 	//render->PushEngine(new RenderingEngine(context), ContextType::MainDeferrd);
 
 	//hr = mpSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE);
@@ -136,8 +144,10 @@ HRESULT Device::Init(const Window& window)
 
 	mRenderTargetBack = new RenderTarget();
 	hr = mRenderTargetBack->CreateBackBuffer(WindowState::mWidth, WindowState::mHeight);
-	if (FAILED(hr))
+	if (FAILED(hr)){
+		Window::AddLog("バックバッファー作成失敗");
 		return hr;
+	}
 
 	//レンダーターゲットと深度ステンシルの関連付け
 	mRenderTargetBack->SetRendererTarget(mpImmediateContext);

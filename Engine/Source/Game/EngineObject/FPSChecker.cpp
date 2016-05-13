@@ -23,7 +23,7 @@ public:
 
 		//mComponents.AddComponent<TextureModelComponent>();
 
-		mComponents.AddComponent<TextComponent>();
+		//mComponents.AddComponent<TextComponent>();
 
 
 		//auto mPixelTopLeft = TopLeft;
