@@ -1,2 +1,2 @@
-"ScriptComponent/MSBuild.exe" ScriptComponent/ScriptComponent.vcxproj /t:rebuild /p:Configuration=EngineRelease
+"ScriptComponent/MSBuild.exe" ScriptComponent/ScriptComponent.vcxproj /t:build /p:Configuration=EngineRelease
 pause
