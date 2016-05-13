@@ -71,11 +71,6 @@ public:
 	PxRigidActor* createBody();
 	PxRigidActor* createBodyEngine();
 
-	void DrawBox(PxShape* pShape, PxRigidActor* actor);
-	void DrawShape(PxShape* shape, PxRigidActor* actor);
-
-	void DrawActor(PxRigidActor* actor);
-
 	void EngineDisplay();
 	void Display();
 	void StepPhysX();
