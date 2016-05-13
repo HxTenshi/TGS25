@@ -12,30 +12,23 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void Sail::Initialize(){
-
+	mSailRotate = 0.00f;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void Sail::Start(){
-	mRotateY = 0.00f;
+	
 	
 }
 
 //毎フレーム呼ばれます
 void Sail::Update(){
 
-	if (Input::Down(KeyCoord::Key_O) && mRotateY > -1.5f) {
-		mRotateY -= 0.05f;
-	}
-	if (Input::Down(KeyCoord::Key_P) && mRotateY < 1.5f) {
-		mRotateY += 0.05f;
-	}
-	
+	SailRotate();
 
-	if(Input::Trigger(KeyCoord::Key_H)) game->Debug()->Log(std::to_string(typeid(PhysXComponent).hash_code()));
-	
 	auto parent = gameObject->mTransform->GetParent();
-	parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);
+	parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 15);        //PS4デバック
+	//parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);         //PCデバック
 
 }
 
@@ -59,27 +52,43 @@ void Sail::OnCollideExit(Actor* target){
 	(void)target;
 }
 
-//風の向き＋セイルで推進力の計算
+//風の向き＋セイルの向きで推進力の計算 返り値
 float Sail::MovePower()
 {
 
 	auto wind = gameObject->mTransform->GetParent()->GetScript<SailBoard>();
 	if (!wind)return 0.0f;
-	auto mWindvec = wind->mWindVector;
-	mWindvec.y = 0;
+	auto windvec = wind->GetWind();
+	windvec.y = 0;
 
-	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mRotateY);
-	gameObject->mTransform->Rotate(rotatey);
+	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mSailRotate);
+	gameObject->mTransform->Quaternion(rotatey);
 
-	auto temprotate = gameObject->mTransform->Left();
+	auto saildir = gameObject->mTransform->Left();
 
-	temprotate = XMVector3Normalize(temprotate);
-	if (XMVector3Length(mWindvec).x < 0.000000001f) {
+	saildir = XMVector3Normalize(saildir);
+	if (XMVector3Length(windvec).x < 0.000000001f) {
 		return 0.0f;
 	}
-		mWindvec = XMVector3Normalize(mWindvec);
+	windvec = XMVector3Normalize(windvec);
 
-	auto rad = XMVector3Dot(mWindvec, temprotate);
+	auto rad = XMVector3Dot(windvec, saildir);
 
 	return abs(rad.x);
+}
+
+void Sail::SailRotate()
+{
+	if (Input::Down(KeyCoord::Key_O) && mSailRotate > -XM_PI / 2) {
+		mSailRotate -= 0.05f;
+	}
+	if (Input::Down(KeyCoord::Key_P) && mSailRotate < XM_PI / 2) {
+		mSailRotate += 0.05f;
+	}
+
+	mSailRotate += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).z;
+
+	mSailRotate = min(max(mSailRotate, -XM_PI / 2), XM_PI / 2);
+
+	if (Input::Down(PAD_DS4_KeyCoord::Button_PS)) mSailRotate = 0;
 }

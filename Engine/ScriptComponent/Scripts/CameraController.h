@@ -19,6 +19,12 @@ private:
 	Actor* mTarget;
 	XMVECTOR mPosition;
 
+	bool mPrevJump;
+
+	XMVECTOR mFromPos;
+	float mTimer;
+
 private:
 	void Look();
+	XMVECTOR Lerp(XMVECTOR p1, XMVECTOR p2);
 };

@@ -29,6 +29,8 @@
 */ScriptComponent/*.vcxproj.filters
 */ScriptComponent/*.opensdf
 */ScriptComponent/System/
+*/ScriptComponent/MSBuild.exe
+*/ScriptComponent/createdll_auto.bat
 UniqueID.txt
 
 

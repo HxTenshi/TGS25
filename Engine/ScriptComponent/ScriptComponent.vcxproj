@@ -123,9 +123,12 @@
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="Scripts\CameraController.cpp" />
     <ClCompile Include="Scripts\Enemy.cpp" />
+<<<<<<< HEAD
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\KillerWhale.cpp" />
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
+=======
+>>>>>>> 3643683350aaa8969b21a3e6e286b3cb517232cc
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
     <ClCompile Include="Scripts\Wind.cpp" />
@@ -136,9 +139,12 @@
     <ClInclude Include="Script.h" />
     <ClInclude Include="Scripts\CameraController.h" />
     <ClInclude Include="Scripts\Enemy.h" />
+<<<<<<< HEAD
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\KillerWhale.h" />
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
+=======
+>>>>>>> 3643683350aaa8969b21a3e6e286b3cb517232cc
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
     <ClInclude Include="Scripts\Wind.h" />

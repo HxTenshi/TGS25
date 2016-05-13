@@ -2,6 +2,7 @@
 #include "SelectActor.h"
 
 #include <set>
+#include <map>
 
 #include "Device/DirectX11Device.h"
 
@@ -25,6 +26,8 @@
 
 
 #include "Game/Game.h"
+
+#include "Game/RenderingSystem.h"
 
 //選択時の移動オブジェクト
 class Arrow : public Actor{
@@ -195,9 +198,9 @@ void SelectActor::Initialize(){
 
 		}
 
-		mVectorBox[0].mTransform->Rotate(XMQuaternionRotationRollPitchYawFromVector(XMVectorSet(0, 0, -XM_PI / 2, 1)));
-		mVectorBox[1].mTransform->Rotate(XMQuaternionRotationRollPitchYawFromVector(XMVectorSet(0, 0, 0, 1)));
-		mVectorBox[2].mTransform->Rotate(XMQuaternionRotationRollPitchYawFromVector(XMVectorSet(XM_PI / 2, 0, 0, 1)));
+		mVectorBox[0].mTransform->DegreeRotate(XMVectorSet(0, 0, -90, 1));
+		mVectorBox[1].mTransform->DegreeRotate(XMVectorSet(0, 0, 0, 1));
+		mVectorBox[2].mTransform->DegreeRotate(XMVectorSet(90, 0, 0, 1));
 
 		auto mate = mVectorBox[0].GetComponent<MaterialComponent>();
 		if (mate){
@@ -339,63 +342,25 @@ void SelectActor::SelectActorDraw(){
 			if (!mModel)return;
 			Model& model = *mModel->mModel;
 
-			ID3D11DepthStencilState* pBackDS;
-			UINT ref;
-			Device::mpImmediateContext->OMGetDepthStencilState(&pBackDS, &ref);
+			auto render = RenderingEngine::GetEngine(ContextType::MainDeferrd);
 
-			D3D11_DEPTH_STENCIL_DESC descDS = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
-			descDS.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-			//descDS.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-			descDS.DepthFunc = D3D11_COMPARISON_ALWAYS;
-			ID3D11DepthStencilState* pDS = NULL;
-			Device::mpd3dDevice->CreateDepthStencilState(&descDS, &pDS);
-			Device::mpImmediateContext->OMSetDepthStencilState(pDS, 0);
-
-			D3D11_RASTERIZER_DESC descRS = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
-			descRS.CullMode = D3D11_CULL_BACK;
-			descRS.FillMode = D3D11_FILL_WIREFRAME;
-
-			ID3D11RasterizerState* pRS = NULL;
-			Device::mpd3dDevice->CreateRasterizerState(&descRS, &pRS);
-
-			Device::mpImmediateContext->RSSetState(pRS);
+			render->PushSet(DepthStencil::Preset::DS_Zero_Alawys);
+			render->PushSet(Rasterizer::Preset::RS_Back_Wireframe);
 
 
-			model.Draw(mSelectWireMaterial);
+			model.Draw(render->m_Context, mSelectWireMaterial);
 
 
-			Device::mpImmediateContext->RSSetState(NULL);
-			if (pRS)pRS->Release();
-
-			Device::mpImmediateContext->OMSetDepthStencilState(NULL, 0);
-			pDS->Release();
-
-			Device::mpImmediateContext->OMSetDepthStencilState(pBackDS, ref);
-			if (pBackDS)pBackDS->Release();
+			render->PopRS();
+			render->PopDS();
 		}));
 	}
 	Game::AddDrawList(DrawStage::Engine, std::function<void()>([&](){
 	
-		ID3D11DepthStencilState* pBackDS;
-		UINT ref;
-		Device::mpImmediateContext->OMGetDepthStencilState(&pBackDS, &ref);
-	
-		D3D11_DEPTH_STENCIL_DESC descDS = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
-		descDS.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-		//descDS.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-		descDS.DepthFunc = D3D11_COMPARISON_ALWAYS;
-		ID3D11DepthStencilState* pDS = NULL;
-		Device::mpd3dDevice->CreateDepthStencilState(&descDS, &pDS);
-		Device::mpImmediateContext->OMSetDepthStencilState(pDS, 0);
-	
-		D3D11_RASTERIZER_DESC descRS = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
-		descRS.CullMode = D3D11_CULL_BACK;
-		descRS.FillMode = D3D11_FILL_SOLID;
-	
-		ID3D11RasterizerState* pRS = NULL;
-		Device::mpd3dDevice->CreateRasterizerState(&descRS, &pRS);
-	
-		Device::mpImmediateContext->RSSetState(pRS);
+		auto render = RenderingEngine::GetEngine(ContextType::MainDeferrd);
+
+		render->PushSet(DepthStencil::Preset::DS_All_Alawys);
+		render->PushSet(Rasterizer::Preset::RS_Back_Solid);
 	
 
 		auto f = Game::GetMainCamera()->gameObject->mTransform->Forward();
@@ -418,13 +383,13 @@ void SelectActor::SelectActorDraw(){
 
 			auto result = draws.insert(std::pair<float, std::function<void()>>((float)dot.x, [=](){
 				mModel->SetMatrix();
-				model.Draw(mVectorBox[i].GetComponent<MaterialComponent>());
+				model.Draw(render->m_Context, mVectorBox[i].GetComponent<MaterialComponent>());
 			}));
 			if (!result.second){
 				dot.x -= 0.01f;
 				draws.insert(std::pair<float, std::function<void()>>((float)dot.x, [=](){
 					mModel->SetMatrix();
-					model.Draw(mVectorBox[i].GetComponent<MaterialComponent>());
+					model.Draw(render->m_Context, mVectorBox[i].GetComponent<MaterialComponent>());
 				}));
 			}
 		}
@@ -434,21 +399,8 @@ void SelectActor::SelectActorDraw(){
 			d.second();
 		}
 
-		//Game::GetMainCamera()->SetPerspective();
-
-		//model1.Draw(mVectorBox[0].GetComponent<MaterialComponent>());
-		//model2.Draw(mVectorBox[1].GetComponent<MaterialComponent>());
-		//model3.Draw(mVectorBox[2].GetComponent<MaterialComponent>());
-	
-	
-		Device::mpImmediateContext->RSSetState(NULL);
-		if (pRS)pRS->Release();
-	
-		Device::mpImmediateContext->OMSetDepthStencilState(NULL, 0);
-		pDS->Release();
-	
-		Device::mpImmediateContext->OMSetDepthStencilState(pBackDS, ref);
-		if (pBackDS)pBackDS->Release();
+		render->PopRS();
+		render->PopDS();
 	}));
 }
 

@@ -5,12 +5,13 @@
 #include "Game/Component/TransformComponent.h"
 #include "Engine\DebugEngine.h"
 #include<math.h>
+#include"SailBoard.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void CameraController::Initialize(){
-	
-
+	mPrevJump = false;
+	mTimer = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -22,13 +23,28 @@ void CameraController::Start(){
 //毎フレーム呼ばれます
 void CameraController::Update()
 {
-	Look();
+	if (mTarget)
+	{
+		Look();
 
-	mPosition = mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -3) + XMVectorSet(0,1,0,1);
+		//プレイヤーがジャンプしたらカメラの位置変更の準備
+		if (mPrevJump != mTarget->GetScript<SailBoard>()->GetIsJump())
+		{
+			mFromPos = mPosition;
+			mTimer = 0;
+			mPrevJump = mTarget->GetScript<SailBoard>()->GetIsJump();
+		}
 
-	//mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 0);
-	gameObject->mTransform->Position(mPosition);
-	//gameObject->mTransform->Rotate(XMQuaternionRotationMatrix(mat));
+		if (!mTarget->GetScript<SailBoard>()->GetIsJump())
+		{
+			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -3) + XMVectorSet(0, 1, 0, 1));
+		}
+		else
+		{
+			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1));
+		}
+		gameObject->mTransform->Position(mPosition);
+	}
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -51,16 +67,23 @@ void CameraController::OnCollideExit(Actor* target){
 	(void)target;
 }
 
+//プレイヤーを見る
 void CameraController::Look()
 {
 	auto SubVector = gameObject->mTransform->Position() - mTarget->mTransform->Position();
 
 	auto Angel = atan2(-SubVector.x, -SubVector.z);
-	if (Input::Down(KeyCoord::Key_F))
-	game->Debug()->Log(std::to_string(Angel));
 
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), Angel);
 	auto vec = XMVectorSet(0, Angel, 0, 1);
 	gameObject->mTransform->Rotate(vec);
 
 }
+
+XMVECTOR CameraController::Lerp(XMVECTOR p1, XMVECTOR p2)
+{
+	mTimer += 0.2f;
+	mTimer = min(1, mTimer);
+	return XMVectorLerp(p1, p2, mTimer);
+}
+
