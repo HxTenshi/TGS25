@@ -28,6 +28,7 @@ public:
 
 protected:
 	//ƒƒ“ƒo•Ï”
+	Actor* mSearchRange;
 	float mSpeed;
 	float mSize;
 	float mPositionY;

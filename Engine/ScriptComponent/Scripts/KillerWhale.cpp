@@ -23,7 +23,7 @@ void KillerWhale::Start(){
 void KillerWhale::Update(){
 	Enemy::PlayerColorChange(gameObject);
 	Enemy::PlayerSearchMode(gameObject);
-	//Enemy::PlayerChaseMode(gameObject);
+	Enemy::PlayerChaseMode(gameObject);
 	Enemy::PlayerChase(gameObject);
 	Enemy::FallDead(gameObject);
 }

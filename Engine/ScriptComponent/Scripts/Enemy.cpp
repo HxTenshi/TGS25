@@ -20,8 +20,6 @@ void Enemy::Initialize(){
 	mDeadHeigth = -10.0f;
 	mIsHit = false;
 	mIsSearchRange = false;
-
-	//game->CreateActor("");
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -31,11 +29,12 @@ void Enemy::Start(){
 	auto nowPosition = gameObject->mTransform->Position();
 	mPositionY = nowPosition.y;
 	gameObject->mTransform->Position(nowPosition);
+
+	//game->Debug()->Log(std::to_string(mSearchRange->mTransform->Scale().x));
 }
 
 //毎フレーム呼ばれます
 void Enemy::Update(){
-
 	/*PlayerSearch(gameObject);
 
 	if (mIsSearchRange) {
