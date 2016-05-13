@@ -484,6 +484,8 @@ Font::~Font(){
 }
 
 void Font::Initialize(){
+	return;
+
 	SafeRelease(&texture11);
 	SafeRelease(&keyedmutex11);
 	SafeRelease(&keyedmutex10);
@@ -584,20 +586,21 @@ void Font::Initialize(){
 #include "Application/DrawThreadQueue.h"
 
 HRESULT Font::SetText(const std::string& text){
-	std::wstring wtext;
-	widen(text, wtext);
-	if (!mInitializeComplete){
-		Initialize();
-	}
-	if (!mInitializeComplete){
-		return S_FALSE;
-	}
-
-	DrawThreadQueue::enqueue(
-		[wtext, this](){
-			this->DrawThreadUpdateText(wtext);
-		}
-	);
+	//std::wstring wtext;
+	//widen(text, wtext);
+	//if (!mInitializeComplete){
+	//	Initialize();
+	//}
+	//if (!mInitializeComplete){
+	//	return S_FALSE;
+	//}
+	//
+	//DrawThreadQueue::enqueue(
+	//	[wtext, this](){
+	//		this->DrawThreadUpdateText(wtext);
+	//	}
+	//);
+	return S_OK;
 }
 Texture Font::GetTexture(){
 	return mTexture;

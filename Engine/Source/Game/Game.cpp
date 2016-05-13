@@ -76,14 +76,6 @@ Game::Game(){
 	Window::CreateContextMenu_CreateObject("Texture", "EngineResource/new Texture");
 
 
-	DWORD start = GetTickCount();
-
-	for (int i = 0; i < 1000; i++){
-		volatile auto act = new Actor();
-		delete act;
-
-	}
-
 	mRootObject = new Actor();
 	mRootObject->mTransform = mRootObject->AddComponent<TransformComponent>();
 	mRootObject->Initialize();

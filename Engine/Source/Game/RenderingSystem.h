@@ -175,6 +175,7 @@ protected:
 };
 enum class ContextType{
 
+	Immediate,
 	MainDeferrd,
 	Count,
 

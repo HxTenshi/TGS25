@@ -52,7 +52,6 @@ private:
 	std::deque<T> data;
 	std::condition_variable c_enq;
 	std::condition_variable c_deq;
-
 	int mode = 0;
 };
 
@@ -64,8 +63,10 @@ public:
 	}
 	static std::function<void(void)> dequeue(){
 		return mQueue.dequeue();
+		//return[](){};
 	}
 	static int size(){
+		//return 0;
 		return mQueue.size();
 	}
 private:
