@@ -19,6 +19,7 @@ void SailBoard::Initialize(){
 	mWindVector = XMVectorSet(1,0,0,1);
 	isGround = false;
 	isJump = false;
+	isDead = false;
 	mRotateX = 0;
 	mYRot = 0.0f;
 	mXRot = 0.0f;
@@ -26,10 +27,14 @@ void SailBoard::Initialize(){
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Start(){
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
 }
 
 //毎フレーム呼ばれます
 void SailBoard::Update(){
+
+	isDead = Dead();
+	ReSpawn();
 
 	auto physx = gameObject->GetComponent<PhysXComponent>();
 	if (physx) {
@@ -41,7 +46,7 @@ void SailBoard::Update(){
 	auto rotatey = RotationBoard();
 	auto rotatex = Trick();
 
-	if ((Input::Trigger(KeyCoord::Key_SPACE) || Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z > 0) && isGround)
+	if ((Input::Trigger(KeyCoord::Key_SPACE) || Shake()) && isGround)
 	{
 		Jump();
 	}
@@ -142,7 +147,7 @@ XMVECTOR SailBoard::RotationBoard()
 		mYRot += max(min(mRotateY, 5), -5) * 0.05f;
 	}
 	
-	if (Input::Trigger(PAD_DS4_KeyCoord::Button_PS))mRotateY = 0;
+	if (Input::Trigger(PAD_DS4_KeyCoord::Button_L1))mRotateY = 0;
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mYRot);
 	return rotatey;
 }
@@ -180,4 +185,39 @@ void SailBoard::Jump()
 	float power = 300.0f;
 	auto v = XMVectorSet(0, 1, 0, 1);
 	gameObject->mTransform->AddForce(v*power);
+}
+
+bool SailBoard::Dead()
+{
+	//if (gameObject->mTransform->Position().y < -7) return true;
+	auto deadline = game->FindActor("DeadLine");
+	if (deadline)
+	{
+		return deadline->mTransform->Position().y > gameObject->mTransform->Position().y;
+	}
+	return false;
+}
+
+void SailBoard::ReSpawn()
+{
+	if (isDead)
+	{
+		gameObject->mTransform->Position(XMVectorSet(0.0f,0.0f,0.0f,1.0f));
+		auto point = game->FindActor("ReSpawnPoint");
+		if (point)
+		{
+			gameObject->mTransform->Position(point->mTransform->Position());
+		}
+	}
+}
+
+bool SailBoard::Shake()
+{
+	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z);
+	if (f > 0.3f)
+	{
+		return true;
+	}
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
+	return false;
 }
