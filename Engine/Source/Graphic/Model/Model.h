@@ -13,6 +13,9 @@ class MaterialComponent;
 
 class BoneModel;
 
+#include <vector>
+class MeshComponent;
+
 class Model{
 public:
 	Model();
@@ -20,12 +23,15 @@ public:
 	HRESULT Create(const char* FileName);
 	HRESULT CreateBoneModel(const char* FileName);
 	void Release();
-	void SetConstantBuffer() const;
+	void SetConstantBuffer(ID3D11DeviceContext* context) const;
 	void Update();
-	void IASet() const;
-	void Draw(const Material& material) const;
-	void Draw(const shared_ptr<MaterialComponent> material) const;
+	void IASet(ID3D11DeviceContext* context) const;
+	void Draw(ID3D11DeviceContext* context, const Material& material) const;
+	void Draw(ID3D11DeviceContext* context, const shared_ptr<MaterialComponent> material) const;
+	void Draw(ID3D11DeviceContext* context, const std::vector<weak_ptr<MeshComponent>>& mesh) const;
 
+
+	int GetMeshNum();
 	//クリエイトされているか
 	bool IsCreate(){
 		return m_MeshAssetDataPtr != NULL;
@@ -47,6 +53,28 @@ protected:
 	ConstantBuffer<CBChangesEveryFrame> mCBuffer;
 
 	friend PointLightComponent;
+
+	mutable bool mIsChangeMatrix;
+};
+
+#include "Engine/AssetFile/Mesh/MeshBufferData.h"
+class ModelMesh{
+public:
+	ModelMesh(){}
+	~ModelMesh(){}
+
+	void SetMaterialComponent(const weak_ptr<MaterialComponent>& mate){
+		m_MaterialComponent = mate;
+	}
+
+	void Create(const std::string& name, int id);
+
+	void Draw(ID3D11DeviceContext* context) const;
+private:
+
+	weak_ptr<MaterialComponent> m_MaterialComponent;
+	MeshAssetDataPtr m_MeshAssetDataPtr;
+	int m_ID;
 };
 
 //class ModelTexture : public Model{

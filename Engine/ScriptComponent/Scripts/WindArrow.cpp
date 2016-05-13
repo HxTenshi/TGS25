@@ -5,6 +5,8 @@
 #include "Game/Component/TransformComponent.h"
 #include "Wind.h"
 
+#include "Engine/DebugEngine.h"
+
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -19,7 +21,6 @@ void WindArrow::Start(){
 
 //毎フレーム呼ばれます
 void WindArrow::Update(){
-
 	auto wind = game->FindActor("Wind");
 	if (wind){
 		auto windscr = wind->GetScript<Wind>();
@@ -37,6 +38,10 @@ void WindArrow::Update(){
 			}
 		}
 	}
+	game->Debug()->Log("test1");
+	game->Debug()->Log("test2");
+	game->Debug()->Log("test3");
+	game->Debug()->Log("test4");
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）

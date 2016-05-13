@@ -1,8 +1,10 @@
 #pragma once
 
-#define _ASSET_TEMP
 
 #include "MySTL/ptr.h"
+#include <functional>
+#include <map>
+#include <string>
 
 enum class AssetFileType{
 	None,
@@ -16,36 +18,6 @@ enum class AssetFileType{
 	Count,
 };
 
-#ifndef _ASSET_TEMP
-
-class AssetData{
-public:
-
-	AssetData(AssetFileType type = AssetFileType::None)
-		:m_AssetFileType(type){
-
-	}
-	virtual ~AssetData(){}
-	virtual void CreateInspector(){}
-	virtual void FileUpdate() = 0;
-
-	const AssetFileType m_AssetFileType;
-
-	static const AssetFileType _AssetFileType = AssetFileType::None;
-
-
-protected:
-	void* m_Data;
-	char m_GUID[33];
-
-private:
-	void operator = (const AssetData&);
-	AssetData(const AssetData&);
-
-};
-using AssetDataPtr = shared_ptr < AssetData > ;
-
-#else
 class IAssetDataTemplate{
 public:
 	IAssetDataTemplate(AssetFileType type = AssetFileType::None)
@@ -60,27 +32,13 @@ public:
 };
 
 using AssetDataTemplatePtr = shared_ptr < IAssetDataTemplate >;
-#endif
 
-#ifndef _ASSET_TEMP
-#else
-#endif
 
-#include <functional>
-#include <map>
 class AssetFactory{
 public:
-#ifndef _ASSET_TEMP
-	static AssetDataPtr Create(const char* filename);
-#else
 	static AssetDataTemplatePtr Create(const char* filename);
-#endif
 private:
-#ifndef _ASSET_TEMP
-	static std::map<std::string, std::function<AssetDataPtr(const char*)>> m_Factory;
-#else
 	static std::map<std::string, std::function<AssetDataTemplatePtr(const char*)>> m_Factory;
-#endif
 protected:
 	AssetFactory();
 };
@@ -93,11 +51,9 @@ public:
 
 		auto file = m_AssetCache.find(filename);
 
-#ifndef _ASSET_TEMP
-		AssetDataPtr data;
-#else
+
 		AssetDataTemplatePtr data;
-#endif
+
 		if (file == m_AssetCache.end()){
 
 			data = AssetFactory::Create(filename);
@@ -124,21 +80,14 @@ public:
 			file->second->FileUpdate();
 		}
 		else{
-#ifndef _ASSET_TEMP
-			shared_ptr<AssetData> temp;
-#else
 			AssetDataTemplatePtr temp;
-#endif
 			Instance(filename,temp);
 		}
 	}
 
 	static void CreateInspector(const char* filename){
-#ifndef _ASSET_TEMP
-		shared_ptr<AssetData> temp;
-#else
 		AssetDataTemplatePtr temp;
-#endif
+
 		Instance(filename, temp);
 		if (temp){
 			temp->CreateInspector();
@@ -147,142 +96,8 @@ public:
 
 
 private:
-#ifndef _ASSET_TEMP
-	static std::map<std::string, AssetDataPtr> m_AssetCache;
-#else
 	static std::map<std::string, AssetDataTemplatePtr> m_AssetCache;
-#endif
 };
-
-
-#ifndef _ASSET_TEMP
-
-#include "Engine/AssetFile/Mesh/MeshFileData.h"
-#include "Engine/AssetFile/Mesh/MeshBufferData.h"
-
-class MeshAssetData : public AssetData{
-public:
-	virtual ~MeshAssetData();
-
-	static AssetDataPtr MeshAssetData::Create(const char* filename);
-	void FileUpdate()override;
-
-	const MeshFileData& GetFileData() const;
-	const MeshBufferData& GetBufferData() const;
-
-	static const AssetFileType _AssetFileType = AssetFileType::Temesh;
-
-private:
-
-	MeshAssetData();
-
-
-	//コピー禁止
-	MeshAssetData(const MeshAssetData&) = delete;
-	MeshAssetData& operator=(const MeshAssetData&) = delete;
-
-	MeshFileData	m_MeshFileData;		// ファイルを読み込んだデータ
-	MeshBufferData	m_MeshBufferData;	// 描画に使用するデータ
-
-};
-
-using MeshAssetDataPtr = shared_ptr < MeshAssetData >;
-
-
-#include "Engine/AssetFile/Bone/BoneFileData.h"
-
-class BoneAssetData : public AssetData{
-public:
-	virtual ~BoneAssetData();
-
-	static AssetDataPtr BoneAssetData::Create(const char* filename);
-	void FileUpdate()override;
-
-	const BoneFileData& GetFileData() const;
-
-	static const AssetFileType _AssetFileType = AssetFileType::Tebone;
-
-private:
-
-	BoneAssetData();
-
-
-	//コピー禁止
-	BoneAssetData(const BoneAssetData&) = delete;
-	BoneAssetData& operator=(const BoneAssetData&) = delete;
-
-	BoneFileData	m_BoneFileData;		// ファイルを読み込んだデータ
-
-};
-
-using BoneAssetDataPtr = shared_ptr < BoneAssetData >;
-
-
-#include "AssetFile/Prefab/PrefabFileData.h"
-
-class PrefabAssetData : public AssetData{
-public:
-	virtual ~PrefabAssetData();
-
-	static AssetDataPtr PrefabAssetData::Create(const char* filename);
-
-	void FileUpdate()override;
-
-	const PrefabFileData& GetFileData() const;
-
-	void CreateInspector() override;
-
-	static const AssetFileType _AssetFileType = AssetFileType::Prefab;
-
-private:
-
-	PrefabAssetData();
-
-
-	//コピー禁止
-	PrefabAssetData(const PrefabAssetData&) = delete;
-	PrefabAssetData& operator=(const PrefabAssetData&) = delete;
-
-	PrefabFileData	m_PrefabFileData;		// ファイルを読み込んだデータ
-
-};
-
-using PrefabAssetDataPtr = shared_ptr < PrefabAssetData >;
-
-
-#include "AssetFile/Shader/ShaderFileData.h"
-
-class ShaderAssetData : public AssetData{
-public:
-	virtual ~ShaderAssetData();
-
-	static AssetDataPtr ShaderAssetData::Create(const char* filename);
-
-	void FileUpdate()override;
-
-	const ShaderFileData& GetFileData() const;
-
-	void CreateInspector() override;
-
-	static const AssetFileType _AssetFileType = AssetFileType::Shader;
-
-private:
-
-	ShaderAssetData();
-
-
-	//コピー禁止
-	ShaderAssetData(const ShaderAssetData&) = delete;
-	ShaderAssetData& operator=(const ShaderAssetData&) = delete;
-
-	ShaderFileData	m_FileData;		// ファイルを読み込んだデータ
-
-};
-
-using ShaderAssetDataPtr = shared_ptr < ShaderAssetData >;
-
-
-#endif
 
 
 template<class T>

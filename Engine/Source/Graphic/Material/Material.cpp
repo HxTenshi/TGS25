@@ -5,7 +5,7 @@ Material::Material()
 {
 	mDiffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mSpecular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	mAmbient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	mTexScale = XMFLOAT2(1.0f, 1.0f);
 	mHeightPower = XMFLOAT2(2.0f, 1.0f);
 }
@@ -32,6 +32,7 @@ HRESULT Material::Create(const char* shaderFileName){
 	if (!mCBUseTexture.mBuffer)
 		return S_FALSE;
 	mCBUseTexture.mParam.UseTexture = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	mCBUseTexture.mParam.UseTexture2 = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	mShader.Create(shaderFileName);
 
@@ -68,35 +69,51 @@ void Material::CreateShader(const char* shaderFileName){
 //	return S_OK;
 //}
 
-void Material::SetShader(bool UseAnime) const{
-	mShader.SetShader(UseAnime);
+void Material::SetShader(bool UseAnime, ID3D11DeviceContext* context) const{
+	mShader.SetShader(UseAnime,context);
 }
-void Material::VSSetShaderResources() const{
+void Material::VSSetShaderResources(ID3D11DeviceContext* context) const{
 	if (!mCBMaterial.mBuffer || !mCBUseTexture.mBuffer){
 		return;
 	}
 
-	mCBMaterial.UpdateSubresource();
-	mCBUseTexture.UpdateSubresource();
+	mCBMaterial.UpdateSubresource(context);
+	mCBUseTexture.UpdateSubresource(context);
 
-	mCBMaterial.VSSetConstantBuffers();
-	mCBUseTexture.VSSetConstantBuffers();
+	mCBMaterial.VSSetConstantBuffers(context);
+	mCBUseTexture.VSSetConstantBuffers(context);
 }
-void Material::PSSetShaderResources() const{
+void Material::PSSetShaderResources(ID3D11DeviceContext* context) const{
 	if (!mCBMaterial.mBuffer || !mCBUseTexture.mBuffer){
 		return;
 	}
 
 	for (UINT i = 0; i < 8; i++){
-		mTexture[i].PSSetShaderResources(i);
+		mTexture[i].PSSetShaderResources(context,i);
 	}
 
-	mCBMaterial.UpdateSubresource();
-	mCBUseTexture.UpdateSubresource();
+	mCBMaterial.UpdateSubresource(context);
+	mCBUseTexture.UpdateSubresource(context);
 
-	mCBMaterial.PSSetConstantBuffers();
-	mCBUseTexture.PSSetConstantBuffers();
+	mCBMaterial.PSSetConstantBuffers(context);
+	mCBUseTexture.PSSetConstantBuffers(context);
 }
+void Material::GSSetShaderResources(ID3D11DeviceContext* context) const{
+	if (!mCBMaterial.mBuffer || !mCBUseTexture.mBuffer){
+		return;
+	}
+
+	for (UINT i = 0; i < 8; i++){
+		mTexture[i].GSSetShaderResources(context, i);
+	}
+
+	mCBMaterial.UpdateSubresource(context);
+	mCBUseTexture.UpdateSubresource(context);
+
+	mCBMaterial.GSSetConstantBuffers(context);
+	mCBUseTexture.GSSetConstantBuffers(context);
+}
+
 
 void Material::SetTexture(const char* FileName, UINT Slot){
 	HRESULT hr = mTexture[Slot].Create(FileName);
@@ -112,6 +129,15 @@ void Material::SetTexture(const char* FileName, UINT Slot){
 		mCBUseTexture.mParam.UseTexture.z = flag;
 	if (Slot == 3)
 		mCBUseTexture.mParam.UseTexture.w = flag;
+
+	if (Slot == 4)
+		mCBUseTexture.mParam.UseTexture2.x = flag;
+	if (Slot == 5)
+		mCBUseTexture.mParam.UseTexture2.y = flag;
+	if (Slot == 6)
+		mCBUseTexture.mParam.UseTexture2.z = flag;
+	if (Slot == 7)
+		mCBUseTexture.mParam.UseTexture2.w = flag;
 	//mCBUseTexture->UpdateSubresource();
 }
 void Material::SetTexture(const Texture& Tex, UINT Slot){
@@ -125,6 +151,15 @@ void Material::SetTexture(const Texture& Tex, UINT Slot){
 		mCBUseTexture.mParam.UseTexture.z = 1.0f;
 	if (Slot == 3)
 		mCBUseTexture.mParam.UseTexture.w = 1.0f;
+
+	if (Slot == 4)
+		mCBUseTexture.mParam.UseTexture2.x = 1.0f;
+	if (Slot == 5)
+		mCBUseTexture.mParam.UseTexture2.y = 1.0f;
+	if (Slot == 6)
+		mCBUseTexture.mParam.UseTexture2.z = 1.0f;
+	if (Slot == 7)
+		mCBUseTexture.mParam.UseTexture2.w = 1.0f;
 	//mCBUseTexture->UpdateSubresource();
 }
 

@@ -119,6 +119,7 @@ private:
 };
 #pragma endregion
 
+#include <iostream>
 template<class T>
 class make_sp_counter_impl : public sp_counter_base
 {
@@ -285,7 +286,6 @@ public:
 		return ptr != NULL;
 	}
 
-
 	typedef typename shared_ptr_traits< T >::reference reference;
 	inline
 	reference operator* ()const{
@@ -384,7 +384,7 @@ public:
 		return (T*)ptr;
 	}
 
-	operator bool(){
+	operator bool() const{
 		return !count.expired();
 	}
 
