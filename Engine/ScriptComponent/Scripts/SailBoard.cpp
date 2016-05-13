@@ -147,7 +147,7 @@ XMVECTOR SailBoard::RotationBoard()
 		mYRot += max(min(mRotateY, 5), -5) * 0.05f;
 	}
 	
-	if (Input::Trigger(PAD_DS4_KeyCoord::Button_L1))mRotateY = 0;
+	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS))mRotateY = 0;
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mYRot);
 	return rotatey;
 }
@@ -202,7 +202,6 @@ void SailBoard::ReSpawn()
 {
 	if (isDead)
 	{
-		gameObject->mTransform->Position(XMVectorSet(0.0f,0.0f,0.0f,1.0f));
 		auto point = game->FindActor("ReSpawnPoint");
 		if (point)
 		{
@@ -213,11 +212,11 @@ void SailBoard::ReSpawn()
 
 bool SailBoard::Shake()
 {
-	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y);
-	if (f > mPrevAcceler)
+	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z);
+	if (f > 0.5f)
 	{
 		return true;
 	}
-	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
 	return false;
 }

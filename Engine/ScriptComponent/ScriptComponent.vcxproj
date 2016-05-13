@@ -128,6 +128,7 @@
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
+    <ClCompile Include="Scripts\WaterGunBullet.cpp" />
     <ClCompile Include="Scripts\Wind.cpp" />
     <ClCompile Include="Scripts\WindArrow.cpp" />
   </ItemGroup>
@@ -141,6 +142,7 @@
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
+    <ClInclude Include="Scripts\WaterGunBullet.h" />
     <ClInclude Include="Scripts\Wind.h" />
     <ClInclude Include="Scripts\WindArrow.h" />
   </ItemGroup>
