@@ -15,7 +15,7 @@
 //#define INITGUID
 #include <dinput.h>
 
-#include "System\include"
+#include "System\include.h"
 
 
 class FuctorySetter{
@@ -25,7 +25,7 @@ public:
 		
 		//ここに作成したクラスを追加します
 
-#include "System\factory"
+#include "System\factory.h"
 
 #undef _ADD
 	}
@@ -60,7 +60,7 @@ int filter(unsigned int code, struct _EXCEPTION_POINTERS *ep) {
 		os << std::hex << address;
 		debug->Log(" Exceptエラー Address[" + os.str() + "]");
 	}
-	{
+{
 		std::ostringstream os;
 		os << std::hex << code;
 		debug->Log(" +-- Code[" + os.str() + "]");
