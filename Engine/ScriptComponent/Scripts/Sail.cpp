@@ -90,5 +90,5 @@ void Sail::SailRotate()
 
 	mSailRotate = min(max(mSailRotate, -XM_PI / 2), XM_PI / 2);
 
-	if (Input::Down(PAD_DS4_KeyCoord::Button_PS)) mSailRotate = 0;
+	if (Input::Down(PAD_DS4_KeyCoord::Button_CROSS)) mSailRotate = 0;
 }

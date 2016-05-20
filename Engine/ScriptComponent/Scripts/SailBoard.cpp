@@ -19,29 +19,45 @@ void SailBoard::Initialize(){
 	mWindVector = XMVectorSet(1,0,0,1);
 	isGround = false;
 	isJump = false;
+	isDead = false;
 	mRotateX = 0;
 	mYRot = 0.0f;
 	mXRot = 0.0f;
+	count = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Start(){
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
 }
 
 //毎フレーム呼ばれます
 void SailBoard::Update(){
+
+	isDead = Dead();
+	ReSpawn();
 
 	auto physx = gameObject->GetComponent<PhysXComponent>();
 	if (physx) {
 		auto v = physx->GetForceVelocity();
 		v *= -0.5f;
 		gameObject->mTransform->AddForce(v);
+
+		auto mat = gameObject->GetComponent<MaterialComponent>();
+		if(XMVector3Length(physx->GetForceVelocity()).x > 50)
+		{
+			if (mat) mat->SetAlbedoColor(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+		if(!physx)
+		{
+			if (mat) mat->SetAlbedoColor(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		}
 	}
 
 	auto rotatey = RotationBoard();
 	auto rotatex = Trick();
 
-	if ((Input::Trigger(KeyCoord::Key_SPACE) || Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z > 0) && isGround)
+	if ((Input::Trigger(KeyCoord::Key_SPACE) || Shake()) && isGround)
 	{
 		Jump();
 	}
@@ -70,6 +86,8 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 	if (target->Name() == "PointItem"){
 
+		count++;
+		game->Debug()->Log(std::to_string(count));
 		game->DestroyObject(target);
 	}
 }
@@ -137,12 +155,12 @@ XMVECTOR SailBoard::RotationBoard()
 		auto movepower = sail->GetScript<Sail>()->MovePower();
 		mYRot += max(min(mRotateY, 5), -5) * 0.01f * movepower;
 	}
-	if (!isGround)
+	if (!isJump)
 	{
 		mYRot += max(min(mRotateY, 5), -5) * 0.05f;
 	}
 	
-	if (Input::Trigger(PAD_DS4_KeyCoord::Button_PS))mRotateY = 0;
+	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS))mRotateY = 0;
 	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mYRot);
 	return rotatey;
 }
@@ -160,9 +178,7 @@ XMVECTOR SailBoard::Trick()
 		}
 		mRotateX -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y;
 	}
-
-	//ジャンプ中でなければXの回転は初期に戻す
-	if(!isJump)
+	else //ジャンプ中でなければXの回転は初期に戻す
 	{
 		mXRot = 0;
 		mRotateX = 0;
@@ -180,4 +196,38 @@ void SailBoard::Jump()
 	float power = 300.0f;
 	auto v = XMVectorSet(0, 1, 0, 1);
 	gameObject->mTransform->AddForce(v*power);
+}
+
+bool SailBoard::Dead()
+{
+	//if (gameObject->mTransform->Position().y < -7) return true;
+	auto deadline = game->FindActor("DeadLine");
+	if (deadline)
+	{
+		return deadline->mTransform->Position().y > gameObject->mTransform->Position().y;
+	}
+	return false;
+}
+
+void SailBoard::ReSpawn()
+{
+	if (isDead)
+	{
+		auto point = game->FindActor("ReSpawnPoint");
+		if (point)
+		{
+			gameObject->mTransform->Position(point->mTransform->Position());
+		}
+	}
+}
+
+bool SailBoard::Shake()
+{
+	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z);
+	if (f > 0.5f)
+	{
+		return true;
+	}
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
+	return false;
 }

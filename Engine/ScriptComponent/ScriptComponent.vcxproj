@@ -23,20 +23,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EngineRelease|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -123,14 +123,13 @@
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="Scripts\CameraController.cpp" />
     <ClCompile Include="Scripts\Enemy.cpp" />
-<<<<<<< HEAD
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\KillerWhale.cpp" />
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
-=======
->>>>>>> 3643683350aaa8969b21a3e6e286b3cb517232cc
+    <ClCompile Include="Scripts\PlayerSearch.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
+    <ClCompile Include="Scripts\WaterGunBullet.cpp" />
     <ClCompile Include="Scripts\Wind.cpp" />
     <ClCompile Include="Scripts\WindArrow.cpp" />
   </ItemGroup>
@@ -139,14 +138,13 @@
     <ClInclude Include="Script.h" />
     <ClInclude Include="Scripts\CameraController.h" />
     <ClInclude Include="Scripts\Enemy.h" />
-<<<<<<< HEAD
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\KillerWhale.h" />
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
-=======
->>>>>>> 3643683350aaa8969b21a3e6e286b3cb517232cc
+    <ClInclude Include="Scripts\PlayerSearch.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
+    <ClInclude Include="Scripts\WaterGunBullet.h" />
     <ClInclude Include="Scripts\Wind.h" />
     <ClInclude Include="Scripts\WindArrow.h" />
   </ItemGroup>

@@ -19,11 +19,16 @@ private:
 	XMVECTOR RotationBoard();
 	XMVECTOR Trick();
 	void Jump();
+	bool Dead();
+	void ReSpawn();
+	bool Shake();
+	int count;
 
 private:
 	//メンバ変数
 	bool isGround;     //地面と接地しているかのチェック
 	bool isJump;       //プレイヤーがジャンプしたかのチェック
+	bool isDead;
 
 	float mRotateX;
 	float mRotateY;
@@ -31,6 +36,7 @@ private:
 	float mYRot;
 	float mXRot;
 
+	float mPrevAcceler;
 	XMVECTOR mWindVector;
 
 
