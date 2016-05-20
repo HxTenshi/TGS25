@@ -30,9 +30,9 @@ void LongSpinePorcupineFish::Start(){
 //毎フレーム呼ばれます
 void LongSpinePorcupineFish::Update(){
 
-	auto v = XMVectorSet(mSize, mSize, mSize, mSize);
+	//auto v = XMVectorSet(mSize, mSize, mSize, mSize);
 
-	gameObject->mTransform->Scale(v);
+	//gameObject->mTransform->Scale(v);
 
 	// 色の設定
 	auto color = XMFLOAT4(1, 1, 1, 1);
@@ -40,12 +40,12 @@ void LongSpinePorcupineFish::Update(){
 	if (mIsSearchRange == true) {
 		//100 = 1秒？ 
 		if (mSwellUpCount % mSwellUpTimer < mSwellUpTimer / 2) {
-			mSize += 1.5f / mSwellUpTimer / 2;
+			//mSize += 1.5f / mSwellUpTimer / 2;
 			color = XMFLOAT4(1, 0, 0, 1);
 			mIsPlayerKill = true;
 		}
 		else {
-			mSize -= 1.5f / mSwellUpTimer / 2;
+			//mSize -= 1.5f / mSwellUpTimer / 2;
 			color = XMFLOAT4(0, 1, 0, 1);
 			mIsPlayerKill = false;
 		}
@@ -64,7 +64,7 @@ void LongSpinePorcupineFish::Update(){
 
 	if (!mIsSearchRange) {
 		mSwellUpCount = 0;
-		mSize = 1.0f;
+		//mSize = 1.0f;
 		mDirection += 1.0f;
 		SearchMove();
 	}
