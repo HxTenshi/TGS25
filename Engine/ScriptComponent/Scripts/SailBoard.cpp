@@ -12,6 +12,7 @@
 
 #include"Game\Component\MaterialComponent.h"
 #include"Sail.h"
+#include"PlayerManager.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Initialize(){
@@ -23,7 +24,7 @@ void SailBoard::Initialize(){
 	mRotateX = 0;
 	mYRot = 0.0f;
 	mXRot = 0.0f;
-	count = 0;
+	mPlyerHP = 100.0f;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -42,16 +43,6 @@ void SailBoard::Update(){
 		auto v = physx->GetForceVelocity();
 		v *= -0.5f;
 		gameObject->mTransform->AddForce(v);
-
-		auto mat = gameObject->GetComponent<MaterialComponent>();
-		if(XMVector3Length(physx->GetForceVelocity()).x > 50)
-		{
-			if (mat) mat->SetAlbedoColor(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-		}
-		if(!physx)
-		{
-			if (mat) mat->SetAlbedoColor(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-		}
 	}
 
 	auto rotatey = RotationBoard();
@@ -86,8 +77,6 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 	if (target->Name() == "PointItem"){
 
-		count++;
-		game->Debug()->Log(std::to_string(count));
 		game->DestroyObject(target);
 	}
 }
@@ -137,6 +126,24 @@ bool SailBoard::GetIsJump()
 	return this->isJump;
 }
 
+bool SailBoard::IsUnrivaled()
+{
+	auto physx = gameObject->GetComponent<PhysXComponent>();
+	if (XMVector3Length(physx->GetForceVelocity()).x > 15)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void SailBoard::Damage(int damage)
+{
+	mPlyerHP -= damage;
+}
+
 //ボードの左右回転
 XMVECTOR SailBoard::RotationBoard()
 {
@@ -155,7 +162,12 @@ XMVECTOR SailBoard::RotationBoard()
 		auto movepower = sail->GetScript<Sail>()->MovePower();
 		mYRot += max(min(mRotateY, 5), -5) * 0.01f * movepower;
 	}
-	if (!isJump)
+	//ジャンプ中なら
+	if (isJump)
+	{
+		mYRot += max(min(mRotateY, 5), -5) * 0.5f;
+	}
+	else
 	{
 		mYRot += max(min(mRotateY, 5), -5) * 0.05f;
 	}
@@ -216,6 +228,10 @@ void SailBoard::ReSpawn()
 		auto point = game->FindActor("ReSpawnPoint");
 		if (point)
 		{
+			auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
+			manager->CreditDown();
+			auto physx = gameObject->GetComponent<PhysXComponent>();
+			physx->SetForceVelocity(XMVectorSet(0, 0, 0, 1));
 			gameObject->mTransform->Position(point->mTransform->Position());
 		}
 	}
@@ -226,6 +242,7 @@ bool SailBoard::Shake()
 	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z);
 	if (f > 0.5f)
 	{
+		mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
 		return true;
 	}
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;

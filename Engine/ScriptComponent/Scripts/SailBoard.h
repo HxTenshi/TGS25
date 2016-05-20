@@ -14,6 +14,10 @@ public:
 	void OnCollideExit(Actor* target)override;
 	XMVECTOR GetWind();
 	bool GetIsJump();
+	//プレイヤーは無敵か?
+	bool IsUnrivaled();
+	//ダメージの処理
+	void Damage(int damage);
 
 private:
 	XMVECTOR RotationBoard();
@@ -22,13 +26,16 @@ private:
 	bool Dead();
 	void ReSpawn();
 	bool Shake();
-	int count;
+	
 
 private:
 	//メンバ変数
 	bool isGround;     //地面と接地しているかのチェック
 	bool isJump;       //プレイヤーがジャンプしたかのチェック
 	bool isDead;
+
+	//プレイヤーが無敵かどうか
+	bool mUnrivaled;
 
 	float mRotateX;
 	float mRotateY;
@@ -38,6 +45,9 @@ private:
 
 	float mPrevAcceler;
 	XMVECTOR mWindVector;
+
+	//プレイヤーのHP
+	float mPlyerHP;
 
 
 };

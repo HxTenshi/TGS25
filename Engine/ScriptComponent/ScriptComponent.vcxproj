@@ -126,6 +126,7 @@
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\KillerWhale.cpp" />
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
+    <ClCompile Include="Scripts\PlayerManager.cpp" />
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\KillerWhale.h" />
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
+    <ClInclude Include="Scripts\PlayerManager.h" />
     <ClInclude Include="Scripts\PlayerSearch.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
