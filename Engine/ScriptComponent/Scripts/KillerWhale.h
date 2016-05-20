@@ -15,4 +15,6 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	int mMotionCount;
+	bool mIsShot;
 };

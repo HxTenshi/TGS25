@@ -2,6 +2,8 @@
 #pragma once
 #include "main.h"
 
+class PlayerSearch;
+
 
 class Enemy :public IDllScriptComponent{
 public:
@@ -20,20 +22,28 @@ public:
 	//bool IsInSector(XMVECTOR c, float a, float b, float r, XMVECTOR p);
 	virtual void PlayerColorChange(Actor* obj);
 	virtual void SearchMove();
-	virtual void PlayerSearchMode(Actor* thisObj);
+	virtual void PlayerSearchMode(Actor* thisObj, const float sizeX, const float sizeY, const float sizeZ);
+	virtual void PlayerSearchMode(Actor* thisObj); // エラー防止用
 	virtual void PlayerChaseMode(Actor* thisObj);
 	virtual void PlayerChase(Actor* thisObj);
 	virtual void PlayerSpaceChase(Actor* thisObj, const int interval, int count);
+	virtual void SetForwardObj(Actor* setObj);
+	virtual void SetForwardChildrenObj(Actor* setObj);
 	virtual void FallDead(Actor* thisObj);
+	virtual float PlayerDistance();
 
 protected:
 	//メンバ変数
-	Actor* mSearchRange;
+	Actor* mPlayerSearchObj;	// 索敵範囲オブジェクト
+	PlayerSearch* searchScript;	// 索敵範囲オブジェクトのスクリプト
+	XMVECTOR mSize;
+	int mAddSearchObjCount;
 	float mSpeed;
-	float mSize;
+	float mHalfSizeZ;
 	float mPositionY;
 	float mRotateY;
 	float mDeadHeigth;
-	bool mIsHit;
+	bool mIsObjHit;
 	bool mIsSearchRange;
+	bool mIsImmortalBody;
 };

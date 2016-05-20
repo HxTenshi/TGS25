@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class WaterGunBullet :public IDllScriptComponent{
+class PlayerSearch :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -12,10 +12,10 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+	bool IsPlayerSearch();
 
 private:
 	//ƒƒ“ƒo•Ï”
-	int mDestroyTime;
-	float mSpeed;
-	XMVECTOR mForwardVelocity;
+	float mSizeZ;
+	bool mIsPlayerHit;
 };

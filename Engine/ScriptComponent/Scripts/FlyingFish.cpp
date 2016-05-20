@@ -27,6 +27,7 @@ void FlyingFish::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void FlyingFish::Start(){
 	//game->Debug()->Log(std::to_string(mSize));
+	Enemy::Start();
 }
 
 //毎フレーム呼ばれます
@@ -36,7 +37,7 @@ void FlyingFish::Update(){
 	auto position = gameObject->mTransform->Position();
 
 	Enemy::PlayerColorChange(gameObject);
-	Enemy::PlayerSearchMode(gameObject);
+	Enemy::PlayerSearchMode(gameObject, mSize.x, mSize.y, 3.0f);
 	//Enemy::PlayerChase(gameObject);
 
 	if (mIsJamp == false) {
@@ -91,9 +92,9 @@ void FlyingFish::Update(){
 		}
 		else {
 			if (position.y > mInitPositionY) {
+				// 落ちる処理
 				auto upVelocity = XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f);
 				mJampVelocity = upVelocity * -((mUpPowar) + (mDownCount / mUpInterval));
-				//mJampVelocity = gameObject->mTransform->Up() * -((mUpPowar / 10) + (mDownCount / mUpInterval));
 			}
 		}
 	}
@@ -135,6 +136,10 @@ void FlyingFish::OnCollideEnter(Actor* target){
 			//game->Debug()->Log(std::to_string(mPositionY - target->mTransform->Position().y));
 			mIsJamp = false;
 		//}
+	}
+
+	if (target->Name() == "Wall") {
+
 	}
 }
 
