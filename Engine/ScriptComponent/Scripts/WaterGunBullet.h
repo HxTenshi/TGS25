@@ -15,6 +15,7 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	SERIALIZE
 	int mDestroyTime;
 	float mSpeed;
 	XMVECTOR mForwardVelocity;

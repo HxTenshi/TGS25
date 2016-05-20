@@ -11,10 +11,11 @@
 void KillerWhale::Initialize(){
 	Enemy::Initialize();
 	
-	mSpeed = 1.0f * 0.01f;
+	mSpeed = 4.0f * 0.01f;
 	mMotionCount = 0;
 	mIsShot = false;
-	mIsImmortalBody = true;
+	//// 不死身判定
+	//mIsImmortalBody = true;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -34,6 +35,18 @@ void KillerWhale::Update(){
 	//game->Debug()->Log(std::to_string(mIsSearchRange));
 	auto PlayerObj = game->FindActor("Board");
 
+	mMotionCount++;
+	if (mMotionCount >= 60 * 3) {
+		if (!mIsShot) {
+			// 水鉄砲の弾の生成
+			auto GunBullet = game->CreateActor("Assets/WaterGunBullet");
+			game->AddObject(GunBullet);
+			// 位置の変更
+			Enemy::SetForwardObj(GunBullet);
+		}
+		mIsShot = true;
+	}
+
 	//auto thisPosi = gameObject->mTransform->Position();
 	//thisPosi = XMVector3Normalize(thisPosi);
 	//auto otherPosi = PlayerObj->mTransform->Position();
@@ -47,11 +60,7 @@ void KillerWhale::Update(){
 	
 	// 後でvector で行動の配列を作り、 size判定も余りを出してifを少なくさせる
 	if (mIsSearchRange) {
-		if (Enemy::PlayerDistance() <= mSize.z * 1.0f + mHalfSizeZ) {
-			Enemy::PlayerChase(gameObject);
-			//game->Debug()->Log("過ぎた");
-		}
-		else if (Enemy::PlayerDistance() > mSize.z * 1.0f + mHalfSizeZ ||
+		if (Enemy::PlayerDistance() <= mSize.z * 1.0f + mHalfSizeZ ||
 			Enemy::PlayerDistance() <= mSize.z * 2.0f + mHalfSizeZ) {
 			mMotionCount++;
 			//game->Debug()->Log("発射");
@@ -74,6 +83,17 @@ void KillerWhale::Update(){
 			//game->Debug()->Log("まだ");
 			Enemy::PlayerChase(gameObject);
 		}
+	}
+
+	auto objPosition = gameObject->mTransform->Position();
+	auto forwardMove = gameObject->mTransform->Forward() * mSpeed;
+	// Y軸の補正 (敵の一部が海面に出ているようにする)
+	if (mIsFloorHit) {	
+		auto setPosition = XMVectorSet(objPosition.x, mPositionY, objPosition.z, 0.0f);
+		gameObject->mTransform->Position(setPosition + forwardMove);
+	}
+	else {
+		gameObject->mTransform->Position(objPosition + forwardMove);
 	}
 }
 

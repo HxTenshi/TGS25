@@ -15,6 +15,7 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	SERIALIZE
 	int mUpInterval;
 	int mUpCount;
 	int mDownCount;
@@ -25,5 +26,6 @@ private:
 	float mInitPositionY;
 	float mRotateInterval;
 	bool mIsJamp;
+	bool mIsInitSet;
 	XMVECTOR mJampVelocity;
 };
