@@ -22,6 +22,7 @@ private:
 	bool Dead();
 	void ReSpawn();
 	bool Shake();
+	int count;
 
 private:
 	//ƒƒ“ƒo•Ï”

@@ -23,6 +23,7 @@ void SailBoard::Initialize(){
 	mRotateX = 0;
 	mYRot = 0.0f;
 	mXRot = 0.0f;
+	count = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -41,6 +42,16 @@ void SailBoard::Update(){
 		auto v = physx->GetForceVelocity();
 		v *= -0.5f;
 		gameObject->mTransform->AddForce(v);
+
+		auto mat = gameObject->GetComponent<MaterialComponent>();
+		if(XMVector3Length(physx->GetForceVelocity()).x > 50)
+		{
+			if (mat) mat->SetAlbedoColor(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+		if(!physx)
+		{
+			if (mat) mat->SetAlbedoColor(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		}
 	}
 
 	auto rotatey = RotationBoard();
@@ -75,6 +86,8 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 	if (target->Name() == "PointItem"){
 
+		count++;
+		game->Debug()->Log(std::to_string(count));
 		game->DestroyObject(target);
 	}
 }
@@ -142,7 +155,7 @@ XMVECTOR SailBoard::RotationBoard()
 		auto movepower = sail->GetScript<Sail>()->MovePower();
 		mYRot += max(min(mRotateY, 5), -5) * 0.01f * movepower;
 	}
-	if (!isGround)
+	if (!isJump)
 	{
 		mYRot += max(min(mRotateY, 5), -5) * 0.05f;
 	}
@@ -165,9 +178,7 @@ XMVECTOR SailBoard::Trick()
 		}
 		mRotateX -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y;
 	}
-
-	//ジャンプ中でなければXの回転は初期に戻す
-	if(!isJump)
+	else //ジャンプ中でなければXの回転は初期に戻す
 	{
 		mXRot = 0;
 		mRotateX = 0;
