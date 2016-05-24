@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class WaterGunBullet :public IDllScriptComponent{
+class HPGauge :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -15,8 +15,4 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
-	SERIALIZE
-	int mDestroyTime;
-	float mSpeed;
-	XMVECTOR mForwardVelocity;
 };

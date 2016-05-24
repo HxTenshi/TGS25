@@ -124,14 +124,15 @@
     <ClCompile Include="Scripts\CameraController.cpp" />
     <ClCompile Include="Scripts\Enemy.cpp" />
     <ClCompile Include="Scripts\FlyingFish.cpp" />
-    <ClCompile Include="Scripts\JumpDai.cpp" />
-    <ClCompile Include="Scripts\KillerWhale.cpp" />
+    <ClCompile Include="Scripts\HPGauge.cpp" />
+    <ClCompile Include="Scripts\JumpDai.cpp" />    <ClCompile Include="Scripts\KillerWhale.cpp" />
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
+    <ClCompile Include="Scripts\PlayerManager.cpp" />
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
-    <ClCompile Include="Scripts\Tornado.cpp" />
-    <ClCompile Include="Scripts\WaterGunBullet.cpp" />
+    <ClCompile Include="Scripts\TitleMnager.cpp" />
+    <ClCompile Include="Scripts\Tornado.cpp" />    <ClCompile Include="Scripts\WaterGunBullet.cpp" />
     <ClCompile Include="Scripts\Wind.cpp" />
     <ClCompile Include="Scripts\WindArrow.cpp" />
   </ItemGroup>
@@ -141,14 +142,15 @@
     <ClInclude Include="Scripts\CameraController.h" />
     <ClInclude Include="Scripts\Enemy.h" />
     <ClInclude Include="Scripts\FlyingFish.h" />
-    <ClInclude Include="Scripts\JumpDai.h" />
-    <ClInclude Include="Scripts\KillerWhale.h" />
+    <ClInclude Include="Scripts\HPGauge.h" />
+    <ClInclude Include="Scripts\JumpDai.h" />    <ClInclude Include="Scripts\KillerWhale.h" />
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
+    <ClInclude Include="Scripts\PlayerManager.h" />
     <ClInclude Include="Scripts\PlayerSearch.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
-    <ClInclude Include="Scripts\Tornado.h" />
-    <ClInclude Include="Scripts\WaterGunBullet.h" />
+    <ClInclude Include="Scripts\TitleMnager.h" />
+    <ClInclude Include="Scripts\Tornado.h" />    <ClInclude Include="Scripts\WaterGunBullet.h" />
     <ClInclude Include="Scripts\Wind.h" />
     <ClInclude Include="Scripts\WindArrow.h" />
   </ItemGroup>

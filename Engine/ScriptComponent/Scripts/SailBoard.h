@@ -14,6 +14,14 @@ public:
 	void OnCollideExit(Actor* target)override;
 	XMVECTOR GetWind();
 	bool GetIsJump();
+	//プレイヤーは無敵か?
+	bool IsUnrivaled();
+	//ダメージの処理
+	void Damage(int damage);
+	//トリックできたか？
+	bool IsTrick();
+	//プレイヤーの体力の入手
+	float GetHitPoint();
 
 private:
 	XMVECTOR RotationBoard();
@@ -22,7 +30,7 @@ private:
 	bool Dead();
 	void ReSpawn();
 	bool Shake();
-	int count;
+	
 
 private:
 	//メンバ変数
@@ -30,14 +38,21 @@ private:
 	bool isJump;       //プレイヤーがジャンプしたかのチェック
 	bool isDead;
 
+	//プレイヤーのトリックが成功したか
+	bool mTrick;
+
 	float mRotateX;
 	float mRotateY;
 
 	float mYRot;
 	float mXRot;
 
+	float mJumpYRotate; //ジャンプ中の回転
 	float mPrevAcceler;
 	XMVECTOR mWindVector;
+
+	//プレイヤーのHP
+	float mPlyerHP;
 
 
 };

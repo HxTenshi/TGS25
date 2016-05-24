@@ -21,6 +21,7 @@ void FlyingFish::Initialize(){
 	mInitPositionY = gameObject->mTransform->Position().y;
 	mRotateInterval = 2.0f;
 	mIsJamp = true;
+	mIsInitSet = false;
 	mJampVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
@@ -100,11 +101,13 @@ void FlyingFish::Update(){
 	}
 	
 	/*gameObject->mTransform->Position(position + v + mJampVelocity);*/
-	if (mIsJamp) {
-		gameObject->mTransform->Position(position + v + mJampVelocity);
-	}
-	else {
-		gameObject->mTransform->Position(position + v);
+	if (mIsInitSet) {
+		if (mIsJamp) {
+			gameObject->mTransform->Position(position + v + mJampVelocity);
+		}
+		else {
+			gameObject->mTransform->Position(position + v);
+		}
 	}
 
 	Enemy::FallDead(gameObject);
@@ -117,8 +120,12 @@ void FlyingFish::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void FlyingFish::OnCollideBegin(Actor* target){
-	(void)target;
 	Enemy::OnCollideBegin(target);
+	if (target->Name() == "Floor") {
+		if (gameObject->mTransform->Position().y <= mPositionY) {
+			mIsJamp = false;
+		}
+	}
 
 	if (target->Name() == "Wall") {
 		mWallHitCount++;
@@ -128,14 +135,12 @@ void FlyingFish::OnCollideBegin(Actor* target){
 
 //コライダーとのヒット中に呼ばれます
 void FlyingFish::OnCollideEnter(Actor* target){
-	(void)target;
 	Enemy::OnCollideEnter(target);
 
 	if (target->Name() == "Floor") {
-		//if (mPositionY - target->mTransform->Position().y <= 0) {
-			//game->Debug()->Log(std::to_string(mPositionY - target->mTransform->Position().y));
+		if (gameObject->mTransform->Position().y <= mPositionY) {
 			mIsJamp = false;
-		//}
+		}
 	}
 
 	if (target->Name() == "Wall") {
@@ -145,6 +150,5 @@ void FlyingFish::OnCollideEnter(Actor* target){
 
 //コライダーとのロスト時に呼ばれます
 void FlyingFish::OnCollideExit(Actor* target){
-	(void)target;
 	Enemy::OnCollideExit(target);
 }

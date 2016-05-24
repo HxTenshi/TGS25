@@ -30,7 +30,7 @@ void WaterGunBullet::Update(){
 
 	mDestroyTime--;
 	if (mDestroyTime <= 0) {
-		//game->DestroyObject(gameObject);
+		game->DestroyObject(gameObject);
 	}
 }
 

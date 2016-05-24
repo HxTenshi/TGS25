@@ -15,11 +15,6 @@ public:
 	virtual void OnCollideBegin(Actor* target)override;
 	virtual void OnCollideEnter(Actor* target)override;
 	virtual void OnCollideExit(Actor* target)override;
-	//float norm(XMVECTOR a);
-	//float dot(XMVECTOR a, XMVECTOR b);
-	//float cross(XMVECTOR a, XMVECTOR b);
-	//int CCW(XMVECTOR p0, XMVECTOR p1, XMVECTOR p2);
-	//bool IsInSector(XMVECTOR c, float a, float b, float r, XMVECTOR p);
 	virtual void PlayerColorChange(Actor* obj);
 	virtual void SearchMove();
 	virtual void PlayerSearchMode(Actor* thisObj, const float sizeX, const float sizeY, const float sizeZ);
@@ -44,6 +39,7 @@ protected:
 	float mRotateY;
 	float mDeadHeigth;
 	bool mIsObjHit;
+	bool mIsFloorHit;
 	bool mIsSearchRange;
 	bool mIsImmortalBody;
 };

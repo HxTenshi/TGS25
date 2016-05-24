@@ -18,10 +18,11 @@ void Enemy::Initialize(){
 	mSpeed = 1.0f * 0.01f;
 	mSize = gameObject->mTransform->Scale();
 	mHalfSizeZ = mSize.z / 2.0f;
-	mPositionY = 0.0f;
+	mPositionY = gameObject->mTransform->Position().y;
 	mRotateY = 0.0f;
 	mDeadHeigth = -10.0f;
 	mIsObjHit = false;
+	mIsFloorHit = false;
 	mIsSearchRange = false;
 	mIsImmortalBody = false;
 }
@@ -46,7 +47,6 @@ void Enemy::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void Enemy::OnCollideBegin(Actor* target){
-	(void)target;
 	if (target->Name() == "Board"){
 		if (!mIsSearchRange && !mIsImmortalBody) {
 			game->DestroyObject(gameObject);
@@ -57,16 +57,24 @@ void Enemy::OnCollideBegin(Actor* target){
 
 //コライダーとのヒット中に呼ばれます
 void Enemy::OnCollideEnter(Actor* target){
-	(void)target;
 	if (target->Name() == "Board") {
 		mIsObjHit = true;
+	}
+
+	if (target->Name() == "Floor") {
+		mIsFloorHit = true;
 	}
 }
 
 //コライダーとのロスト時に呼ばれます
 void Enemy::OnCollideExit(Actor* target){
-	(void)target;
-	mIsObjHit = false;
+	if (target->Name() == "Board") {
+		mIsObjHit = false;
+	}
+
+	if (target->Name() == "Floor") {
+		mIsFloorHit = false;
+	}
 }
 
 void Enemy::PlayerColorChange(Actor* obj) {
@@ -114,7 +122,7 @@ void Enemy::PlayerSearchMode(Actor* thisObj, const float sizeX, const float size
 		mPlayerSearchObj->GetScript<PlayerSearch>();
 		// 大きさの変更
 		auto objScale = gameObject->mTransform->Scale();
-		auto setScale = XMVectorSet(sizeX, sizeY * 2.0f, sizeZ, 0.0f);
+		auto setScale = XMVectorSet(sizeX, sizeY, sizeZ, 0.0f);
 		mPlayerSearchObj->mTransform->Scale(setScale);
 		// 目の前の位置に設置する
 		Enemy::SetForwardChildrenObj(mPlayerSearchObj);
@@ -127,7 +135,7 @@ void Enemy::PlayerSearchMode(Actor* thisObj, const float sizeX, const float size
 
 	if (searchScript->IsPlayerSearch()) {
 		mIsSearchRange = true;
-		game->Debug()->Log("当たり");
+		//game->Debug()->Log("当たり");
 	}
 	else {
 		mIsSearchRange = false;
@@ -159,7 +167,7 @@ void Enemy::PlayerSearchMode(Actor* thisObj) {
 
 	if (searchScript->IsPlayerSearch()) {
 		mIsSearchRange = true;
-		game->Debug()->Log("当たり");
+		//game->Debug()->Log("当たり");
 	}
 	else {
 		mIsSearchRange = false;
@@ -213,8 +221,14 @@ void Enemy::PlayerChase(Actor* thisObj) {
 	if (!mIsObjHit) {
 		auto moveSpeed = thisObj->mTransform->Forward() * -mSpeed;
 		auto movePosition = thisObj->mTransform->Position();
-
-		thisObj->mTransform->Position(movePosition + moveSpeed);
+		// Y軸の補正 (敵の一部が海面に出ているようにする)
+		if (mIsFloorHit) {
+			auto setPosition = XMVectorSet(movePosition.x, mPositionY, movePosition.z, 0.0f);
+			gameObject->mTransform->Position(setPosition + moveSpeed);
+		}
+		else {
+			thisObj->mTransform->Position(movePosition + moveSpeed);
+		}
 	}
 }
 

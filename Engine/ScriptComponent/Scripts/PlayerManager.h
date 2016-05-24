@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class WaterGunBullet :public IDllScriptComponent{
+class PlayerManager :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -13,10 +13,11 @@ public:
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
 
+	void CreditDown();
+	void CreditUp();
+
 private:
 	//メンバ変数
 	SERIALIZE
-	int mDestroyTime;
-	float mSpeed;
-	XMVECTOR mForwardVelocity;
+	int mCredit; //プレイヤーの残機
 };
