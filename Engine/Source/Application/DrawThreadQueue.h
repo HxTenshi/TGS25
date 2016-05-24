@@ -63,10 +63,8 @@ public:
 	}
 	static std::function<void(void)> dequeue(){
 		return mQueue.dequeue();
-		//return[](){};
 	}
 	static int size(){
-		//return 0;
 		return mQueue.size();
 	}
 private:

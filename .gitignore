@@ -1,4 +1,4 @@
-# �V���[�v�Ŏn�߂�ƃR�����g�s�ɂȂ�
+﻿# �V���[�v�Ŏn�߂�ƃR�����g�s�ɂȂ�
  
 # tmp �t�H���_�܂邲�Ɩ���������
 #tmp/
@@ -34,21 +34,7 @@
 */ScriptComponent/createdll_auto.bat
 UniqueID.txt
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Engine/Temp/
 
 Engine/ScriptComponent/System/factory
 Engine/ScriptComponent/System/include
