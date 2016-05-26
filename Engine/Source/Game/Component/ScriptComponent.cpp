@@ -180,6 +180,7 @@ public:
 	}
 	void ReCompile(){
 		for (auto& p : mList){
+			p->SaveParam();
 			p->Unload();
 		}
 
@@ -230,6 +231,7 @@ public:
 
 		for (auto& p : mList){
 			p->Load();
+			p->LoadParam();
 		}
 	}
 
@@ -564,8 +566,13 @@ ScriptComponent::ScriptComponent(){
 	mEndInitialize = false;
 	mEndStart = false;
 	pDllClass = NULL;
+	mSaveParam = NULL;
 }
 ScriptComponent::~ScriptComponent(){
+	if (mSaveParam){
+		delete mSaveParam;
+		mSaveParam = NULL;
+	}
 }
 void ScriptComponent::Initialize(){
 	mCollideMap.clear();
@@ -598,6 +605,8 @@ void ScriptComponent::Load(){
 }
 void ScriptComponent::Unload(){
 
+
+
 	if (pDllClass){
 		actors.Function(pDllClass, &IDllScriptComponent::Finish);
 		actors.Deleter(pDllClass);
@@ -607,9 +616,33 @@ void ScriptComponent::Unload(){
 
 }
 void ScriptComponent::ReCompile(){
+
 	Unload();
 	Load();
+}
 
+void ScriptComponent::SaveParam(){
+
+	if (mSaveParam){
+		delete mSaveParam;
+		mSaveParam = NULL;
+	}
+	mSaveParam = new picojson::value();
+	shared_ptr<I_InputHelper> prefab_io(NULL);
+	I_ioHelper* io = new MemoryOutputHelper(*mSaveParam, prefab_io.Get());
+	IO_Data(io);
+	delete io;
+
+}
+void ScriptComponent::LoadParam(){
+	if (mSaveParam){
+		shared_ptr<I_InputHelper> prefab_io(NULL);
+		I_ioHelper* io = new MemoryInputHelper(*mSaveParam, prefab_io.Get());
+		IO_Data(io);
+		delete io;
+		delete mSaveParam;
+		mSaveParam = NULL;
+	}
 }
 void ScriptComponent::Start(){
 	mEndStart = true;

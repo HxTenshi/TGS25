@@ -126,3 +126,8 @@ void TextureModelComponent::IO_Data(I_ioHelper* io){
 	_KEY(mTextureName);
 #undef _KEY
 }
+
+void TextureModelComponent::SetTexture(const std::string& filename){
+	mTextureName = filename;
+	mMaterial->SetTexture(filename.c_str(), 0);
+}
