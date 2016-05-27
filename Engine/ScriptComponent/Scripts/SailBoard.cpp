@@ -25,6 +25,7 @@ void SailBoard::Initialize(){
 	mYRot = 0.0f;
 	mXRot = 0.0f;
 	mPlyerHP = 100.0f;
+	mJumpYRotate = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -35,6 +36,8 @@ void SailBoard::Start(){
 //毎フレーム呼ばれます
 void SailBoard::Update(){
 
+	if (Input::Down(KeyCoord::Key_Z)) mPlyerHP--;
+	if (mTrick) game->Debug()->Log("成功");
 	isDead = Dead();
 	ReSpawn();
 
@@ -88,6 +91,8 @@ void SailBoard::OnCollideEnter(Actor* target){
 	if (target->Name() == "Air")
 	{
 		isGround = true;
+		mTrick = false;
+		mJumpYRotate = 0;
 
 		//波の表現のプログラム
 		/*float power = 1.0f;
@@ -144,6 +149,16 @@ void SailBoard::Damage(int damage)
 	mPlyerHP -= damage;
 }
 
+bool SailBoard::IsTrick()
+{
+	return mTrick;
+}
+
+float SailBoard::GetHitPoint()
+{
+	return mPlyerHP;
+}
+
 //ボードの左右回転
 XMVECTOR SailBoard::RotationBoard()
 {
@@ -156,20 +171,21 @@ XMVECTOR SailBoard::RotationBoard()
 	}
 	mRotateY += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x;
 
-	auto sail = game->FindActor("Sail");
-	if (sail)
-	{
-		auto movepower = sail->GetScript<Sail>()->MovePower();
-		mYRot += max(min(mRotateY, 5), -5) * 0.01f * movepower;
-	}
 	//ジャンプ中なら
 	if (isJump)
 	{
+		mJumpYRotate += max(min(mRotateY, 5), -5) * 0.5f;
 		mYRot += max(min(mRotateY, 5), -5) * 0.5f;
+		if (std::abs(mJumpYRotate) >= 2) mTrick = true;
 	}
 	else
 	{
-		mYRot += max(min(mRotateY, 5), -5) * 0.05f;
+		auto sail = game->FindActor("Sail");
+		if (sail)
+		{
+			auto movepower = sail->GetScript<Sail>()->MovePower();
+			mYRot += max(min(mRotateY, 5), -5) * 0.01f * movepower;
+		}
 	}
 	
 	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS))mRotateY = 0;
@@ -189,6 +205,8 @@ XMVECTOR SailBoard::Trick()
 			mRotateX += 0.05f;
 		}
 		mRotateX -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y;
+		if (std::abs(mRotateX) >= 2) mTrick = true;
+		
 	}
 	else //ジャンプ中でなければXの回転は初期に戻す
 	{
@@ -214,9 +232,13 @@ bool SailBoard::Dead()
 {
 	//if (gameObject->mTransform->Position().y < -7) return true;
 	auto deadline = game->FindActor("DeadLine");
-	if (deadline)
+	if (deadline->mTransform->Position().y > gameObject->mTransform->Position().y)
 	{
-		return deadline->mTransform->Position().y > gameObject->mTransform->Position().y;
+		return true;
+	}
+	if (mPlyerHP <= 0)
+	{
+		return true;
 	}
 	return false;
 }
@@ -228,6 +250,7 @@ void SailBoard::ReSpawn()
 		auto point = game->FindActor("ReSpawnPoint");
 		if (point)
 		{
+			mPlyerHP = 100.0f;
 			auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
 			manager->CreditDown();
 			auto physx = gameObject->GetComponent<PhysXComponent>();

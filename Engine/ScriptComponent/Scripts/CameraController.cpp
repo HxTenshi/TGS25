@@ -73,9 +73,16 @@ void CameraController::Look()
 	auto SubVector = gameObject->mTransform->Position() - mTarget->mTransform->Position();
 
 	auto Angel = atan2(-SubVector.x, -SubVector.z);
-
-	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), Angel);
-	auto vec = XMVectorSet(0, Angel, 0, 1);
+	auto vec = XMVectorSet(0, 0, 0, 1);
+	if (!mTarget->GetScript<SailBoard>()->GetIsJump())
+	{
+		auto Angel2 = mTarget->mTransform->Rotate().x;
+		vec = XMVectorSet(Angel2, Angel, 0, 1);
+	}
+	else
+	{
+		vec = XMVectorSet(0, Angel, 0, 1);
+	}
 	gameObject->mTransform->Rotate(vec);
 
 }

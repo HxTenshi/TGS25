@@ -180,6 +180,7 @@ public:
 	}
 	void ReCompile(){
 		for (auto& p : mList){
+			p->SaveParam();
 			p->Unload();
 		}
 
@@ -230,6 +231,7 @@ public:
 
 		for (auto& p : mList){
 			p->Load();
+			p->LoadParam();
 		}
 	}
 
@@ -480,6 +482,9 @@ public:
 			hModule = LoadLibrary("ScriptComponent/Release/ScriptComponent.dll");
 #endif
 		}
+		if (!hModule){
+			_SYSTEM_LOG_ERROR("スクリプトDLLの読み込み");
+		}
 
 
 		mCreate = (CreateInstance_)GetProcAddress(hModule, "CreateInstance");
@@ -516,7 +521,10 @@ public:
 		Reflection::map = ((GetReflectionData_)mGetReflect)();
 	}
 	IDllScriptComponent* Create(const std::string& ClassName){
-		if (!mCreate)return NULL;
+		if (!mCreate){
+			_SYSTEM_LOG_ERROR("スクリプト[" + ClassName + "]の作成");
+			return NULL;
+		}
 		//dllで作成したクラスインスタンスを作成する
 		return ((CreateInstance_)mCreate)(ClassName.c_str());
 	}
@@ -553,23 +561,18 @@ void ScriptManager::CreateScriptFile(const std::string& className){
 }
 
 
-#define _Exception(x,y) \
-	try{ \
-		pDllClass->x(y); \
-	} \
-	catch (...){ \
-		Window::AddLog(mClassName + " "+#x+":"); \
-	} 
-
-
-//Window::AddLog(mClassName + " "+#x+":" + text);
 
 ScriptComponent::ScriptComponent(){
 	mEndInitialize = false;
 	mEndStart = false;
 	pDllClass = NULL;
+	mSaveParam = NULL;
 }
 ScriptComponent::~ScriptComponent(){
+	if (mSaveParam){
+		delete mSaveParam;
+		mSaveParam = NULL;
+	}
 }
 void ScriptComponent::Initialize(){
 	mCollideMap.clear();
@@ -602,6 +605,8 @@ void ScriptComponent::Load(){
 }
 void ScriptComponent::Unload(){
 
+
+
 	if (pDllClass){
 		actors.Function(pDllClass, &IDllScriptComponent::Finish);
 		actors.Deleter(pDllClass);
@@ -611,9 +616,33 @@ void ScriptComponent::Unload(){
 
 }
 void ScriptComponent::ReCompile(){
+
 	Unload();
 	Load();
+}
 
+void ScriptComponent::SaveParam(){
+
+	if (mSaveParam){
+		delete mSaveParam;
+		mSaveParam = NULL;
+	}
+	mSaveParam = new picojson::value();
+	shared_ptr<I_InputHelper> prefab_io(NULL);
+	I_ioHelper* io = new MemoryOutputHelper(*mSaveParam, prefab_io.Get());
+	IO_Data(io);
+	delete io;
+
+}
+void ScriptComponent::LoadParam(){
+	if (mSaveParam){
+		shared_ptr<I_InputHelper> prefab_io(NULL);
+		I_ioHelper* io = new MemoryInputHelper(*mSaveParam, prefab_io.Get());
+		IO_Data(io);
+		delete io;
+		delete mSaveParam;
+		mSaveParam = NULL;
+	}
 }
 void ScriptComponent::Start(){
 	mEndStart = true;

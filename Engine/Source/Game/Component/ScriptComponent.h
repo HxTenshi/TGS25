@@ -12,6 +12,8 @@ public:
 	void Load();
 	void Unload();
 	void ReCompile();
+	void SaveParam();
+	void LoadParam();
 	void Initialize() override;
 	void Start() override;
 	void Update() override;
@@ -30,6 +32,8 @@ public:
 private:
 	bool mEndInitialize;
 	bool mEndStart;
+
+	picojson::value* mSaveParam;
 };
 
 

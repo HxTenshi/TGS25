@@ -18,6 +18,10 @@ public:
 	bool IsUnrivaled();
 	//ダメージの処理
 	void Damage(int damage);
+	//トリックできたか？
+	bool IsTrick();
+	//プレイヤーの体力の入手
+	float GetHitPoint();
 
 private:
 	XMVECTOR RotationBoard();
@@ -34,8 +38,8 @@ private:
 	bool isJump;       //プレイヤーがジャンプしたかのチェック
 	bool isDead;
 
-	//プレイヤーが無敵かどうか
-	bool mUnrivaled;
+	//プレイヤーのトリックが成功したか
+	bool mTrick;
 
 	float mRotateX;
 	float mRotateY;
@@ -43,6 +47,7 @@ private:
 	float mYRot;
 	float mXRot;
 
+	float mJumpYRotate; //ジャンプ中の回転
 	float mPrevAcceler;
 	XMVECTOR mWindVector;
 

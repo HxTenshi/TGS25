@@ -5,6 +5,7 @@
 #include "Game/Script/IGame.h"
 #include "Game/Component/TransformComponent.h"
 #include "Game/Component/PhysXComponent.h"
+#include"Game\Component\TextureModelComponent.h"
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
@@ -24,6 +25,13 @@ void PlayerManager::Start(){
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
 void PlayerManager::Update(){
 	if (Input::Trigger(KeyCoord::Key_SPACE)) game->Debug()->Log(std::to_string(mCredit));
+	if (mCredit <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
+
+	auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();
+	auto text2 = game->FindActor("column10")->GetComponent<TextureModelComponent>();
+
+	text1->SetTexture("Assets/num/" +std::to_string(mCredit % 10) + ".png");
+	text2->SetTexture("Assets/num/" + std::to_string((mCredit / 10) % 10) + ".png");
 
 }
 
