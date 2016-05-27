@@ -11,15 +11,16 @@
 void FlyingFish::Initialize(){
 	Enemy::Initialize();
 
-	mUpInterval = 60 * 1;
+	//mUpInterval *= 60;
 	mUpCount = mUpInterval / 2;
 	mDownCount = 0;
-	mJampRestTime = 60;
+	//mJampRestTime *= 60;
 	mWallHitCount = 0;
 	mInitJampRestTime = mJampRestTime;
-	mUpPowar = 4.0f * 0.01f;
-	mInitPositionY = gameObject->mTransform->Position().y;
+	//mUpPowar *= 0.01f;
 	mRotateInterval = 2.0f;
+	mFloorPosition = 0.0f;
+	mSpeed = mSetSpeed;
 	mIsJamp = true;
 	mIsInitSet = false;
 	mJampVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
@@ -29,20 +30,17 @@ void FlyingFish::Initialize(){
 void FlyingFish::Start(){
 	//game->Debug()->Log(std::to_string(mSize));
 	Enemy::Start();
+	mInitPositionY = mParentObj->mTransform->Position().y;
+
+	Enemy::setDamage(mSetDamage);
 }
 
 //毎フレーム呼ばれます
 void FlyingFish::Update(){
 
-	auto v = gameObject->mTransform->Forward() * -mSpeed;
-	auto position = gameObject->mTransform->Position();
-
-	Enemy::PlayerColorChange(gameObject);
-	Enemy::PlayerSearchMode(gameObject, mSize.x, mSize.y, 3.0f);
-	//Enemy::PlayerChase(gameObject);
+	if (!mIsInitSet) mInitPositionY = -1.5f;
 
 	if (mIsJamp == false) {
-		//game->Debug()->Log(std::to_string(mJampRestTime));
 		if (mJampRestTime <= 0) {
 			mJampRestTime = mInitJampRestTime;
 		}
@@ -65,52 +63,7 @@ void FlyingFish::Update(){
 		}
 	}
 
-	// 敵の回転
-	if (!mIsSearchRange) {
-		if (mWallHitCount % 2 == 0) {
-			mRotateY += 3.14 / 180;
-		}
-		else {
-			mRotateY -= 3.14 / 180 / mRotateInterval;
-		}
-		
-		if (mRotateY >= 3.14 * 2.0f) {
-			mRotateY = 0.0f;
-		}
-		auto rotate = XMVectorSet(0.0f, mRotateY, 0.0f, 0.0f);
-		gameObject->mTransform->Rotate(rotate);
-	}
-	else {
-		//Enemy::PlayerChaseMode(gameObject);
-	}
-	// ジャンプ間隔
-	if(mJampRestTime <= 0){
-		if (mUpCount > 0) {
-			// 上げる処理
-			mJampVelocity = gameObject->mTransform->Up() * (mUpPowar + (mUpCount / mUpInterval));
-
-			mIsJamp = true;
-		}
-		else {
-			if (position.y > mInitPositionY) {
-				// 落ちる処理
-				auto upVelocity = XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f);
-				mJampVelocity = upVelocity * -((mUpPowar) + (mDownCount / mUpInterval));
-			}
-		}
-	}
-	
-	/*gameObject->mTransform->Position(position + v + mJampVelocity);*/
-	if (mIsInitSet) {
-		if (mIsJamp) {
-			gameObject->mTransform->Position(position + v + mJampVelocity);
-		}
-		else {
-			gameObject->mTransform->Position(position + v);
-		}
-	}
-
-	Enemy::FallDead(gameObject);
+	Enemy::Move();
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -122,7 +75,12 @@ void FlyingFish::Finish(){
 void FlyingFish::OnCollideBegin(Actor* target){
 	Enemy::OnCollideBegin(target);
 	if (target->Name() == "Floor") {
-		if (gameObject->mTransform->Position().y <= mPositionY) {
+		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mInitPositionY) {
+			mIsInitSet = true;
+		}
+		
+
+		if (mParentObj->mTransform->Position().y <= mInitPositionY) {
 			mIsJamp = false;
 		}
 	}
@@ -138,17 +96,91 @@ void FlyingFish::OnCollideEnter(Actor* target){
 	Enemy::OnCollideEnter(target);
 
 	if (target->Name() == "Floor") {
-		if (gameObject->mTransform->Position().y <= mPositionY) {
+		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mInitPositionY) {
+			mIsInitSet = true;
+		}
+
+		if (mParentObj->mTransform->Position().y <= mInitPositionY) {
 			mIsJamp = false;
 		}
-	}
-
-	if (target->Name() == "Wall") {
-
 	}
 }
 
 //コライダーとのロスト時に呼ばれます
 void FlyingFish::OnCollideExit(Actor* target){
 	Enemy::OnCollideExit(target);
+}
+
+void FlyingFish::SearchMove() {
+
+	// 敵の回転
+	if (mWallHitCount % 2 == 0) {
+		mRotateY += 3.14 / 180;
+	}
+	else {
+		mRotateY -= 3.14 / 180 / mRotateInterval;
+	}
+
+	if (mRotateY >= 3.14 * 2.0f) {
+		mRotateY = 0.0f;
+	}
+	auto rotate = XMVectorSet(0.0f, mRotateY, 0.0f, 0.0f);
+	mParentObj->mTransform->Rotate(rotate);
+	
+	JampMove();
+
+	/*gameObject->mTransform->Position(position + v + mJampVelocity);*/
+
+	//mParentObj->mTransform->Position(parentPosition + forwardMove + mJampVelocity);
+}
+
+void FlyingFish::PlayerChase() {
+	Enemy::PlayerChaseMode();
+	JampMove();
+
+}
+
+void FlyingFish::JampMove() {
+	auto parentPosition = mParentObj->mTransform->Position();
+	auto forwardMove = mParentObj->mTransform->Forward() * -mSpeed * 0.01f;
+
+	// ジャンプ間隔
+	if (mJampRestTime <= 0) {
+		if (mUpCount > 0) {
+			// 上げる処理
+			mJampVelocity =
+				mParentObj->mTransform->Up() * (mUpPowar + (mUpCount / mUpInterval));
+
+			mIsJamp = true;
+		}
+		else {
+			if (parentPosition.y > mInitPositionY) {
+				// 落ちる処理
+				auto downVelocity = XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f);
+				mJampVelocity = downVelocity * -((mUpPowar)+(mDownCount / mUpInterval));
+
+				// 絶対に初期値に戻るように補正
+				if (parentPosition.y + mJampVelocity.y < mInitPositionY) {
+					auto revasionVelocity = XMVectorSet(
+						0.0f,
+						(float)abs(parentPosition.y) - (float)abs(mInitPositionY)
+						, 0.0f, 0.0f);
+					mJampVelocity = revasionVelocity;
+					//game->Debug()->Log(std::to_string(mJampVelocity.y));
+				}
+			}
+		}
+	}
+
+	if (mIsInitSet) {
+		if (mIsJamp) {
+			mParentObj->mTransform->Position(parentPosition + forwardMove + mJampVelocity);
+		}
+		else {
+			mParentObj->mTransform->Position(parentPosition + forwardMove);
+		}
+	}
+	else {
+		mParentObj->mTransform->Position(parentPosition - mParentObj->mTransform->Up() * (10.0f * 0.01f));
+	}
 }

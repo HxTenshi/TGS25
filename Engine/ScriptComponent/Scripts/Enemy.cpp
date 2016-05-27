@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "PlayerSearch.h"
+#include "SailBoard.h"
 
 #include "Game/Actor.h"
 #include "Game/Script/IGame.h"
@@ -14,30 +15,32 @@ Enemy::~Enemy() {
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void Enemy::Initialize(){
+	mEnemyState = EnemyState::PlayerSearch;
 	mAddSearchObjCount = 0;
+	mDamage = 0;
 	mSpeed = 1.0f * 0.01f;
 	mSize = gameObject->mTransform->Scale();
 	mHalfSizeZ = mSize.z / 2.0f;
 	mPositionY = gameObject->mTransform->Position().y;
 	mRotateY = 0.0f;
-	mDeadHeigth = -10.0f;
-	mIsObjHit = false;
+	mScalarX = 1.0f;
+	mScalarY = 2.0f;
+	mScalarZ = 3.0f;
+	//mDeadHeigth = -10.0f;
 	mIsFloorHit = false;
-	mIsSearchRange = false;
 	mIsImmortalBody = false;
+	mIsDistanceAct = false;
+	mIsAttckMode = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void Enemy::Start(){
-	//game->Debug()->Log(std::to_string(mSize));
-
-	auto nowPosition = gameObject->mTransform->Position();
-	mPositionY = nowPosition.y;
+	// 親の取得	
+	mParentObj = gameObject->mTransform->GetParent();
 }
 
 //毎フレーム呼ばれます
 void Enemy::Update(){
-
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -48,19 +51,20 @@ void Enemy::Finish(){
 //コライダーとのヒット時に呼ばれます
 void Enemy::OnCollideBegin(Actor* target){
 	if (target->Name() == "Board"){
-		if (!mIsSearchRange && !mIsImmortalBody) {
+		auto playerScript = target->GetComponent<SailBoard>();
+		// プレイヤーが無敵状態なら死亡
+		// そうでない場合はプレイヤーにダメージを与える
+		if (playerScript->IsUnrivaled()) {
 			game->DestroyObject(gameObject);
 		}
-		mIsObjHit = true;
+		else {
+			playerScript->Damage(mDamage);
+		}
 	}
 }
 
 //コライダーとのヒット中に呼ばれます
 void Enemy::OnCollideEnter(Actor* target){
-	if (target->Name() == "Board") {
-		mIsObjHit = true;
-	}
-
 	if (target->Name() == "Floor") {
 		mIsFloorHit = true;
 	}
@@ -68,20 +72,16 @@ void Enemy::OnCollideEnter(Actor* target){
 
 //コライダーとのロスト時に呼ばれます
 void Enemy::OnCollideExit(Actor* target){
-	if (target->Name() == "Board") {
-		mIsObjHit = false;
-	}
-
 	if (target->Name() == "Floor") {
 		mIsFloorHit = false;
 	}
 }
-
-void Enemy::PlayerColorChange(Actor* obj) {
+// 敵の色の設定です
+void Enemy::PlayerColorChange() {
 	// 色の設定
 	auto color = XMFLOAT4(1, 1, 1, 1);
 	// 一定距離内だと色の値を変える
-	if (mIsSearchRange) {
+	if (mEnemyState == EnemyState::PlayerChase) {
 		color = XMFLOAT4(1, 0, 0, 1);
 	}
 	else {
@@ -94,206 +94,160 @@ void Enemy::PlayerColorChange(Actor* obj) {
 		mate->SetAlbedoColor(color);
 	}
 }
-
+// 索敵移動をします（デフォルト設定）
 void Enemy::SearchMove() {
-	auto v = gameObject->mTransform->Forward() * mSpeed;
+	// デフォルトの移動
 	auto position = gameObject->mTransform->Position();
-	gameObject->mTransform->Position(position + v);
-
-	mRotateY += 3.14 / 180;
-	
-	auto rotate = XMVectorSet(0.0f, mRotateY, 0.0f, 0.0f);
-
-	gameObject->mTransform->Rotate(rotate);
+	auto forward = gameObject->mTransform->Forward();
+	gameObject->mTransform->Position(position + forward);
 }
+// 索敵関数です
+void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
+	// 親の取得
+	mParentObj = gameObject->mTransform->GetParent();
 
-void Enemy::PlayerSearchMode(Actor* thisObj, const float sizeX, const float sizeY, const float sizeZ) {
-	// プレイヤーの捜索
-	/*auto object = game->FindActor("Board");
-	if (!object) return;*/
-
-	// 索敵範囲オブジェの作成
+	// 索敵オブジェの作成
 	if (mAddSearchObjCount < 1) {
 		mPlayerSearchObj = game->CreateActor("Assets/PlayerSearchRange");
 		game->AddObject(mPlayerSearchObj);
-		// 敵の子供に追加する
-		mPlayerSearchObj->mTransform->SetParent(gameObject);
-		// 索敵オブジェのスクリプト取得
-		mPlayerSearchObj->GetScript<PlayerSearch>();
-		// 大きさの変更
-		auto objScale = gameObject->mTransform->Scale();
-		auto setScale = XMVectorSet(sizeX, sizeY, sizeZ, 0.0f);
-		mPlayerSearchObj->mTransform->Scale(setScale);
-		// 目の前の位置に設置する
-		Enemy::SetForwardChildrenObj(mPlayerSearchObj);
+		//game->Debug()->Log("親検索");
 
-		// 一度生成したら再度生成しない
-		mAddSearchObjCount = 1;
-	}
-
-	searchScript = mPlayerSearchObj->GetScript<PlayerSearch>();
-
-	if (searchScript->IsPlayerSearch()) {
-		mIsSearchRange = true;
-		//game->Debug()->Log("当たり");
-	}
-	else {
-		mIsSearchRange = false;
-	}
-}
-
-void Enemy::PlayerSearchMode(Actor* thisObj) {
-	// 索敵範囲オブジェの作成
-	if (mAddSearchObjCount < 1) {
-		mPlayerSearchObj = game->CreateActor("Assets/PlayerSearchRange");
-		game->AddObject(mPlayerSearchObj);
-		// 敵の子供に追加する
-		mPlayerSearchObj->mTransform->SetParent(gameObject);
 		// 索敵オブジェのスクリプト取得
 		searchScript = mPlayerSearchObj->GetScript<PlayerSearch>();
 		// 大きさの変更
-		auto objScale = gameObject->mTransform->Scale();
-		auto setScale = XMVectorSet(objScale.x, objScale.y * 2.0f, 3.0f, 0.0f);
+		auto setScale = XMVectorSet(
+			objScale.x * mScalarX, objScale.y * mScalarY, objScale.z * mScalarZ, 0.0f);
 		mPlayerSearchObj->mTransform->Scale(setScale);
-		// 目の前の位置に設置する
-		Enemy::SetForwardChildrenObj(mPlayerSearchObj);
+		searchScript->SetScalarZ(mScalarZ);
 
-		// 一度生成したら再度生成しない
+		// 索敵範囲オブジェの位置設定
+		auto childrenScale = mPlayerSearchObj->mTransform->Scale();
+		// 位置の指定
+		auto setPosition = XMVectorSet(0.0f, 0.0f, (objScale.z + childrenScale.z) / 2.0f, 0.0f);
+		mSearchObjPosition = setPosition;
+
+		// 位置の変更
+		mPlayerSearchObj->mTransform->Position(-setPosition);
+		game->Debug()->Log(std::to_string(mPlayerSearchObj->mTransform->Position().z));
+
+		// 敵の子供に追加する
+		mPlayerSearchObj->mTransform->SetParent(mParentObj);
+
 		mAddSearchObjCount = 1;
 	}
 
-	//searchScript = mPlayerSearchObj->GetScript<PlayerSearch>();
+	// 索敵オブジェの位置更新
+	mPlayerSearchObj->mTransform->Position(-mSearchObjPosition);
 
-
-	if (searchScript->IsPlayerSearch()) {
-		mIsSearchRange = true;
-		//game->Debug()->Log("当たり");
-	}
-	else {
-		mIsSearchRange = false;
-	}
-}
-
-void  Enemy::PlayerChaseMode(Actor* thisObj) {
-	// プレイヤーの捜索
-	auto object = game->FindActor("Board");
-	if (!object) {
-		return;
-	}
-	else {
-		// プレイヤーとの距離の計算
-		auto target = ((object->mTransform->Position()) - thisObj->mTransform->Position());
-		// 正規化
-		target = XMVector3Normalize(target);
-
-		// 移動
-		if (mIsObjHit == false) {
-
-			if (mIsSearchRange) {
-				//// プレイヤーの方向を向く
-				auto mRotate = XMVectorSet(target.x, 0.0f, target.z, 0.0f);
-				
-				gameObject->mTransform->Quaternion(mRotate);
-
-				//thisObj->mTransform->Quaternion(target);
-				/*auto rotateZero = XMVectorSet(0.0f, gameObject->mTransform->Rotate().y, 0.0f, 0.0f);
-				gameObject->mTransform->Rotate(rotateZero);*/
-
-				/*auto thisObj = gameObject->mTransform->Position();
-				auto player = object->mTransform->Position();
-				auto addVector = thisObj + player;
-				auto rotateY = 180.0f / 3.14f;
-				auto objRotate = XMVectorSet(0.0f, rotateY, 0.0f, 0.0f);
-				if (addVector.x < 0) {
-					gameObject->mTransform->Rotate(gameObject->mTransform->Rotate() + -objRotate);
-				}
-				else if (addVector.x > 0) {
-					gameObject->mTransform->Rotate(gameObject->mTransform->Rotate() + objRotate);
-				}*/
-			}
-
-		}
-	}
-}
-
-void Enemy::PlayerChase(Actor* thisObj) {
-	// 移動
-	if (!mIsObjHit) {
-		auto moveSpeed = thisObj->mTransform->Forward() * -mSpeed;
-		auto movePosition = thisObj->mTransform->Position();
-		// Y軸の補正 (敵の一部が海面に出ているようにする)
-		if (mIsFloorHit) {
-			auto setPosition = XMVectorSet(movePosition.x, mPositionY, movePosition.z, 0.0f);
-			gameObject->mTransform->Position(setPosition + moveSpeed);
+	if (searchScript->IsPlayerSearch()|| mIsAttckMode){
+		if (!mIsDistanceAct) {
+			mEnemyState = EnemyState::PlayerChase;
 		}
 		else {
-			thisObj->mTransform->Position(movePosition + moveSpeed);
-		}
-	}
-}
-
-// 間隔移動
-void Enemy::PlayerSpaceChase(Actor* thisObj, const int interval, int count) {
-	// プレイヤーの捜索
-	auto object = game->FindActor("Board");
-	if (!object) return;
-
-	auto target = ((object->mTransform->Position()) - thisObj->mTransform->Position());
-	auto targetRange = XMVector3Length(object->mTransform->Position() - thisObj->mTransform->Position());
-
-	target = XMVector3Normalize(target);
-
-	//target.y = 0;
-
-	// 移動
-	if (!mIsObjHit) {
-		// 一定距離なら反応する
-		if (targetRange.x <= (mSize.z / 2) + (mSize.z * 6)) {
-			if (count % interval < interval / 2) {
-				gameObject->mTransform->AddForce(target*mSpeed);
+			auto searchObjScale = mPlayerSearchObj->mTransform->Scale().z;
+			/*int PlayerDistanceNumber = 1 + (searchScript->PlayerDistance() / (searchObjScale / 3.0f));
+			if (PlayerDistanceNumber == 4) {
+				PlayerDistanceNumber = 3;
+			}*/
+			// 配列にしてif文を無くす
+			if (searchScript->PlayerDistance() <= searchObjScale / 3.0f) {
+				mEnemyState = EnemyState::PlayerShortDistance;
 			}
-			mIsSearchRange = true;
+			else if (searchScript->PlayerDistance() <= searchObjScale / 2.0f) {
+				mEnemyState = EnemyState::PlayerCenterDistance;
+			}
+			else if (searchScript->PlayerDistance() > searchObjScale / 2.0f) {
+				mEnemyState = EnemyState::PlayerLongDistance;
+			}
 		}
-		else if (targetRange.x >(mSize.z / 2) + (mSize.z * 6)) {
-			gameObject->mTransform->Forward() * 0;
-			mIsSearchRange = false;
-		}
+	}
+	else {
+		mEnemyState = EnemyState::PlayerSearch;
 	}
 }
 
-// 目の前にオブジェを生成します
-void Enemy::SetForwardObj(Actor* setObj) {
-	auto objPosition = gameObject->mTransform->Position();
-	auto objScale = gameObject->mTransform->Scale();
-	auto setObjScale = setObj->mTransform->Scale();
-	// 位置の指定
-	auto setPosition = XMVectorSet(0.0f, 0.0f, ((1.0f - objScale.z) / 2.0f) + (objScale.z + setObjScale.z) / 2.0f, 0.0f);
-	// 位置の変更
-	setObj->mTransform->Position(objPosition + -setPosition);
-	// 生成元のオブジェの回転角に変更
-	setObj->mTransform->Rotate(gameObject->mTransform->Rotate());
+// プレイヤーの方向に回転します(未完成)
+void  Enemy::PlayerChaseMode() {
+	// プレイヤーの捜索
+	// プレイヤーの方向を向く（まだ）
+	auto playerObj = game->FindActor("Board");
+	auto playerPosition = playerObj->mTransform->Position();
+	// 親のステータスの取得
+	auto parentPosition = mParentObj->mTransform->Position();
+	
+	auto v = parentPosition - playerPosition;
+	auto angle = atan2(v.x, v.z);
+
+	mParentObj->mTransform->Quaternion(XMQuaternionRotationAxis(mParentObj->mTransform->Up(), angle));
+}
+// プレイヤーを追跡します（デフォルト設定）
+void Enemy::PlayerChase() {
+	// 移動
+	auto position = gameObject->mTransform->Position();
+	auto forward = gameObject->mTransform->Forward();
+	gameObject->mTransform->Position(position + forward);
 }
 
-// 親のオブジェの前に子のオブジェを作成します
-void Enemy::SetForwardChildrenObj(Actor* setObj) {
-	// 索敵範囲オブジェの位置設定
-	auto objScale = gameObject->mTransform->Scale();
-	auto childrenScale = setObj->mTransform->Scale();
+// プレイヤーとの距離が短いときの行動です（デフォルト設定）
+void Enemy::ShortDistanceAttack() {
+	// 移動
+	auto position = gameObject->mTransform->Position();
+	auto forward = gameObject->mTransform->Forward();
+	gameObject->mTransform->Position(position + forward);
+}
+
+// プレイヤーとの距離が中間の行動です（デフォルト設定）
+void Enemy::CenterDistanceAttack() {
+	// 移動
+	auto position = gameObject->mTransform->Position();
+	auto forward = gameObject->mTransform->Forward();
+	gameObject->mTransform->Position(position + forward);
+}
+
+// プレイヤーとの距離が長いときの行動です（デフォルト設定）
+void Enemy::LongDistanceAttack() {
+	// 移動
+	auto position = gameObject->mTransform->Position();
+	auto forward = gameObject->mTransform->Forward();
+	gameObject->mTransform->Position(position + forward);
+}
+
+// 敵の目の前にオブジェを生成します
+void Enemy::SetForwardObj(Actor* setObj) {
+	auto parentPosition = mParentObj->mTransform->Position();
+	auto parentRotate = mParentObj->mTransform->Rotate();
+	auto parentScale = gameObject->mTransform->Scale();
+	/*auto objPosition = gameObject->mTransform->Position();
+	auto objScale = gameObject->mTransform->Scale();*/
+	auto setObjScale = setObj->mTransform->Scale();
+
 	// 位置の指定
-	auto setPosition = XMVectorSet(0.0f, 0.0f, ((1.0f - objScale.z) / 2.0f) + (objScale.z + childrenScale.z) / 2.0f, 0.0f);
+	auto setPosition = XMVectorSet(
+		((parentScale.z / 2.0f) + (setObjScale.z / 2.0f)) * sinf(parentRotate.y),
+		0.0f,
+		((parentScale.z / 2.0f) + (setObjScale.z / 2.0f)) * cosf(parentRotate.y), 0.0f);
 	// 位置の変更
-	setObj->mTransform->Position(-setPosition);
+	setObj->mTransform->Position(parentPosition + -setPosition);
+	// 生成元のオブジェの回転角に変更
+	setObj->mTransform->Rotate(parentRotate);
+}
+
+// ダメージの設定です
+void Enemy::setDamage(int damage) {
+	mDamage = damage;
 }
 
 // 一定距離まで落ちたら死亡します
 void Enemy::FallDead(Actor* thisObj) {
 	// 一定の位置まで落ちたら死亡
 	if (thisObj->mTransform->Position().y <= mDeadHeigth) {
+		game->DestroyObject(mPlayerSearchObj);
+		game->DestroyObject(gameObject);
 		game->DestroyObject(thisObj);
 	}
 }
 
-// プレイヤーとの距離の計算 (Z座標)
+// プレイヤーとの距離の計算をします (Z座標)
 float Enemy::PlayerDistance() {
 	// プレイヤーの検索
 	auto object = game->FindActor("Board");
@@ -302,4 +256,34 @@ float Enemy::PlayerDistance() {
 	auto targetRange = XMVector3Length(
 		object->mTransform->Position() - gameObject->mTransform->Position());
 	return targetRange.z;
+}
+// 敵の行動関数
+void Enemy::Move() {
+	PlayerSearchMode(gameObject->mTransform->Scale());
+
+	if (mEnemyState == EnemyState::PlayerSearch) {
+		SearchMove();
+	}
+
+	if (!mIsDistanceAct) {
+		if (mEnemyState == EnemyState::PlayerChase) {
+			PlayerChase();
+			//PlayerChaseMode();
+		}
+	}
+	else {
+
+		if (mEnemyState == EnemyState::PlayerShortDistance) {
+			ShortDistanceAttack();
+		}
+		else if (mEnemyState == EnemyState::PlayerCenterDistance) {
+			CenterDistanceAttack();
+		}
+		else if (mEnemyState == EnemyState::PlayerLongDistance) {
+			LongDistanceAttack();
+		}
+	}
+
+	Enemy::PlayerColorChange();
+	Enemy::FallDead(mParentObj);
 }

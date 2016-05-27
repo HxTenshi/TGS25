@@ -2,7 +2,6 @@
 #pragma once
 #include "main.h"
 
-
 class CreateEnemyObj :public IDllScriptComponent{
 public:
 	void Initialize()override;

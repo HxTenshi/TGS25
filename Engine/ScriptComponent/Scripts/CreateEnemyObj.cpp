@@ -9,7 +9,7 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void CreateEnemyObj::Initialize(){
-
+	mIsCreateObj = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -27,18 +27,20 @@ void CreateEnemyObj::Update(){
 	auto distance = XMVector3Length(playerPosition - thisPosition);
 
 	if (mCreateObj == NULL) {
-		mCreateObj = game->CreateActor("Assets/FlyingFish");
+		//mCreateObj = game->CreateActor("Assets/FlyingFish");
+		mCreateObj = game->CreateActor("Assets/SampleObj");
 	}
 
-	if (distance.z <= mReactionDistance) {
+	if (distance.z <= mReactionDistance && mCreateCount > 0) {
 
 		if (mCreateInterval <= 0) {
 
-			if (!mIsCreateObj && mCreateCount > 0) {
+			if (!mIsCreateObj) {
 				// 敵オブジェの生成
 				game->AddObject(mCreateObj);
-				mCreateObj->mTransform->Position(thisPosition);
-				mCreateObj->mTransform->Rotate(playerRotate);
+				mCreateObj->mTransform->SetParent(gameObject);
+				/*mCreateObj->mTransform->Position(thisPosition);
+				mCreateObj->mTransform->Rotate(playerRotate);*/
 
 				mIsCreateObj = true;
 			}
@@ -58,11 +60,18 @@ void CreateEnemyObj::Update(){
 		}
 	
 	}
+
+	if (mCreateCount <= 0) {
+		auto material = gameObject->GetComponent<MaterialComponent>();
+		auto color = XMFLOAT4(0, 0, 1, 1);
+
+		material->SetAlbedoColor(color);
+	}
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void CreateEnemyObj::Finish(){
-
+	gameObject->mTransform->Children().clear();
 }
 
 //コライダーとのヒット時に呼ばれます

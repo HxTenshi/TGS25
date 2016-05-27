@@ -13,13 +13,5 @@ public:
 	virtual void OnCollideEnter(Actor* target)override;
 	virtual void OnCollideExit(Actor* target)override;
 
-	void SearchMove();
-
 private:
-	//ƒƒ“ƒo•Ï”
-	int mSwellUpCount;
-	int mSwellUpTimer;
-	float mDirection;
-	float mSwellUpSize;
-	bool mIsPlayerKill;
 };

@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class WaterGunBullet :public IDllScriptComponent{
+class SquidInk :public IDllScriptComponent{
 public:
 	void Initialize()override;
 	void Start()override;
@@ -18,8 +18,5 @@ private:
 	SERIALIZE
 	int mDestroyTime;
 	SERIALIZE
-	int mSetDamege;
-	SERIALIZE
 	float mSpeed;
-	XMVECTOR mForwardVelocity;
 };

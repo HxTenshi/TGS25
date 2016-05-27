@@ -1,4 +1,5 @@
 #include "WaterGunBullet.h"
+#include "SailBoard.h"
 
 #include "Game/Actor.h"
 #include "Game/Script/IGame.h"
@@ -9,24 +10,23 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void WaterGunBullet::Initialize(){
-	mDestroyTime = 3 * 60;
-	mSpeed = 10.0f * 0.01f;
+	
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void WaterGunBullet::Start(){
-
+	mDestroyTime *= 60;
 }
 
 //毎フレーム呼ばれます
 void WaterGunBullet::Update(){
 	// 前方に移動
-	mForwardVelocity = gameObject->mTransform->Forward() * -mSpeed;
+	mForwardVelocity = gameObject->mTransform->Forward() * -mSpeed * 0.01f;
 
 	auto position = gameObject->mTransform->Position();
 	gameObject->mTransform->Position(position + mForwardVelocity);
 
-	//mSpeed -= 0.01f;
+	mSpeed -= 0.01f;
 
 	mDestroyTime--;
 	if (mDestroyTime <= 0) {
@@ -41,8 +41,11 @@ void WaterGunBullet::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void WaterGunBullet::OnCollideBegin(Actor* target){
-	(void)target;
+
 	if (target->Name() == "Board") {
+		auto playerScript = target->GetComponent<SailBoard>();
+		playerScript->Damage(mSetDamege);
+
 		game->DestroyObject(gameObject);
 		target->mTransform->AddForce(gameObject->mTransform->Forward() * -100.0f);
 	}
