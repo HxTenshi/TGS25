@@ -24,8 +24,8 @@ public:
 	float GetHitPoint();
 
 private:
-	XMVECTOR RotationBoard();
-	XMVECTOR Trick();
+	void RotationBoard();
+	void Trick();
 	void Jump();
 	bool Dead();
 	void ReSpawn();
@@ -41,11 +41,13 @@ private:
 	//プレイヤーのトリックが成功したか
 	bool mTrick;
 
-	float mRotateX;
+	//地上用の変数
 	float mRotateY;
-
 	float mYRot;
-	float mXRot;
+	//トリック中の変数
+	XMVECTOR mTrickRotate;
+	float mTrickPoint; //トリックの点数
+
 
 	float mJumpYRotate; //ジャンプ中の回転
 	float mPrevAcceler;

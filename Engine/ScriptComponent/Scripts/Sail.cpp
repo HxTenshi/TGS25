@@ -26,8 +26,8 @@ void Sail::Update(){
 
 	SailRotate();
 
-	auto parent = gameObject->mTransform->GetParent();
-	parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 15);        //PS4デバック
+	auto parent = gameObject->mTransform->GetParent()->mTransform->GetParent();
+	if(!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 30);        //PS4デバック
 	//parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);         //PCデバック
 
 }
@@ -56,7 +56,7 @@ void Sail::OnCollideExit(Actor* target){
 float Sail::MovePower()
 {
 
-	auto wind = gameObject->mTransform->GetParent()->GetScript<SailBoard>();
+	auto wind = gameObject->mTransform->GetParent()->mTransform->GetParent()->GetScript<SailBoard>();
 	if (!wind)return 0.0f;
 	auto windvec = wind->GetWind();
 	windvec.y = 0;

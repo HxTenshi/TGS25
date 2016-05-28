@@ -38,6 +38,10 @@ void CameraController::Update()
 		if (!mTarget->GetScript<SailBoard>()->GetIsJump())
 		{
 			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -3) + XMVectorSet(0, 1, 0, 1));
+			if (Input::Down(PAD_DS4_KeyCoord::Button_DOWN))
+			{
+				mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * 3) + XMVectorSet(0, 1, 0, 1));
+			}
 		}
 		else
 		{

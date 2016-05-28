@@ -21,11 +21,11 @@ void SailBoard::Initialize(){
 	isGround = false;
 	isJump = false;
 	isDead = false;
-	mRotateX = 0;
 	mYRot = 0.0f;
-	mXRot = 0.0f;
+	mTrickPoint = 0;
 	mPlyerHP = 100.0f;
 	mJumpYRotate = 0;
+	mTrickRotate = XMVectorSet(0, 0, 0, 0);
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -37,7 +37,6 @@ void SailBoard::Start(){
 void SailBoard::Update(){
 
 	if (Input::Down(KeyCoord::Key_Z)) mPlyerHP--;
-	if (mTrick) game->Debug()->Log("成功");
 	isDead = Dead();
 	ReSpawn();
 
@@ -48,15 +47,30 @@ void SailBoard::Update(){
 		gameObject->mTransform->AddForce(v);
 	}
 
-	auto rotatey = RotationBoard();
-	auto rotatex = Trick();
+	if (isJump)
+	{
+		Trick();
+	}
+	else
+	{
+		RotationBoard();
+		mTrickPoint = 0;
+		mTrickRotate = XMVectorSet(0, 0, 0, 0);
+	}
 
+	//ジャンプ用
 	if ((Input::Trigger(KeyCoord::Key_SPACE) || Shake()) && isGround)
 	{
 		Jump();
 	}
 
-	gameObject->mTransform->Quaternion(XMQuaternionMultiply(rotatex,rotatey));
+
+	//qｷｰとShareボタンで姿勢を戻す
+	if (Input::Down(KeyCoord::Key_Q) || Input::Trigger(PAD_DS4_KeyCoord::Button_SHARE))
+	{
+		physx->SetForceVelocity(XMVectorSet(0, 0, 0, 1));
+		gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
+	}
 	
 
 }
@@ -70,12 +84,13 @@ void SailBoard::Finish(){
 void SailBoard::OnCollideBegin(Actor* target){
 	(void)target;
 
-	if (target->Name() == "Air"){
+	if (target->Name() == "Air" || target->Name() == "Floor"){
 		isJump = false;
 
 		float power = 2.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
 		gameObject->mTransform->AddForce(v*power);
+		gameObject->mTransform->Quaternion(XMQuaternionMultiply(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0),gameObject->mTransform->Quaternion()));
 	}
 
 	if (target->Name() == "PointItem"){
@@ -88,7 +103,7 @@ void SailBoard::OnCollideBegin(Actor* target){
 void SailBoard::OnCollideEnter(Actor* target){
 	(void)target;
 
-	if (target->Name() == "Air")
+	if (target->Name() == "Air" || target->Name() == "Floor")
 	{
 		isGround = true;
 		mTrick = false;
@@ -110,7 +125,7 @@ void SailBoard::OnCollideEnter(Actor* target){
 void SailBoard::OnCollideExit(Actor* target){
 	(void)target;
 
-	if (target->Name() == "Air")
+	if (target->Name() == "Air" || target->Name() == "Floor")
 	{
 		isGround = false;
 	}
@@ -159,73 +174,74 @@ float SailBoard::GetHitPoint()
 	return mPlyerHP;
 }
 
-//ボードの左右回転
-XMVECTOR SailBoard::RotationBoard()
+//ボードの左右回転(地上用)
+void SailBoard::RotationBoard()
 {
-	
 	if (Input::Down(KeyCoord::Key_A)) {
-		mRotateY -= 0.01f;
+		mRotateY -= 1;
 	}
 	if (Input::Down(KeyCoord::Key_D)) {
-		mRotateY += 0.01f;
+		mRotateY += 1;
 	}
 	mRotateY += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x;
+	mYRot += mRotateY;
+	auto sail = game->FindActor("Sail");
+	if (sail)
+	{
+		auto movepower = sail->GetScript<Sail>()->MovePower();
+		mYRot *= movepower * 0.1f;
+		auto rotatey = XMQuaternionRotationAxis(gameObject->mTransform->Up(), mYRot);
+		gameObject->mTransform->AddTorque(rotatey, ForceMode::eVELOCITY_CHANGE);
 
-	//ジャンプ中なら
-	if (isJump)
-	{
-		mJumpYRotate += max(min(mRotateY, 5), -5) * 0.5f;
-		mYRot += max(min(mRotateY, 5), -5) * 0.5f;
-		if (std::abs(mJumpYRotate) >= 2) mTrick = true;
 	}
-	else
+
+	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS))
 	{
-		auto sail = game->FindActor("Sail");
-		if (sail)
-		{
-			auto movepower = sail->GetScript<Sail>()->MovePower();
-			mYRot += max(min(mRotateY, 5), -5) * 0.01f * movepower;
-		}
+		mRotateY = 0;
+		mYRot = 0;
 	}
-	
-	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS))mRotateY = 0;
-	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mYRot);
-	return rotatey;
 }
 
 //ジャンプ中であれば前後回転が可能になる
-XMVECTOR SailBoard::Trick()
+void SailBoard::Trick()
 {
-	if (isJump)
-	{
 		if (Input::Down(KeyCoord::Key_W)) {
-			mRotateX -= 0.05f;
+			mTrickRotate.x -= 0.05f;
 		}
 		if (Input::Down(KeyCoord::Key_S)) {
-			mRotateX += 0.05f;
+			mTrickRotate.x += 0.05f;
 		}
-		mRotateX -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y;
-		if (std::abs(mRotateX) >= 2) mTrick = true;
-		
-	}
-	else //ジャンプ中でなければXの回転は初期に戻す
-	{
-		mXRot = 0;
-		mRotateX = 0;
-	}
+		if (Input::Down(KeyCoord::Key_A)) {
+			mTrickRotate.y -= 0.05f;
+		}
+		if (Input::Down(KeyCoord::Key_D)) {
+			mTrickRotate.y += 0.05f;
+		}
 
-	mXRot += max(min(mRotateX, 5), -5) * 0.1f;
+		mTrickRotate.x -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y * 0.1f;
+		mTrickRotate.y += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x * 0.1f;
 
-	auto rotatez = XMQuaternionRotationAxis(XMVectorSet(1, 0, 0, 1), mXRot);
-	return rotatez;
+		mTrickPoint = abs(mTrickRotate.x) + abs(mTrickRotate.y);
+		if (mTrickPoint > 0.1f)
+		{
+			mTrick = true;
+		}
+
+		auto xrotate = XMQuaternionRotationAxis(gameObject->mTransform->Left(), mTrickRotate.x);
+		auto yrotate = XMQuaternionRotationAxis(gameObject->mTransform->Up(), mTrickRotate.y);
+		auto mix = XMQuaternionMultiply(xrotate, yrotate);
+		gameObject->mTransform->Quaternion(XMQuaternionMultiply(mix, gameObject->mTransform->Quaternion()));
 }
 
 void SailBoard::Jump()
 {
+	auto physx = gameObject->GetComponent<PhysXComponent>();
+	auto force = XMVector3Normalize(physx->GetForceVelocity());
 	isJump = true;
-	float power = 300.0f;
-	auto v = XMVectorSet(0, 1, 0, 1);
-	gameObject->mTransform->AddForce(v*power);
+	float power = 50.0f;
+	auto v = gameObject->mTransform->Up();
+	gameObject->mTransform->AddForce(v*power,ForceMode::eIMPULSE);
+	gameObject->mTransform->AddForce(force, ForceMode::eIMPULSE);
 }
 
 bool SailBoard::Dead()
@@ -251,6 +267,7 @@ void SailBoard::ReSpawn()
 		if (point)
 		{
 			mPlyerHP = 100.0f;
+			gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
 			auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
 			manager->CreditDown();
 			auto physx = gameObject->GetComponent<PhysXComponent>();

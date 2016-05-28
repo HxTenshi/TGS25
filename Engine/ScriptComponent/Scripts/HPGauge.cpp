@@ -31,9 +31,9 @@ void HPGauge::Update()
 	auto playerScript = game->FindActor("Board")->GetScript<SailBoard>();
 	if (playerScript)
 	{
-		auto height = (playerScript->GetHitPoint() / 100.0f) * 700;
-		gameObject->mTransform->Scale(XMVectorSet(100, height, 1, 1));
-		gameObject->mTransform->Position(XMVectorSet(1100, 750 - (height / 2), 1, 1));
+		auto height = (playerScript->GetHitPoint() / 100.0f) * 660;
+		gameObject->mTransform->Scale(XMVectorSet(20, height, 1, 1));
+		gameObject->mTransform->Position(XMVectorSet(1090, 740 - (height / 2), 1, 1));
 	}
 }
 
