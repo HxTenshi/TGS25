@@ -13,6 +13,8 @@
 #include "AssetFile\Shader\ShaderFileData.h"
 #include "AssetFile\Material\TextureFileData.h"
 #include "AssetFile\Physx\PhysxMaterialFileData.h"
+#include "AssetFile\Sound\SoundFileData.h"
+
 
 decltype(AssetFactory::m_Factory) AssetFactory::m_Factory;
 class __AssetFactory :public AssetFactory{
@@ -42,6 +44,9 @@ AssetFactory::AssetFactory(){
 	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("tga"), [](const char* filename){ return AssetDataTemplate<TextureFileData>::Create(filename); }));
 
 	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("pxmaterial"), [](const char* filename){ return AssetDataTemplate<PhysxMaterialFileData>::Create(filename); }));
+
+	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("wav"), [](const char* filename){ return AssetDataTemplate<SoundFileData>::Create(filename); }));
+	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("wave"), [](const char* filename){ return AssetDataTemplate<SoundFileData>::Create(filename); }));
 
 }
 AssetDataTemplatePtr AssetFactory::Create(const char* filename){
@@ -110,7 +115,7 @@ void AssetDataTemplate<PhysxMaterialFileData>::CreateInspector(){
 		Game::GetAllObject([&](Actor* tar){
 			auto com = tar->GetComponent<PhysXColliderComponent>();
 			if (com){
-				com->ChangeMaterial();
+				com->ChangeMaterial(com->GetMaterial());
 			}
 		});
 	};

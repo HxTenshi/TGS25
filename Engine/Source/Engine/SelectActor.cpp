@@ -50,7 +50,8 @@ public:
 		phy->mIsEngineMode = true;
 		mComponents.AddComponent<PhysXColliderComponent>();
 		auto col = mComponents.GetComponent<PhysXColliderComponent>();
-		col->SetMesh("EngineResource/Arrow.pmx.tesmesh");
+		col->CreateMesh(std::string("EngineResource/Arrow.pmx.tesmesh"));
+		col->SetScale(XMVectorSet(0.1, 0.1, 0.1, 1));
 
 		phy->SetKinematic(true);
 	}
@@ -172,6 +173,11 @@ SelectActor::SelectActor()
 	mSelectWireMaterial.mDiffuse.y = 0.6f;
 	mSelectWireMaterial.mDiffuse.z = 0.1f;
 	mSelectWireMaterial.Create();
+	
+	mSelectPhysxWireMaterial.mDiffuse.x = 0.1f;
+	mSelectPhysxWireMaterial.mDiffuse.y = 0.95f;
+	mSelectPhysxWireMaterial.mDiffuse.z = 0.6f;
+	mSelectPhysxWireMaterial.Create();
 }
 
 void SelectActor::Finish(){
@@ -291,6 +297,15 @@ void SelectActor::Update(float deltaTime){
 		mVectorBox[0].mTransform->Scale(XMVectorSet(l, l, l, 1));
 		mVectorBox[1].mTransform->Scale(XMVectorSet(l, l, l, 1));
 		mVectorBox[2].mTransform->Scale(XMVectorSet(l, l, l, 1));
+
+
+		auto col = mVectorBox[0].GetComponent<PhysXColliderComponent>();
+		col->SetScale(XMVectorSet(l, l, l, 1));
+		col = mVectorBox[1].GetComponent<PhysXColliderComponent>();
+		col->SetScale(XMVectorSet(l, l, l, 1));
+		col = mVectorBox[2].GetComponent<PhysXColliderComponent>();
+		col->SetScale(XMVectorSet(l, l, l, 1));
+
 	}
 
 	mVectorBox[0].UpdateComponent(deltaTime);
@@ -335,6 +350,7 @@ void SelectActor::SelectActorDraw(){
 
 	if (mSelectAsset)return;
 
+	//メッシュ描画
 	for (auto select : mSelects.GetSelects()){
 		Game::AddDrawList(DrawStage::Engine, std::function<void()>([&, select](){
 			if (!select)return;
@@ -347,7 +363,7 @@ void SelectActor::SelectActorDraw(){
 			render->PushSet(DepthStencil::Preset::DS_Zero_Alawys);
 			render->PushSet(Rasterizer::Preset::RS_Back_Wireframe);
 
-
+			mModel->SetMatrix();
 			model.Draw(render->m_Context, mSelectWireMaterial);
 
 
@@ -355,6 +371,28 @@ void SelectActor::SelectActorDraw(){
 			render->PopDS();
 		}));
 	}
+	//Physxメッシュ描画
+	for (auto select : mSelects.GetSelects()){
+		Game::AddDrawList(DrawStage::Engine, std::function<void()>([&, select](){
+			if (!select)return;
+			auto com = select->GetComponent<PhysXColliderComponent>();
+			if (!com)return;
+
+			auto render = RenderingEngine::GetEngine(ContextType::MainDeferrd);
+
+			render->PushSet(DepthStencil::Preset::DS_Zero_Alawys);
+			render->PushSet(Rasterizer::Preset::RS_Back_Wireframe);
+
+			
+			com->DrawMesh(render->m_Context, mSelectPhysxWireMaterial);
+
+
+			render->PopRS();
+			render->PopDS();
+		}));
+	}
+
+	//アロー描画
 	Game::AddDrawList(DrawStage::Engine, std::function<void()>([&](){
 	
 		auto render = RenderingEngine::GetEngine(ContextType::MainDeferrd);

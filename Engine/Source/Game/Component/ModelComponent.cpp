@@ -6,9 +6,6 @@
 #include "TransformComponent.h"
 
 #include "Graphic/Model/Model.h"
-
-
-
 ModelComponent::ModelComponent()
 {
 	mModel =NULL;
@@ -36,8 +33,10 @@ void ModelComponent::Start(){
 void ModelComponent::Finish(){
 	m_MeshComVector.clear();
 }
-void ModelComponent::Update(){
+void ModelComponent::EngineUpdate(){
+}
 
+void ModelComponent::Update(){
 }
 
 void ModelComponent::CreateInspector(){

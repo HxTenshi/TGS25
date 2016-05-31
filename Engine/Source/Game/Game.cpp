@@ -11,8 +11,7 @@
 
 #include "Game/RenderingSystem.h"
 
-
-#include "Engine/SystemLog.h"
+#include "Engine/ModelConverter.h"
 
 static std::stack<int> gIntPtrStack;
 
@@ -100,8 +99,6 @@ Game::Game(){
 	mSelectActor.Initialize();
 
 	LoadScene("./Assets/Scene_.scene");
-	
-	mSoundPlayer.Play();
 
 	mCBGameParameter = ConstantBuffer<cbGameParameter>::create(11);
 	mCBGameParameter.mParam.Time = XMFLOAT4(0, 0, 0, 0);
@@ -193,11 +190,12 @@ Game::Game(){
 		//delete coll;
 	});
 
-	Window::SetWPFCollBack(MyWindowMessage::CreatePMXtoTEStaticMesh, [&](void* p)
+	Window::SetWPFCollBack(MyWindowMessage::CreateModelConvert, [&](void* p)
 	{
 		std::string *s = (std::string*)p;
-		AssetLoader loader;
-		loader.LoadFile(*s);
+		ModelConverter::Comvert(*s);
+		//AssetLoader loader;
+		//loader.LoadFile(*s);
 		Window::Deleter(s);
 	});
 
@@ -313,7 +311,6 @@ Game::Game(){
 Game::~Game(){
 
 	ChangePlayGame(false);
-	mSoundPlayer.Stop();
 
 	//for (auto& act : mList){
 	//	DestroyObject(act.second);

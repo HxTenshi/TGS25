@@ -11,6 +11,7 @@ public:
 	void Initialize() override;
 	void Start() override;
 	void Finish() override;
+	void EngineUpdate() override;
 	void Update() override;
 
 	void SetMatrix() override;

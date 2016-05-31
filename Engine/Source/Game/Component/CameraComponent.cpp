@@ -42,6 +42,9 @@ void CameraComponent::Initialize()
 
 	SetPerspective();
 
+	//static RenderTarget mRenderTarget;
+	//mRenderTarget.CreateCUBE(256, 256, DXGI_FORMAT_R32G32B32A32_FLOAT);
+
 }
 
 void CameraComponent::SetPerspective(){
@@ -72,6 +75,7 @@ void CameraComponent::SetOrthographic(){
 
 	auto render = RenderingEngine::GetEngine(ContextType::MainDeferrd);
 	mCBChangeOnResize.UpdateSubresource(render->m_Context);
+
 }
 
 void CameraComponent::Update(){

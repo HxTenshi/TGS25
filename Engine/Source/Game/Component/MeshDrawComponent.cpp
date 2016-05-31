@@ -24,8 +24,8 @@ void MeshDrawComponent::Update(){
 
 	if (!mModel){
 		mModel = gameObject->GetComponent<ModelComponent>();
-		if (!mModel)
-			mModel = gameObject->GetComponent<TextureModelComponent>();
+		//if (!mModel)
+		//	mModel = gameObject->GetComponent<TextureModelComponent>();
 		if (!mModel)return;
 	}
 	if (!mModel->mModel)return;

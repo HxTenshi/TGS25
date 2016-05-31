@@ -28,6 +28,7 @@ public:
 	float m_AttenuationParam;
 	//ƒJƒ‰[
 	XMFLOAT3 m_Color;
+	float m_HDR;
 
 	Material mMaterial;
 

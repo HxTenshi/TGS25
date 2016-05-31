@@ -44,8 +44,8 @@ void PhysXComponent::Start(){
 	//}
 }
 void PhysXComponent::Finish(){
-	mRigidActor->userData = NULL;
 	if (mRigidActor){
+		mRigidActor->userData = NULL;
 		if (mIsEngineMode){
 			Game::RemovePhysXActorEngine(mRigidActor);
 		}

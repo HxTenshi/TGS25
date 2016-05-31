@@ -121,7 +121,6 @@ void TextureModelComponent::CreateInspector(){
 }
 
 void TextureModelComponent::IO_Data(I_ioHelper* io){
-	(void)io;
 #define _KEY(x) io->func( x , #x)
 	_KEY(mTextureName);
 #undef _KEY

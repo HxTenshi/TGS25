@@ -31,6 +31,7 @@ public:
 private:
 	//ÉJÉâÅ[
 	XMFLOAT3 m_Color;
+	float m_HDR;
 
 	ConstantBuffer<cbChangesLight>		mCBChangeLgiht;
 	//ConstantBuffer<cbChangesMaterial>	mCBChangeLgihtMaterial;

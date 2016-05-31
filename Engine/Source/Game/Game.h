@@ -115,8 +115,6 @@ private:
 	FPSChecker mFPS;
 	ProfileViewer mProfileViewer;
 
-	SoundPlayer mSoundPlayer;
-
 	PhysX3Main* mPhysX3Main;
 
 	CommandManager mCommandManager;

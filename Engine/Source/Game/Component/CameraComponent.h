@@ -59,8 +59,5 @@ private:
 	Material mSkyMaterial;
 	Model mSkyModel;
 
-
-
-
 	friend EditorCamera;
 };

@@ -150,7 +150,7 @@ void BoneModel::createBone(){
 	DWORD mBoneNum = bones.size();
 	mBone.clear();
 	mBoneInitPos.clear();
-	mIk.clear();
+	//mIk.clear();
 	mBone.resize(mBoneNum);
 	mBoneInitPos.resize(mBoneNum);
 
@@ -186,15 +186,15 @@ void BoneModel::createBone(){
 		if (mBone[i].mHierarchy.mIdxParent < (int)mBoneNum){
 			mBone[i].mMtxPose = XMMatrixMultiply(mBone[i].mMtxPose, mBone[mBone[i].mHierarchy.mIdxParent].mMtxPose);
 		}
-		if (bone.bone_flag & pmx::t_bone::BIT_IK){
-			mBone[i].mIkBoneIdx = (WORD)bone.t_ik_data_idx;
-
-			createIk(ikCount, i);
-			ikCount++;
-		}
-		else{
-			mBone[i].mIkBoneIdx = 0;
-		}
+		//if (bone.bone_flag & pmx::t_bone::BIT_IK){
+		//	mBone[i].mIkBoneIdx = (WORD)bone.t_ik_data_idx;
+		//
+		//	createIk(ikCount, i);
+		//	ikCount++;
+		//}
+		//else{
+		//	mBone[i].mIkBoneIdx = 0;
+		//}
 
 
 		mBone[i].mMtxPoseInit = mBone[i].mMtxPose;
@@ -202,26 +202,26 @@ void BoneModel::createBone(){
 	}
 }
 
-void BoneModel::createIk(DWORD ikCount, UINT bidx){
-
-
-	auto& bones = mBoneAssetDataPtr->GetFileData()->GetBoneData().mBoneBuffer;
-	auto& iks = mBoneAssetDataPtr->GetFileData()->GetBoneData().mIK_Links;
-
-	auto& bone = bones[bidx];
-	auto& ik = iks[bidx];
-
-	mIk.push_back(Ik());
-
-	mIk[ikCount].bone_index = bidx;
-	mIk[ikCount].target_bone_index = bone.t_ik_data_idx;
-	mIk[ikCount].chain_length = ik.size();
-	mIk[ikCount].iterations = bone.t_ik_data_Loop;
-	mIk[ikCount].control_weight = bone.t_ik_data_LimitAng;
-	for (auto& ikc : ik){
-		mIk[ikCount].child_bone_index.push_back(ikc.idxBone);
-	}
-}
+//void BoneModel::createIk(DWORD ikCount, UINT bidx){
+//
+//
+//	auto& bones = mBoneAssetDataPtr->GetFileData()->GetBoneData().mBoneBuffer;
+//	auto& iks = mBoneAssetDataPtr->GetFileData()->GetBoneData().mIK_Links;
+//
+//	auto& bone = bones[bidx];
+//	auto& ik = iks[bidx];
+//
+//	mIk.push_back(Ik());
+//
+//	mIk[ikCount].bone_index = bidx;
+//	mIk[ikCount].target_bone_index = bone.t_ik_data_idx;
+//	mIk[ikCount].chain_length = ik.size();
+//	mIk[ikCount].iterations = bone.t_ik_data_Loop;
+//	mIk[ikCount].control_weight = bone.t_ik_data_LimitAng;
+//	for (auto& ikc : ik){
+//		mIk[ikCount].child_bone_index.push_back(ikc.idxBone);
+//	}
+//}
 
 void BoneModel::SetConstantBuffer(ID3D11DeviceContext* context) const{
 	if (mCBBoneMatrix.mBuffer){

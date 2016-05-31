@@ -65,4 +65,5 @@ private:
 	XMVECTOR mDragPos;
 
 	Material mSelectWireMaterial;
+	Material mSelectPhysxWireMaterial;
 };

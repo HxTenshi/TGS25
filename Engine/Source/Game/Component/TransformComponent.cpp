@@ -416,6 +416,11 @@ void TransformComponent::Quaternion(const XMVECTOR& Quaternion){
 const XMVECTOR TransformComponent::Quaternion() const{
 	return XMQuaternionRotationMatrix(fromEulerYXZ(mRotate));
 }
+const XMVECTOR TransformComponent::WorldScale() const{
+	auto m = GetMatrix();
+
+	return XMVectorSet(XMVector3Length(m.r[0]).x, XMVector3Length(m.r[1]).x, XMVector3Length(m.r[2]).x, 1);
+}
 
 const XMVECTOR TransformComponent::LossyScale() const{
 	auto m = GetMatrix();
