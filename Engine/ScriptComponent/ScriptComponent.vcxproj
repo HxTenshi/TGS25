@@ -131,6 +131,7 @@
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
     <ClCompile Include="Scripts\PlayerManager.cpp" />
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
+    <ClCompile Include="Scripts\PointItem.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
     <ClCompile Include="Scripts\Squid.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
     <ClInclude Include="Scripts\PlayerManager.h" />
     <ClInclude Include="Scripts\PlayerSearch.h" />
+    <ClInclude Include="Scripts\PointItem.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
     <ClInclude Include="Scripts\Squid.h" />
