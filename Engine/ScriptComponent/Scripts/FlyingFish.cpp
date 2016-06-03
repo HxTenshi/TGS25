@@ -11,15 +11,11 @@
 void FlyingFish::Initialize(){
 	Enemy::Initialize();
 
-	//mUpInterval *= 60;
 	mUpCount = mUpInterval / 2;
 	mDownCount = 0;
-	//mJampRestTime *= 60;
 	mWallHitCount = 0;
 	mInitJampRestTime = mJampRestTime;
-	//mUpPowar *= 0.01f;
 	mRotateInterval = 2.0f;
-	mFloorPosition = 0.0f;
 	mSpeed = mSetSpeed;
 	mIsJamp = true;
 	mIsInitSet = false;
@@ -28,17 +24,23 @@ void FlyingFish::Initialize(){
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void FlyingFish::Start(){
-	//game->Debug()->Log(std::to_string(mSize));
 	Enemy::Start();
-	mInitPositionY = mParentObj->mTransform->Position().y;
 
-	Enemy::setDamage(mSetDamage);
+	Enemy::SetDamage(mSetDamage);
+	Enemy::SetResPawnTime(mSetResPawnTime);
+	Enemy::EnemyCGCreate();
+
+	auto floorObj = game->FindActor("Floor");
+	mFloorPosition = floorObj->mTransform->Position().y;
+	/*mInitParentPositionY = mParentObj->mTransform->Position().y;*/
 }
 
 //毎フレーム呼ばれます
 void FlyingFish::Update(){
 
-	if (!mIsInitSet) mInitPositionY = -1.5f;
+	Enemy::Move();
+
+	/*if (!mIsInitSet) mInitParentPositionY = -1.5f;*/
 
 	if (mIsJamp == false) {
 		if (mJampRestTime <= 0) {
@@ -62,12 +64,12 @@ void FlyingFish::Update(){
 			}
 		}
 	}
-
-	Enemy::Move();
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void FlyingFish::Finish(){
+	Enemy::Finish();
+
 	mUpCount = 0;
 }
 
@@ -75,12 +77,12 @@ void FlyingFish::Finish(){
 void FlyingFish::OnCollideBegin(Actor* target){
 	Enemy::OnCollideBegin(target);
 	if (target->Name() == "Floor") {
-		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mInitPositionY) {
+		// 床に接触したらtrue
+		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsInitSet = true;
 		}
-		
-
-		if (mParentObj->mTransform->Position().y <= mInitPositionY) {
+		// 初期の高さ以下となったら再度ジャンプフラグをfalseにする
+		if (mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsJamp = false;
 		}
 	}
@@ -96,11 +98,11 @@ void FlyingFish::OnCollideEnter(Actor* target){
 	Enemy::OnCollideEnter(target);
 
 	if (target->Name() == "Floor") {
-		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mInitPositionY) {
+		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsInitSet = true;
 		}
 
-		if (mParentObj->mTransform->Position().y <= mInitPositionY) {
+		if (mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsJamp = false;
 		}
 	}
@@ -115,23 +117,19 @@ void FlyingFish::SearchMove() {
 
 	// 敵の回転
 	if (mWallHitCount % 2 == 0) {
-		mRotateY += 3.14 / 180;
+		mRotateY += 3.14f / 180.0f / mRotateInterval;
 	}
 	else {
-		mRotateY -= 3.14 / 180 / mRotateInterval;
+		mRotateY -= 3.14f / 180.0f / mRotateInterval;
 	}
 
-	if (mRotateY >= 3.14 * 2.0f) {
+	if (mRotateY >= 3.14f * 2.0f) {
 		mRotateY = 0.0f;
 	}
 	auto rotate = XMVectorSet(0.0f, mRotateY, 0.0f, 0.0f);
 	mParentObj->mTransform->Rotate(rotate);
 	
 	JampMove();
-
-	/*gameObject->mTransform->Position(position + v + mJampVelocity);*/
-
-	//mParentObj->mTransform->Position(parentPosition + forwardMove + mJampVelocity);
 }
 
 void FlyingFish::PlayerChase() {
@@ -154,16 +152,16 @@ void FlyingFish::JampMove() {
 			mIsJamp = true;
 		}
 		else {
-			if (parentPosition.y > mInitPositionY) {
+			if (parentPosition.y > mFloorPosition) {
 				// 落ちる処理
 				auto downVelocity = XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f);
 				mJampVelocity = downVelocity * -((mUpPowar)+(mDownCount / mUpInterval));
 
 				// 絶対に初期値に戻るように補正
-				if (parentPosition.y + mJampVelocity.y < mInitPositionY) {
+				if (parentPosition.y + mJampVelocity.y < mFloorPosition) {
 					auto revasionVelocity = XMVectorSet(
 						0.0f,
-						(float)abs(parentPosition.y) - (float)abs(mInitPositionY)
+						(float)abs(parentPosition.y) - (float)abs(mFloorPosition)
 						, 0.0f, 0.0f);
 					mJampVelocity = revasionVelocity;
 					//game->Debug()->Log(std::to_string(mJampVelocity.y));
@@ -171,8 +169,9 @@ void FlyingFish::JampMove() {
 			}
 		}
 	}
-
+	// 初期段階で床と接触していなかったら
 	if (mIsInitSet) {
+		// 接触したらジャンプする
 		if (mIsJamp) {
 			mParentObj->mTransform->Position(parentPosition + forwardMove + mJampVelocity);
 		}
@@ -181,6 +180,7 @@ void FlyingFish::JampMove() {
 		}
 	}
 	else {
+		// 床まで落ちる
 		mParentObj->mTransform->Position(parentPosition - mParentObj->mTransform->Up() * (10.0f * 0.01f));
 	}
 }

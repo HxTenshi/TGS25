@@ -16,7 +16,7 @@ void PlayerSearch::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void PlayerSearch::Start(){
 	mSizeZ = gameObject->mTransform->Scale().z;
-	game->Debug()->Log(std::to_string(mSizeZ));
+	//game->Debug()->Log(std::to_string(mSizeZ));
 }
 
 //毎フレーム呼ばれます
@@ -44,10 +44,12 @@ void PlayerSearch::Update(){
 		mPlayerDistance = targetRange.z;
 		//game->Debug()->Log(std::to_string(targetRange.z));
 
-		//if (mPlayerDistance > mSizeZ * (5.0f / 3.0f)) {
-		//	//game->Debug()->Log("hit");
-		//	//mIsPlayerHit = false;
-		//}
+		if (mPlayerDistance >= mSizeZ * (5.0f / 3.0f)) {
+			//game->Debug()->Log("いない");
+			game->Debug()->Log(std::to_string(mPlayerDistance));
+			game->Debug()->Log(std::to_string(mSizeZ * (5.0f / 3.0f)));
+			mIsPlayerHit = false;
+		}
 	}
 }
 

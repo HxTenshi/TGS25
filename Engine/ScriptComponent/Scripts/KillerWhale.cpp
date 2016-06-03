@@ -20,7 +20,9 @@ void KillerWhale::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void KillerWhale::Start(){
 	Enemy::Start();
-	Enemy::setDamage(mSetDamage);
+	Enemy::SetDamage(mSetDamage);
+	Enemy::SetResPawnTime(mSetResPawnTime);
+	//EnemyCGCreate("Shachi/shachi", 0.1f, 0.1f, 0.1f);
 
 	/*mBulletShotTime *= 60;
 	mRecastTime *= 60;*/
@@ -30,12 +32,21 @@ void KillerWhale::Start(){
 
 //毎フレーム呼ばれます
 void KillerWhale::Update(){
+	/*if (mParentCreateCount == 1) {
+
+		if (mCGCreateCount == 0) {
+			Enemy::EnemyCGCreate();
+			mCGCreateCount = 1;
+		}
+	}*/
+
 	Enemy::Move();
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void KillerWhale::Finish(){
-	//Enemy::Finish();
+	Enemy::Finish();
+	
 }
 
 //コライダーとのヒット時に呼ばれます
@@ -64,7 +75,7 @@ void KillerWhale::ShortDistanceAttack() {
 	if (mBulletShotTime <= 0) {
 		if (!mIsShot) {
 			// 水鉄砲の弾の生成
-			auto GunBullet = game->CreateActor("Assets/WaterGunBullet");
+			auto GunBullet = game->CreateActor("Assets/Enemy/WaterGunBullet");
 			game->AddObject(GunBullet);
 			// 位置の変更
 			Enemy::SetForwardObj(GunBullet);
@@ -79,6 +90,9 @@ void KillerWhale::ShortDistanceAttack() {
 				mIsAttckMode = false;
 			}
 		}	
+	}
+	else {
+		Enemy::PlayerChaseMode();
 	}
 
 }
