@@ -221,7 +221,7 @@ Game::Game(){
 
 
 		std::string *s = (std::string*)p;
-		obj->ExportData("Assets", *s);
+		obj->ExportData("Assets", *s,true);
 
 		AssetDataBase::FileUpdate(("Assets/"+*s+".json").c_str());
 
@@ -350,6 +350,10 @@ void Game::AddObject(Actor* actor){
 	actor->Initialize();
 
 	mGame->mActorMoveList.push(std::make_pair(ActorMove::Create, actor));
+
+	for (auto child : actor->mTransform->Children()){
+		AddObject(child);
+	}
 	
 }
 
@@ -680,6 +684,7 @@ float Game::GetDeltaTime(){
 void Game::Update(){
 
 	ActorMoveStage();
+	mSelectActor.UpdateInspector();
 
 	mProfileViewer.Update(1);
 	if (mIsPlay){
@@ -689,7 +694,6 @@ void Game::Update(){
 		GameStop();
 	}
 	mFPS.Update(1);
-	mSelectActor.UpdateInspector();
 }
 void Game::GameStop(){
 	float deltaTime = GetDeltaTime();

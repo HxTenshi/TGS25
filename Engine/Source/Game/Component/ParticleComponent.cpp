@@ -11,6 +11,7 @@
 
 #define _MAX_CAPACITY_PARTICLE 5000
 
+
 class ParticleInitializeHelper{
 public:
 	ParticleInitializeHelper(){
@@ -33,6 +34,31 @@ public:
 		mAppedResource.pSysMem = mInitParticle;  // バッファ・データの初期値
 		mAppedResource.SysMemPitch = 0;
 		mAppedResource.SysMemSlicePitch = 0;
+
+
+		UINT stride[] = { sizeof(ParticleComponent::ParticleVertex) };
+
+		D3D11_INPUT_ELEMENT_DESC layout[] = {
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 位置座標
+				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 初速度
+				{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 初速度
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 }   // 時間
+		};
+
+		D3D11_SO_DECLARATION_ENTRY decl[] = {
+				{ 0, "POSITION", 0, 0, 3, 0 },
+				{ 0, "NORMAL", 0, 0, 3, 0 },
+				{ 0, "BINORMAL", 0, 0, 3, 0 },
+				{ 0, "TEXCOORD", 0, 0, 1, 0 },
+		};
+		mGeometryShader0.Create("EngineResource/ParticleGS.fx", "GS0_Main", decl, _countof(decl), stride, _countof(stride));
+		mGeometryShader1.Create("EngineResource/ParticleGS.fx", "GS1_Main");
+		mVertexShader.Create("EngineResource/ParticleGS.fx", "VS0_Main", layout, 4);
+		mPixelShader.Create("EngineResource/ParticleGS.fx", "PS1_Main");
+	}
+	~ParticleInitializeHelper(){
+		mGeometryShader0.Release();
+		mGeometryShader1.Release();
 	}
 
 	static ParticleInitializeHelper* Instance(){
@@ -46,6 +72,10 @@ public:
 		Device::mpd3dDevice->CreateBuffer(&mBufferDesc, &mAppedResource, buf);
 	}
 
+	GeometryStreamOutputShader mGeometryShader0;
+	GeometryStreamOutputShader mGeometryShader1;
+	VertexShader	mVertexShader;
+	PixelShader		mPixelShader;
 private:
 	ParticleComponent::ParticleVertex mInitParticle[_MAX_CAPACITY_PARTICLE];
 	D3D11_BUFFER_DESC mBufferDesc;
@@ -57,27 +87,6 @@ ParticleComponent::ParticleComponent()
 	mpSOBuffer[0] = NULL;
 	mpSOBuffer[1] = NULL;
 	mInitialize = false;
-	UINT stride[] = { sizeof(ParticleVertex) };
-
-	D3D11_INPUT_ELEMENT_DESC layout[] = {
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 位置座標
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 初速度
-			{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 初速度
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 }   // 時間
-	};
-
-	D3D11_SO_DECLARATION_ENTRY decl[] = {
-			{ 0, "POSITION", 0, 0, 3, 0 },
-			{ 0, "NORMAL", 0, 0, 3, 0 },
-			{ 0, "BINORMAL", 0, 0, 3, 0 },
-			{ 0, "TEXCOORD", 0, 0, 1, 0 },
-	};
-	mGeometryShader0.Create("EngineResource/ParticleGS.fx", "GS0_Main", decl, _countof(decl), stride, _countof(stride));
-	mGeometryShader1.Create("EngineResource/ParticleGS.fx", "GS1_Main");
-	mVertexShader.Create("EngineResource/ParticleGS.fx", "VS0_Main", layout, 4);
-	mPixelShader.Create("EngineResource/ParticleGS.fx", "PS1_Main");
-
-
 
 
 	mCBuffer = ConstantBuffer<CBChangesEveryFrame>::create(2);
@@ -109,8 +118,7 @@ ParticleComponent::ParticleComponent()
 	mInitialize = true;
 }
 ParticleComponent::~ParticleComponent(){
-	mGeometryShader0.Release();
-	mGeometryShader1.Release();
+
 	if (mpSOBuffer[0])mpSOBuffer[0]->Release();
 	if (mpSOBuffer[1])mpSOBuffer[1]->Release();
 }
@@ -210,9 +218,9 @@ void ParticleComponent::Update(){
 
 
 
-		mVertexShader.SetShader(render->m_Context);
+		ParticleInitializeHelper::Instance()->mVertexShader.SetShader(render->m_Context);
 
-		mGeometryShader0.SetShader(render->m_Context);
+		ParticleInitializeHelper::Instance()->mGeometryShader0.SetShader(render->m_Context);
 
 		// ピクセルシェーダーをデバイスに無効にする。
 		render->m_Context->PSSetShader(NULL, NULL, 0);
@@ -246,8 +254,8 @@ void ParticleComponent::Update(){
 		render->m_Context->SOSetTargets(1, pNullBuffer, NULL);
 
 
-		mGeometryShader1.SetShader(render->m_Context);
-		mPixelShader.SetShader(render->m_Context);
+		ParticleInitializeHelper::Instance()->mGeometryShader1.SetShader(render->m_Context);
+		ParticleInitializeHelper::Instance()->mPixelShader.SetShader(render->m_Context);
 
 		render->m_Context->DrawAuto();
 

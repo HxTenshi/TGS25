@@ -117,7 +117,7 @@ void Selects::Copy(){
 	CopyDelete();
 	for (auto& act : mSelects){
 		auto data = new picojson::value();
-		act->ExportData(*data);
+		act->ExportData(*data, true);
 
 		mCopy.push_back(data);
 	}
@@ -163,6 +163,7 @@ std::list<Actor*>& Selects::GetSelects(){
 }
 
 SelectActor::SelectActor()
+	:mCreateInspector(false)
 {
 	mSelectAsset = false;
 	mDragBox = -1;
@@ -253,13 +254,29 @@ Actor* SelectActor::GetSelectOne(){
 void SelectActor::UpdateInspector(){
 	if (mSelects.SelectNum() != 1 && !mSelectAsset)return;
 
-	static unsigned long time_start = timeGetTime();
-	unsigned long current_time = timeGetTime();
-	unsigned long b = (current_time - time_start);
-	if (b >= 16){
-		time_start = timeGetTime();
-		//ˆ—‚ª’Ç‚¢‚Â‚©‚È‚¢ê‡‚ª‚ ‚é
-		Window::UpdateInspector();
+	if (!mCreateInspector){
+		if (mSelectAsset){
+			if (mSelects.SelectNum() <= 1){
+				AssetDataBase::CreateInspector(mAssetFileName.c_str());
+			}
+		}
+		else{
+			if (mSelects.SelectNum() == 1)mSelects.GetSelectOne()->CreateInspector();
+
+		}
+
+		mCreateInspector = true;
+	}
+	else{
+
+		static unsigned long time_start = timeGetTime();
+		unsigned long current_time = timeGetTime();
+		unsigned long b = (current_time - time_start);
+		if (b >= 16){
+			time_start = timeGetTime();
+			//ˆ—‚ª’Ç‚¢‚Â‚©‚È‚¢ê‡‚ª‚ ‚é
+			Window::UpdateInspector();
+		}
 	}
 }
 void SelectActor::Update(float deltaTime){
@@ -462,7 +479,7 @@ void SelectActor::SetSelect(Actor* select){
 	}
 
 	Window::ClearInspector();
-	if (mSelects.SelectNum() == 1)mSelects.GetSelectOne()->CreateInspector();
+	mCreateInspector = false;
 }
 void SelectActor::SetSelectAsset(Actor* select,const char* filename){
 	mDragBox = -1;
@@ -480,14 +497,16 @@ void SelectActor::SetSelectAsset(Actor* select,const char* filename){
 	}
 
 	Window::ClearInspector();
-	if (mSelects.SelectNum() <= 1){
-		AssetDataBase::CreateInspector(filename);
-	}
+	mCreateInspector = false;
+
+	mAssetFileName = filename;
+
 }
 
 void SelectActor::ReCreateInspector(){
 	Window::ClearInspector();
-	if (mSelects.SelectNum() == 1)mSelects.GetSelectOne()->CreateInspector();
+	mCreateInspector = false;
+
 }
 
 

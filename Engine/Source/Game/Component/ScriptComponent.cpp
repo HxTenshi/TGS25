@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <filesystem> // std::tr2::sys::path etc.
 
+#include "Application/BuildVersion.h"
+
 #include "ScriptComponent.h"
 #include "MySTL/Reflection/Reflection.h"
 #include "Window/window.h"
@@ -57,7 +59,47 @@ void CreateScriptFileExtension(const std::string& classNmae, const std::string& 
 }
 
 
+bool removeDirectory(std::string fileName)
+{
+	bool retVal = true;
+	std::string nextFileName;
 
+	WIN32_FIND_DATA foundFile;
+
+	HANDLE hFile = FindFirstFile((fileName + "\\*.*").c_str(), &foundFile);
+
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			//If a found file is . or .. then skip
+			if (strcmp(foundFile.cFileName, ".") != 0 && strcmp(foundFile.cFileName, "..") != 0)
+			{
+				//The path should be absolute path
+				nextFileName = fileName + "\\" + foundFile.cFileName;
+
+				//If the file is a directory
+				if ((foundFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+				{
+					removeDirectory(nextFileName.c_str());
+					RemoveDirectory(nextFileName.c_str());
+				}
+				//If the file is a file
+				else
+				{
+					DeleteFile(nextFileName.c_str());
+				}
+			}
+		} while (FindNextFile(hFile, &foundFile) != 0);
+	}
+
+	FindClose(hFile);
+
+	//Delete starting point itseft
+	if (RemoveDirectory(fileName.c_str()) == 0)retVal = false;
+
+	return retVal;
+}
 #include <shlwapi.h>
 
 #pragma comment(lib, "shlwapi.lib")
@@ -188,8 +230,22 @@ public:
 
 		CreateIncludeClassFile();
 
-
-
+		
+		//最後のコンパイルバージョン確認
+		const std::string LogFilePath = "Temp/buildver.txt";
+		int ver = _BUILD_VERSION;
+		int buildver = 0;
+		{
+			std::ifstream in(LogFilePath, std::ios::in);
+			in >> buildver;
+		}
+		//バージョンが違う
+		if (ver != buildver){
+			std::ofstream out(LogFilePath, std::ios::out);
+			out << ver;
+			//リリースフォルダ削除
+			removeDirectory(".\\ScriptComponent\\Release");
+		}
 
 		if (!create_cmd_process()){
 			//MessageBox(Window::GetMainHWND(), "ビルドを手動で行って下さい。", "DLL読み込み", MB_OK);
@@ -484,6 +540,7 @@ public:
 		}
 		if (!hModule){
 			_SYSTEM_LOG_ERROR("スクリプトDLLの読み込み");
+			return;
 		}
 
 
@@ -693,15 +750,30 @@ bool reflect(MemberInfo& info,U& data){
 		return false;
 	}
 
-	T* paramdata = Reflection::Get<T>(info);
+	volatile T* paramdata = Reflection::Get<T>(info);
 
-	std::function<void(T)> collback = [=](T f){
-		*paramdata = f;
+	std::function<void(T)> collback = [paramdata](T f){
+		*(T*)paramdata = f;
 	};
-	Window::AddInspector(new TemplateInspectorDataSet<T>(info.GetName(), paramdata, collback), data);
+	Window::AddInspector(new TemplateInspectorDataSet<T>(info.GetName(), (T*)paramdata, collback), data);
 
 	return true;
 }
+
+void initparam(int* p){
+	*p = 0;
+}
+void initparam(float* p){
+	*p = 0.0f;
+}
+void initparam(bool* p){
+	*p = false;
+}
+void initparam(std::string* p){
+	*p = "";
+}
+
+
 template<class T>
 bool reflect_io(MemberInfo& info,I_ioHelper* io){
 
@@ -710,6 +782,10 @@ bool reflect_io(MemberInfo& info,I_ioHelper* io){
 	}
 
 	T* paramdata = Reflection::Get<T>(info);
+
+	if (io->isInput()){
+		initparam(paramdata);
+	}
 
 	io->func(*paramdata, info.GetName().c_str());
 
@@ -750,7 +826,6 @@ void ScriptComponent::IO_Data(I_ioHelper* io){
 	Load();
 
 	if (pDllClass){
-
 		if (Reflection::map){
 			auto infos = Reflection::GetMemberInfos(pDllClass, mClassName);
 
