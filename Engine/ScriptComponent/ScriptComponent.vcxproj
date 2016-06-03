@@ -124,11 +124,13 @@
     <ClCompile Include="Scripts\CameraController.cpp" />
     <ClCompile Include="Scripts\CreateEnemyObj.cpp" />
     <ClCompile Include="Scripts\Enemy.cpp" />
+    <ClCompile Include="Scripts\EnemyCG.cpp" />
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\HPGauge.cpp" />
     <ClCompile Include="Scripts\JumpDai.cpp" />
     <ClCompile Include="Scripts\KillerWhale.cpp" />
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
+    <ClCompile Include="Scripts\ParentObj.cpp" />
     <ClCompile Include="Scripts\PlayerManager.cpp" />
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
@@ -147,11 +149,13 @@
     <ClInclude Include="Scripts\CameraController.h" />
     <ClInclude Include="Scripts\CreateEnemyObj.h" />
     <ClInclude Include="Scripts\Enemy.h" />
+    <ClInclude Include="Scripts\EnemyCG.h" />
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\HPGauge.h" />
     <ClInclude Include="Scripts\JumpDai.h" />
     <ClInclude Include="Scripts\KillerWhale.h" />
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
+    <ClInclude Include="Scripts\ParentObj.h" />
     <ClInclude Include="Scripts\PlayerManager.h" />
     <ClInclude Include="Scripts\PlayerSearch.h" />
     <ClInclude Include="Scripts\Sail.h" />
