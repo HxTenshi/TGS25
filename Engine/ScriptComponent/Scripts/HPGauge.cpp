@@ -32,8 +32,8 @@ void HPGauge::Update()
 	if (playerScript)
 	{
 		auto height = (playerScript->GetHitPoint() / 100.0f) * 660;
-		gameObject->mTransform->Scale(XMVectorSet(20, height, 1, 1));
-		gameObject->mTransform->Position(XMVectorSet(1090, 740 - (height / 2), 1, 1));
+		gameObject->mTransform->Scale(XMVectorSet(15, height, 1, 1));
+		gameObject->mTransform->Position(XMVectorSet(1093, 735 - (height / 2), 1, 1));
 	}
 }
 
