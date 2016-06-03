@@ -19,6 +19,8 @@ private:
 	//ƒƒ“ƒo•Ï”
 	float mSailRotate;
 	XMVECTOR mWindvec;
+	SERIALIZE
+	float Speed;
 
 private:
 	void SailRotate();

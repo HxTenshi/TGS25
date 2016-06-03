@@ -26,6 +26,7 @@ void SailBoard::Initialize(){
 	mPlyerHP = 100.0f;
 	mJumpYRotate = 0;
 	mTrickRotate = XMVectorSet(0, 0, 0, 0);
+	mSpeedEffect = nullptr;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -37,6 +38,8 @@ void SailBoard::Start(){
 void SailBoard::Update(){
 
 	if (Input::Down(KeyCoord::Key_Z)) mPlyerHP--;
+	mPlyerHP -= SlipDamege;
+	IsUnrivaled();
 	isDead = Dead();
 	ReSpawn();
 
@@ -87,6 +90,17 @@ void SailBoard::OnCollideBegin(Actor* target){
 	if (target->Name() == "Air" || target->Name() == "Floor"){
 		isJump = false;
 
+		if (!isGround)
+		{
+			auto bomb = game->CreateActor("Assets/tgs/SmokeBomb.json");
+			if (bomb)
+			{
+				game->AddObject(bomb);
+				bomb->mTransform->Position(gameObject->mTransform->Position());
+			}
+			isGround = true;
+		}
+
 		float power = 2.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
 		gameObject->mTransform->AddForce(v*power);
@@ -107,7 +121,7 @@ void SailBoard::OnCollideEnter(Actor* target){
 
 	if (target->Name() == "Air" || target->Name() == "Floor")
 	{
-		isGround = true;
+		
 		mTrick = false;
 		mJumpYRotate = 0;
 
@@ -151,12 +165,27 @@ bool SailBoard::GetIsJump()
 bool SailBoard::IsUnrivaled()
 {
 	auto physx = gameObject->GetComponent<PhysXComponent>();
-	if (XMVector3Length(physx->GetForceVelocity()).x > 15)
+	if (XMVector3Length(physx->GetForceVelocity()).x > AttackSpeed)
 	{
+		auto temp = game->CreateActor("Assets/SpeedWind.json");
+		if (temp)
+		{
+			if (!mSpeedEffect)
+			{
+				game->AddObject(temp);
+				temp->mTransform->SetParent(gameObject);
+				mSpeedEffect = temp;
+			}
+		}
 		return true;
 	}
 	else
 	{
+		if (mSpeedEffect)
+		{
+			game->DestroyObject(mSpeedEffect);
+			mSpeedEffect = nullptr;
+		}
 		return false;
 	}
 }
@@ -240,9 +269,8 @@ void SailBoard::Jump()
 	auto physx = gameObject->GetComponent<PhysXComponent>();
 	auto force = XMVector3Normalize(physx->GetForceVelocity());
 	isJump = true;
-	float power = 50.0f;
 	auto v = gameObject->mTransform->Up();
-	gameObject->mTransform->AddForce(v*power,ForceMode::eIMPULSE);
+	gameObject->mTransform->AddForce(v*JumpPower,ForceMode::eIMPULSE);
 	gameObject->mTransform->AddForce(force, ForceMode::eIMPULSE);
 }
 

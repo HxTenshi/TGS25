@@ -14,5 +14,5 @@ public:
 	void OnCollideExit(Actor* target)override;
 
 private:
-	//ƒƒ“ƒo•Ï”
+	
 };

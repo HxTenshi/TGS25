@@ -1,6 +1,9 @@
 
 #pragma once
 #include "main.h"
+#include "Game/Actor.h"
+
+class Actor;
 
 
 class SailBoard :public IDllScriptComponent{
@@ -56,5 +59,16 @@ private:
 	//プレイヤーのHP
 	float mPlyerHP;
 
+	SERIALIZE
+	float AttackSpeed; //攻撃できるスピード
+	SERIALIZE
+	float SlipDamege; //受けるダメージ
+	SERIALIZE
+	float JumpPower; //ジャンプの力
+
+	//エフェクト関連
+	std::string bombName;
+	Actor* mSpeedEffect;
+	//--------------------------------------
 
 };

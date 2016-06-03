@@ -27,7 +27,7 @@ void Sail::Update(){
 	SailRotate();
 
 	auto parent = gameObject->mTransform->GetParent()->mTransform->GetParent();
-	if(!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 30);        //PS4デバック
+	if(!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * Speed);        //PS4デバック
 	//parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);         //PCデバック
 
 }

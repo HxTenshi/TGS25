@@ -15,7 +15,7 @@
 void PlayerManager::Initialize()
 {
 	mCredit = 3;
-	mMaxPoint = 5;
+	mMaxPoint = 3;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -34,6 +34,25 @@ void PlayerManager::Update(){
 
 	text1->SetTexture("Assets/num/" +std::to_string(mCredit % 10) + ".png");
 	text2->SetTexture("Assets/num/" + std::to_string((mCredit / 10) % 10) + ".png");
+
+
+	auto hane1 = game->FindActor("hane1")->GetComponent<TextureModelComponent>();
+	auto hane2 = game->FindActor("hane2")->GetComponent<TextureModelComponent>();
+	auto hane3 = game->FindActor("hane3")->GetComponent<TextureModelComponent>();
+
+	if (mMaxPoint == 2)
+	{
+		hane1->SetTexture("./Assets/UI/hane.png");
+		
+	}
+	if (mMaxPoint == 1)
+	{
+		hane2->SetTexture("./Assets/UI/hane.png");
+	}
+	if (mMaxPoint == 0)
+	{
+		hane3->SetTexture("./Assets/UI/hane.png");
+	}
 
 }
 
