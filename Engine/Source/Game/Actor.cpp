@@ -136,7 +136,7 @@ void Actor::ExportSceneData(const std::string& pass, File& sceneFile){
 	}
 }
 
-void Actor::ExportData(const std::string& path, const std::string& fileName){
+void Actor::ExportData(const std::string& path, const std::string& fileName, bool childExport){
 
 	shared_ptr<I_InputHelper> prefab_io(NULL);
 	if (mPrefabAsset && path != "Assets"){
@@ -149,7 +149,7 @@ void Actor::ExportData(const std::string& path, const std::string& fileName){
 
 	I_ioHelper* io = new FileOutputHelper(path + "/" + fileName + ".json", prefab_io.Get());
 
-	_ExportData(io);
+	_ExportData(io, childExport);
 
 
 	delete io;
@@ -162,7 +162,7 @@ void Actor::ExportData(const std::string& path){
 	ExportData(path, "Object_" + std::to_string(mUniqueID));
 }
 
-void Actor::ExportData(picojson::value& json){
+void Actor::ExportData(picojson::value& json, bool childExport){
 
 	shared_ptr<I_InputHelper> prefab_io(NULL);
 	if (mPrefabAsset){
@@ -172,13 +172,13 @@ void Actor::ExportData(picojson::value& json){
 
 	I_ioHelper* io = new MemoryOutputHelper(json, prefab_io.Get());
 
-	_ExportData(io);
+	_ExportData(io,childExport);
 
 	delete io;
 }
 
 
-void Actor::_ExportData(I_ioHelper* io){
+void Actor::_ExportData(I_ioHelper* io, bool childExport){
 
 	if (!mUniqueID){
 		CreateNewID();
@@ -202,6 +202,27 @@ void Actor::_ExportData(I_ioHelper* io){
 
 	}
 	io->popObject();
+
+
+
+	if (childExport){
+
+		io->pushObject("children");
+
+		int i = 0;
+		for (auto child : mTransform->Children()){
+			
+			io->pushObject(std::to_string(i));
+
+			picojson::value obj;
+			child->ExportData(obj);
+			io->func(obj,"child");
+			io->popObject();
+			i++;
+		}
+		io->popObject();
+	}
+
 
 #undef _KEY
 #undef _KEY_COMPEL
@@ -286,6 +307,12 @@ bool Actor::ImportDataAndNewID(const std::string& fileName){
 
 void Actor::CreateNewID(){
 	mUniqueID = gUniqueIDGenerator.CreateUniqueID();
+
+	if (!mTransform)return;
+	//UniqueID“o˜^‚µ‚È‚¨‚µ
+	for (auto child : mTransform->Children()){
+		child->mTransform->SetParentUniqueID(mUniqueID);
+	}
 }
 
 
@@ -399,6 +426,34 @@ void Actor::_ImportData(I_ioHelper* io){
 	}
 
 	mTransform = mComponents.GetComponent<TransformComponent>();
+
+	io->popObject();
+
+	picojson::object children;
+	io->func(children, "children");
+	
+	io->pushObject("children");
+	
+	for (auto child : children){
+		io->pushObject(child.first);
+	
+		picojson::object childobj;
+		io->func(childobj, "child");
+	
+		io->pushObject("child");
+	
+		auto a = new Actor();
+		a->ImportDataAndNewID((picojson::value)childobj);
+		if (!a->mTransform){
+			delete a;
+		}
+		else{
+			a->mTransform->SetParent(this);
+		}
+	
+		io->popObject();
+		io->popObject();
+	}
 	
 
 #undef _KEY

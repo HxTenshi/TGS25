@@ -66,4 +66,6 @@ private:
 
 	Material mSelectWireMaterial;
 	Material mSelectPhysxWireMaterial;
+	bool mCreateInspector;
+	std::string mAssetFileName;
 };

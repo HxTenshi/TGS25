@@ -93,13 +93,13 @@ public:
 
 	void ExportSceneDataStart(const std::string& pass, File& sceneFile);
 	void ExportSceneData(const std::string& pass, File& sceneFile);
-	void ExportData(const std::string& pass, const std::string& fileName);
+	void ExportData(const std::string& pass, const std::string& fileName, bool childExport = false);
 	void ExportData(const std::string& pass);
 	void ImportData(const std::string& fileName);
 	void ImportData(picojson::value& json);
 	bool ImportDataAndNewID(const std::string& fileName);
 
-	void ExportData(picojson::value& json);
+	void ExportData(picojson::value& json, bool childExport=false);
 	void ImportDataAndNewID(picojson::value& json);
 
 	void CreateNewID();
@@ -114,7 +114,7 @@ protected:
 protected:
 
 
-	void _ExportData(I_ioHelper* io);
+	void _ExportData(I_ioHelper* io, bool childExport=false);
 	void _ImportData(I_ioHelper* io);
 
 	std::queue<std::function<void()>> mUpdateStageCollQueue;

@@ -643,6 +643,10 @@ std::list<Actor*>& TransformComponent::Children(){
 Actor* TransformComponent::GetParent(){
 	return mParent;
 }
+
+void TransformComponent::SetParentUniqueID(int id){
+	mParentUniqueID = id;
+}
 void TransformComponent::SetParent(Actor* parent){
 	if (mParent)
 		mParent->mTransform->Children().remove(gameObject);

@@ -36,10 +36,6 @@ public:
 
 
 	bool mInitialize;
-	GeometryStreamOutputShader mGeometryShader0;
-	GeometryStreamOutputShader mGeometryShader1;
-	VertexShader	mVertexShader;
-	PixelShader		mPixelShader;
 	ID3D11Buffer*	mpSOBuffer[2];
 	int mParticleCapacity;
 

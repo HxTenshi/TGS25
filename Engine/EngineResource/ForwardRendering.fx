@@ -105,11 +105,7 @@ struct PS_INPUT
 
 struct PS_OUTPUT_1
 {
-	float4 ColorAlbedo : SV_Target0;
-	float4 ColorSpecular : SV_Target1;
-	float4 ColorNormal : SV_Target2;
-	float4 ColorDepth : SV_Target3;
-	float4 ColorVelocity : SV_Target4;
+	float4 Diffuse : SV_Target0;
 };
 
 float4x3 getBoneMatrix(uint idx)
@@ -117,6 +113,52 @@ float4x3 getBoneMatrix(uint idx)
 	return BoneMatrix[idx];
 }
 
+// V を計算するための便利関数
+inline float G1V(float dotNV, float k)
+{
+	return 1.0f / (dotNV * (1.0f - k) + k);
+}
+
+const static float PI = 3.141592653589793f;
+
+// GGX を使ったスペキュラシェーディングの値を返す関数
+inline float LightingFuncGGX_REF(float3 N, float3 V, float3 L,
+	// ラフネス
+	float roughness,
+	// フレネル反射率 F(0°)
+	float F0)
+{
+	// α = ラフネス^2
+	float alpha = roughness * roughness;
+
+	// ハーフベクトル
+	float3 H = normalize(V + L);
+
+		// ベクトルの内積関連
+		float dotNL = saturate(dot(N, L));
+	float dotNV = saturate(dot(N, V));
+	float dotNH = saturate(dot(N, H));
+	float dotLH = saturate(dot(L, H));
+
+	float F, D, vis;
+
+	// D
+	float alphaSqr = alpha * alpha;
+	float denom = dotNH * dotNH * (alphaSqr - 1.0) + 1.0f;
+	D = alphaSqr / (PI * denom * denom);
+
+	// F
+	float dotLH5 = pow(1.0f - dotLH, 5);
+	F = F0 + (1.0 - F0) * (dotLH5);
+
+	// V
+	float k = alpha / 2.0f;
+	vis = G1V(dotNL, k) * G1V(dotNV, k);
+
+	float specular = dotNL * D * F * vis;
+
+	return specular;
+}
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader
@@ -138,15 +180,9 @@ PS_INPUT VS( VS_INPUT input )
 	output.BefPos = mul(input.Pos, BeforeWorld);
 	output.BefPos = mul(output.BefPos, View);
 
-	//output.Normal = input.Normal;
-	//output.Bin = input.Bin;
-	//output.Tan = input.Tan;
-
-	float3x3 WV = mul((float3x3)World, (float3x3)View);
-
-	output.Normal = mul(input.Normal, WV);
-	output.Bin = mul(input.Bin, WV);
-	output.Tan = mul(input.Tan, WV);
+	output.Normal = input.Normal;
+	output.Bin = input.Bin;
+	output.Tan = input.Tan;
 
 	output.Tex = input.Tex * MTexScale + MOffset;
 	
@@ -197,12 +233,9 @@ PS_INPUT VSSkin(VS_INPUT input)
 	//output.Bin = bbin / 100.0;
 	//output.Tan = btan / 100.0;
 	pos.xyz = bpos;
-
-	float3x3 WV = mul((float3x3)World, (float3x3)View);
-
-	output.Normal = mul(bnor, WV);
-	output.Bin = mul(bbin, WV);
-	output.Tan = mul(btan, WV);
+	output.Normal = bnor;
+	output.Bin = bbin;
+	output.Tan = btan;
 
 	output.Pos = mul(pos, World);
 
@@ -259,85 +292,31 @@ PS_OUTPUT_1 PS(PS_INPUT input)
 	float4 DifColor = float4(1.0, 1.0, 1.0, 1.0);
 		if (UseTexture.x != 0.0)
 			DifColor = AlbedoTex.Sample(AlbedoSamLinear, texcood);
-	if (DifColor.a < 0.01)discard;
 
 
 	// 法線の準備
 	float3 N;
 
-	//[branch]
-	//if (UseTexture.y != 0.0){
-	//	float3 bump = NormalTex.Sample(NormalSamLinear, texcood).rgb * 2 - 1.0;
-	//	bump *= MNormaleScale.xyz;
-	//
-	//	//視線ベクトルを頂点座標系に変換する
-	//	float3 n;
-	//	n.x = dot(bump, input.Tan);
-	//	n.y = dot(bump, input.Bin);
-	//	n.z = dot(bump, input.Normal);
-	//	N = n;
-	//}else{
-	//	N = input.Normal;
-	//}
-	//
-	//N = mul(N, (float3x3)World);
-	//N = mul(N, (float3x3)View);
-	//N = normalize(N);
-
 	[branch]
 	if (UseTexture.y != 0.0){
 		float3 bump = NormalTex.Sample(NormalSamLinear, texcood).rgb * 2 - 1.0;
-			//bump *= MNormaleScale.xyz;
+		bump *= MNormaleScale.xyz;
 
-			//視線ベクトルを頂点座標系に変換する
-			float3x3 normat = float3x3(normalize(input.Tan),
-			normalize(input.Bin),
-			normalize(input.Normal));
-		N = mul(bump, normat);
-	}
-	else{
+		//視線ベクトルを頂点座標系に変換する
+		float3 n;
+		n.x = dot(bump, input.Tan);
+		n.y = dot(bump, input.Bin);
+		n.z = dot(bump, input.Normal);
+		N = n;
+	}else{
 		N = input.Normal;
 	}
 
+	N = mul(N, (float3x3)World);
+	N = mul(N, (float3x3)View);
 	N = normalize(N);
 
-	float farClip = 100;
-	float D = input.VPos.z / farClip;
 
-	float3 LD;
-
-	float dist = input.VPos.z + input.VPos.z*0.0001 + 0.01;
-	[branch]
-	if (dist < SplitPosition.x)
-	{
-		input.LPos[0].xy += 1.0;
-		LD = input.LPos[0].xyz / LD_normal;
-	}
-	else if (dist < SplitPosition.y)
-	{
-		input.LPos[1].xy += 1.0;
-		LD = input.LPos[1].xyz / LD_normal;
-	}
-	else if (dist < SplitPosition.z)
-	{
-		input.LPos[2].xy += 1.0;
-		LD = input.LPos[2].xyz / LD_normal;
-	}
-	else
-	{
-		input.LPos[3].xy += 1.0;
-		LD = input.LPos[3].xyz / LD_normal;
-	}
-	
-
-	//float2 velocity;
-	//{
-	//	float2 b = input.BefPos.xy / input.BefPos.z;
-	//	float2 p = input.VPos.xy / input.VPos.z;
-	//	velocity = p - b;
-	//	//velocity = normalize(velocity);
-	//	velocity = velocity * 0.5 + 0.5;
-	//}
 
 	float4 SpcColor = float4(1.0, 1.0, 1.0, 1.0);
 		if (UseTexture.w != 0.0)
@@ -362,13 +341,30 @@ PS_OUTPUT_1 PS(PS_INPUT input)
 		env = lerp(env1, envR, pow(roughness, 0.5f));
 		env *= SpcColor.rgb;
 	}
-	
-	N = N * 0.5 + 0.5;
 
-	Out.ColorAlbedo = DifColor * MDiffuse;
-	Out.ColorSpecular = float4(env.rgb, MAmbient.a);
-	Out.ColorNormal = float4(N, 1+RghColor.r);
-	Out.ColorDepth = float4(D, 1 - LD.z, LD.x, 1.0 - LD.y);
-	Out.ColorVelocity = float4(0.5,0.5,0,1);//float4(velocity.x, velocity.y, 0, 1);
+
+
+	// ライトのベクトル
+	float3 L = LightVect.xyz;
+	L = mul(L, (float3x3)View).xyz;
+	L = normalize(L);
+
+
+	float NLDot = dot(N, -L);
+
+	// ディフューズ角度減衰率計算
+	float DifGen = saturate(NLDot);
+	DifGen *= 0.75;
+	DifGen += 0.25;
+
+	float roughness = RghColor.r;
+	float spec = LightingFuncGGX_REF(N, -normalize(ray), -L, roughness, 0.1);
+
+
+	Out.Diffuse = DifColor * MDiffuse * LightColor * DifGen;
+	Out.Diffuse.a = DifColor.a;
+
+	Out.Diffuse.rgb += env + LightColor.rgb * spec;
+
 	return Out;
 }

@@ -47,6 +47,7 @@ public:
 
 	virtual std::list<Actor*>& Children() = 0;
 	virtual Actor* GetParent() = 0;
+	virtual void SetParentUniqueID(int id) = 0;
 	virtual void SetParent(Actor* parent) = 0;
 
 	virtual void SetUndo(const XMVECTOR& pos) = 0;
@@ -115,6 +116,7 @@ public:
 
 	std::list<Actor*>& Children() override;
 	Actor* GetParent() override;
+	void SetParentUniqueID(int id) override;
 	void SetParent(Actor* parent) override;
 
 private:
