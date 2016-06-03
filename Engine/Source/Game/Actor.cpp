@@ -215,7 +215,7 @@ void Actor::_ExportData(I_ioHelper* io, bool childExport){
 			io->pushObject(std::to_string(i));
 
 			picojson::value obj;
-			child->ExportData(obj);
+			child->ExportData(obj, childExport);
 			io->func(obj,"child");
 			io->popObject();
 			i++;
