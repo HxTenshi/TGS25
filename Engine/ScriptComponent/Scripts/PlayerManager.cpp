@@ -15,6 +15,7 @@
 void PlayerManager::Initialize()
 {
 	mCredit = 3;
+	mMaxPoint = 5;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -24,8 +25,9 @@ void PlayerManager::Start(){
 
 //毎フレーム呼ばれます
 void PlayerManager::Update(){
-	if (Input::Trigger(KeyCoord::Key_SPACE)) game->Debug()->Log(std::to_string(mCredit));
+	if (Input::Trigger(KeyCoord::Key_SPACE)) game->Debug()->Log(std::to_string(mMaxPoint));
 	if (mCredit <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
+	if (mMaxPoint <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
 
 	auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();
 	auto text2 = game->FindActor("column10")->GetComponent<TextureModelComponent>();
@@ -63,4 +65,9 @@ void PlayerManager::CreditDown()
 void PlayerManager::CreditUp()
 {
 	mCredit++;
+}
+
+void PlayerManager::ItemGet()
+{
+	mMaxPoint--;
 }

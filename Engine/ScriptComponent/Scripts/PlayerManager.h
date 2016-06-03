@@ -15,9 +15,12 @@ public:
 
 	void CreditDown();
 	void CreditUp();
+	void ItemGet();
 
 private:
 	//メンバ変数
 	SERIALIZE
 	int mCredit; //プレイヤーの残機
+	SERIALIZE
+	int mMaxPoint; //回収するアイテムの数
 };

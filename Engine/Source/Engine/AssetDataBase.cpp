@@ -30,7 +30,7 @@ AssetFactory::AssetFactory(){
 	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("tedmesh"), [](const char* filename){ return AssetDataTemplate<MeshFileData>::Create(filename); }));
 	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("tedmesh2"), [](const char* filename){ return AssetDataTemplate<MeshFileData>::Create(filename); }));
 
-	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("tebone"), [](const char* filename){ return AssetDataTemplate<BoneFileData>::Create(filename); }));
+	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("tebone2"), [](const char* filename){ return AssetDataTemplate<BoneFileData>::Create(filename); }));
 
 	m_Factory.insert(std::make_pair<std::string, std::function<AssetDataTemplatePtr(const char*)>>(std::string("json"), [](const char* filename){ return AssetDataTemplate<PrefabFileData>::Create(filename); }));
 

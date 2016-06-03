@@ -17,7 +17,8 @@ PointLightComponent::PointLightComponent()
 	: m_Radius(1)
 	, m_AttenuationStart(0)
 	, m_AttenuationParam(1)
-	, m_Color(XMFLOAT3(1, 1, 1)){
+	, m_Color(XMFLOAT3(1, 1, 1))
+	, m_HDR(1.0f){
 
 	mPointLightBuffer = ConstantBuffer<cbChangesPointLight>::create(8);
 	mModel.Create("EngineResource/ball.tesmesh");

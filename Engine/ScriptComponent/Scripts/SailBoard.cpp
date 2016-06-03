@@ -95,6 +95,8 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 	if (target->Name() == "PointItem"){
 
+		auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
+		manager->ItemGet();
 		game->DestroyObject(target);
 	}
 }
