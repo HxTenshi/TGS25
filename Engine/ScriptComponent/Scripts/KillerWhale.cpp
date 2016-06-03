@@ -28,6 +28,8 @@ void KillerWhale::Start(){
 	mRecastTime *= 60;*/
 	mInitBulletShotTime = mBulletShotTime;
 	mInitRecastTime = mRecastTime;
+
+	//Enemy::EnemyCGCreate();
 }
 
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
@@ -74,6 +76,15 @@ void KillerWhale::ShortDistanceAttack() {
 	//game->Debug()->Log("”­ŽË");
 	if (mBulletShotTime <= 0) {
 		if (!mIsShot) {
+
+			//// V‚µ‚¢…“S–C‚Ì’e‚Ì¶¬
+			//auto createBullet = game->CreateActor("Assets/tgs/WaterShot");
+			//game->AddObject(createBullet);
+			//Enemy::SetForwardObj(createBullet);
+
+			//createBullet->mTransform->SetParent(gameObject);
+			//createBullet->mTransform->Rotate(gameObject->mTransform->Up() * (3.14f));
+
 			// …“S–C‚Ì’e‚Ì¶¬
 			auto GunBullet = game->CreateActor("Assets/Enemy/WaterGunBullet");
 			game->AddObject(GunBullet);

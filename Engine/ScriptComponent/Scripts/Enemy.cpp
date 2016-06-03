@@ -8,6 +8,7 @@
 #include "Game/Component/TransformComponent.h"
 #include "Game/Component/PhysXComponent.h"
 #include "Game/Component/MaterialComponent.h"
+#include "Game/Component/PhysXColliderComponent.h"
 #include "Engine\DebugEngine.h"
 
 Enemy::~Enemy() {
@@ -35,7 +36,7 @@ void Enemy::Initialize(){
 	mIsImmortalBody = false;
 	mIsDistanceAct = false;
 	mIsAttckMode = false;
-	mIsPlayerHit = false;
+	mIsDead = false;
 
 	// 重複処理をしてしまってまずいことになる
 	mDistanceVector.push_back(EnemyState::PlayerShortDistance);
@@ -62,18 +63,27 @@ void Enemy::Finish(){
 //コライダーとのヒット時に呼ばれます
 void Enemy::OnCollideBegin(Actor* target){
 	if (target->Name() == "Board"){
-		auto playerScript = target->GetComponent<SailBoard>();
-		// プレイヤーが無敵状態なら死亡
-		// そうでない場合はプレイヤーにダメージを与える
-		if (playerScript->IsUnrivaled() || playerScript->IsTrick()) {
-			game->DestroyObject(gameObject);
-		}
-		else {
-			playerScript->Damage(mDamage);
-		}
+		auto playerScript = target->GetScript<SailBoard>();
 
-		auto houkou = gameObject->mTransform->Position() - target->mTransform->Position();
-		mKnockBackHoukou = XMVector3Normalize(houkou);
+		//// プレイヤーが無敵状態なら死亡
+		//// そうでない場合はプレイヤーにダメージを与える
+		//if (playerScript->IsUnrivaled() || playerScript->IsTrick()) {
+		//	game->DestroyObject(gameObject);
+		//}
+		//else {
+		//	playerScript->Damage(mDamage);
+		//}
+
+		// ダメージを与えて
+		playerScript->Damage(mDamage);
+		mIsDead = true;
+
+		game->DestroyObject(mPlayerSearchObj);
+		game->DestroyObject(gameObject);
+		game->DestroyObject(gameObject->mTransform->GetParent());
+
+		/*auto houkou = gameObject->mTransform->Position() - target->mTransform->Position();
+		mKnockBackHoukou = XMVector3Normalize(houkou);*/
 	}
 }
 
@@ -286,7 +296,10 @@ void Enemy::ResPawnLine() {
 // 敵の行動関数
 void Enemy::Move() {
 
-	PlayerSearchMode(gameObject->mTransform->Scale());
+	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+	auto colliderScale = collider->GetScale();
+	//PlayerSearchMode(gameObject->mTransform->Scale());
+	PlayerSearchMode(colliderScale);
 	mPlayerSearchObj->mTransform->SetParent(mParentObj);
 
 	//gameObject->mTransform->SetParent(mParentObj);
@@ -310,6 +323,7 @@ void Enemy::Move() {
 			CenterDistanceAttack();
 		}
 		else if (mEnemyState == EnemyState::PlayerLongDistance) {
+			//game->Debug()->Log("遠い");
 			LongDistanceAttack();
 		}
 	}
@@ -372,4 +386,8 @@ void Enemy::ResetStatus() {
 
 	gameObject->mTransform->Position(ZeroStatus);
 	gameObject->mTransform->Rotate(ZeroStatus);
+}
+
+bool Enemy::IsDead() {
+	return mIsDead;
 }

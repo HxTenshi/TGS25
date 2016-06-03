@@ -36,6 +36,7 @@ private:
 	float mUpPowar;
 	SERIALIZE
 	float mSetSpeed;
+	SERIALIZE
 	float mRotateInterval;
 	float mFloorPosition;
 	bool mIsJamp;

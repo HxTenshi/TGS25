@@ -57,13 +57,14 @@ public:
 	void InitStatus();
 	// 敵のステータスのリセット
 	void ResetStatus();
+	bool IsDead();
 
 protected:
 	//メンバ変数
 	Actor* mPlayerSearchObj;				// 索敵範囲オブジェクト
 	Actor* mParentObj;						// 空の親オブジェクト
 	Actor* mEnemyCGObj;						// 敵のグラフィックオブジェクト
-	PlayerSearch* mSearchScript;				// 索敵範囲オブジェクトのスクリプト
+	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
 	EnemyState mEnemyState;					// enumクラスのEnemyState(敵の行動選択時に使用)
 	XMVECTOR mSize;							// 敵の大きさ
 	XMVECTOR mInitPosition;					// 初期位置
@@ -89,7 +90,7 @@ protected:
 	bool mIsImmortalBody;					// 不死身の敵か(未実装)
 	bool mIsDistanceAct;					// 距離判定の行動をするか
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)
-	bool mIsPlayerHit;						// プレイヤーと当たったか
+	bool mIsDead;							// プレイヤーと当たったか
 	// 行動配列(未使用)
 	typedef std::vector<EnemyState> DistanceVector;
 	DistanceVector mDistanceVector;

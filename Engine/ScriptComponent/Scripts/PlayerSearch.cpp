@@ -3,6 +3,7 @@
 #include "Game/Actor.h"
 #include "Game/Script/IGame.h"
 #include "Game/Component/TransformComponent.h"
+#include "Game/Component/PhysXColliderComponent.h"
 #include "Engine\DebugEngine.h"
 
 
@@ -16,6 +17,8 @@ void PlayerSearch::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void PlayerSearch::Start(){
 	mSizeZ = gameObject->mTransform->Scale().z;
+	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+	collider->SetScale(gameObject->mTransform->Scale());
 	//game->Debug()->Log(std::to_string(mSizeZ));
 }
 

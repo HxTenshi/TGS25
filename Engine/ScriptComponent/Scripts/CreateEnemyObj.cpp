@@ -77,41 +77,16 @@ void CreateEnemyObj::Update(){
 				createStr = createStr + "ParentObj";
 				// string型をchar*に変換
 				createObjName = createStr.c_str();
-				// トビウオの場合は複製
-				std::string flyingName = "Assets/Enemy/EnemyParentObj/FlyingFishParentObj";
-				auto posi = -20.0f;
 
-				if (createStr == flyingName) {
+				auto createObj = game->CreateActor(createObjName);
+				// 生成オブジェの子供に設定(終了時に削除するため)
+				//createObj->mTransform->SetParent(gameObject);
 
-					for (auto i = 0; i != 7; ++i) {
-						auto createObj = game->CreateActor(createObjName);
-						// 生成オブジェの子供に設定(終了時に削除するため)
-						createObj->mTransform->SetParent(gameObject);
-						// スクリプト
-						auto objScript = createObj->GetScript<ParentObj>();
-						objScript->SetPosition(posi, 0.0f);
+				game->AddObject(createObj);
+				createObj->mTransform->Position(gameObject->mTransform->Position());
+				//auto thisPositoin = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+				//createObj->mTransform->Position(thisPosition);
 
-						game->AddObject(createObj);
-
-						/*auto thisPositoin = XMVectorSet(posi * i, 0.0f, 0.0f, 0.0f);
-						auto rotate = XMVectorSet(0.0f, 90.0f, 0.0f, 0.0f);*/
-						
-						/*createObj->mTransform->Position(thisPosition);
-						createObj->mTransform->Rotate(rotate);*/
-
-						posi += 10.0f;
-					}	
-				}
-				else {
-					auto createObj = game->CreateActor(createObjName);
-					// 生成オブジェの子供に設定(終了時に削除するため)
-					createObj->mTransform->SetParent(gameObject);
-
-					game->AddObject(createObj);
-					//auto thisPositoin = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-					//createObj->mTransform->Position(thisPosition);
-					
-				}
 				
 				mCreateCount--;
 

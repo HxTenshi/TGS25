@@ -3,6 +3,7 @@
 
 #include "Game/Actor.h"
 #include "Game/Script/IGame.h"
+#include "Engine\DebugEngine.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -42,10 +43,17 @@ void ParentObj::Update(){
 		auto enemyObj = game->CreateActor(createObjName);
 		game->AddObject(enemyObj);
 		enemyObj->mTransform->SetParent(gameObject);
-		mEnemyScript = enemyObj->GetScript<Enemy>();
+
+		/*mEnemyScriptName = gameObject->Name();
+		mEnemyScript = enemyObj->GetScript<Enemy>();*/
 
 		mCreateCount = 1;
 	}
+
+	/*if (!(mEnemyScript->IsDead())) {
+		game->Debug()->Log("消去");
+		game->DestroyObject(gameObject);
+	}*/
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）

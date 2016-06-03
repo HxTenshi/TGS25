@@ -22,4 +22,6 @@ private:
 	SERIALIZE
 	float mSpeed;
 	XMVECTOR mForwardVelocity;
+	XMVECTOR mZeroPosition;
+	Actor* mCreateBullet;
 };

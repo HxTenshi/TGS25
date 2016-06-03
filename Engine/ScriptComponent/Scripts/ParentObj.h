@@ -18,6 +18,7 @@ public:
 private:
 	//ƒƒ“ƒo•Ï”
 	Enemy* mEnemyScript;
+	//std::string mEnemyScriptName;
 	int mCreateCount;
 	float mPositionX;
 	float mPositionZ;

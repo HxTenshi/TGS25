@@ -16,6 +16,18 @@ void WaterGunBullet::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void WaterGunBullet::Start(){
 	mDestroyTime *= 60;
+
+
+	//mZeroPosition = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	//// 新しい水鉄砲の弾の生成
+	//mCreateBullet = game->CreateActor("Assets/tgs/WaterShot");
+	//game->AddObject(mCreateBullet);
+	//mCreateBullet->mTransform->SetParent(gameObject);
+
+	/*auto createBullet = game->CreateActor("Assets/tgs/WaterShot");
+	game->AddObject(createBullet);
+	createBullet->mTransform->SetParent(gameObject);
+	createBullet->mTransform->Rotate(gameObject->mTransform->Up() * (3.14f));*/
 }
 
 //毎フレーム呼ばれます
@@ -32,6 +44,8 @@ void WaterGunBullet::Update(){
 	if (mDestroyTime <= 0) {
 		game->DestroyObject(gameObject);
 	}
+
+	//mCreateBullet->mTransform->Position(mZeroPosition);
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -47,7 +61,6 @@ void WaterGunBullet::OnCollideBegin(Actor* target){
 		playerScript->Damage(mSetDamege);
 
 		game->DestroyObject(gameObject);
-		target->mTransform->AddForce(gameObject->mTransform->Forward() * -100.0f);
 	}
 }
 
