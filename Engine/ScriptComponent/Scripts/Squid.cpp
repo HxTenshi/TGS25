@@ -25,7 +25,9 @@ void Squid::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void Squid::Start(){
 	Enemy::Start();
-	Enemy::setDamage(mSetDamage);
+	Enemy::SetDamage(mSetDamage);
+	Enemy::SetResPawnTime(mSetResPawnTime);
+	//EnemyCGCreate("Shachi/shachi", 0.1f, 0.1f, 0.1f);
 }
 
 //毎フレーム呼ばれます
@@ -36,7 +38,7 @@ void Squid::Update(){
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void Squid::Finish(){
-
+	Enemy::Finish();
 }
 
 //コライダーとのヒット時に呼ばれます

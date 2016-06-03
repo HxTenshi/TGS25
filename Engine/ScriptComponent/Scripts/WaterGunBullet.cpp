@@ -36,7 +36,7 @@ void WaterGunBullet::Update(){
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void WaterGunBullet::Finish(){
-	//game->DestroyObject(gameObject);
+	game->DestroyObject(gameObject);
 }
 
 //コライダーとのヒット時に呼ばれます

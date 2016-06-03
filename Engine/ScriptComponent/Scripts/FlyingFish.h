@@ -5,15 +5,15 @@
 
 class FlyingFish : public Enemy {
 public:
-	virtual void Initialize()override;
-	virtual void Start()override;
-	virtual void Update()override;
-	virtual void Finish()override;
-	virtual void OnCollideBegin(Actor* target)override;
-	virtual void OnCollideEnter(Actor* target)override;
-	virtual void OnCollideExit(Actor* target)override;
-	virtual void SearchMove()override;
-	virtual void PlayerChase()override;
+	void Initialize()override;
+	void Start()override;
+	void Update()override;
+	void Finish()override;
+	void OnCollideBegin(Actor* target)override;
+	void OnCollideEnter(Actor* target)override;
+	void OnCollideExit(Actor* target)override;
+	void SearchMove()override;
+	void PlayerChase()override;
 	void JampMove();
 
 private:
@@ -29,12 +29,13 @@ private:
 	int mWallHitCount;
 	SERIALIZE
 	int mSetDamage;
+	SERIALIZE
+	int mSetResPawnTime;
 	int mInitSetDamage;
 	SERIALIZE
 	float mUpPowar;
 	SERIALIZE
 	float mSetSpeed;
-	float mInitPositionY;
 	float mRotateInterval;
 	float mFloorPosition;
 	bool mIsJamp;
