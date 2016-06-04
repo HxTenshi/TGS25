@@ -209,10 +209,10 @@ float SailBoard::GetHitPoint()
 void SailBoard::RotationBoard()
 {
 	if (Input::Down(KeyCoord::Key_A)) {
-		mRotateY -= 1;
+		mRotateY -= 0.1f;
 	}
 	if (Input::Down(KeyCoord::Key_D)) {
-		mRotateY += 1;
+		mRotateY += 0.1f;
 	}
 	mRotateY += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x;
 	mYRot += mRotateY;
@@ -260,6 +260,8 @@ void SailBoard::Trick()
 
 		auto xrotate = XMQuaternionRotationAxis(gameObject->mTransform->Left(), mTrickRotate.x);
 		auto yrotate = XMQuaternionRotationAxis(gameObject->mTransform->Up(), mTrickRotate.y);
+		/*auto xrotate = XMQuaternionRotationAxis(XMVectorSet(1,0,0,1), mTrickRotate.x);
+		auto yrotate = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mTrickRotate.y);*/
 		auto mix = XMQuaternionMultiply(xrotate, yrotate);
 		gameObject->mTransform->Quaternion(XMQuaternionMultiply(mix, gameObject->mTransform->Quaternion()));
 }

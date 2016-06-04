@@ -30,6 +30,9 @@ void PointItem::Update()
 		v = XMVector3Normalize(v);
 		gameObject->mTransform->Position(gameObject->mTransform->Position() + (v * 0.1f));
 	}
+
+	mAngel += 0.01f;
+	gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Up(), mAngel));
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
