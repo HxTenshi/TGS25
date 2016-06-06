@@ -20,15 +20,18 @@ public:
 		XMFLOAT3 pos;
 		XMFLOAT3 v0;
 		XMFLOAT3 v;
-		FLOAT time;
+		XMFLOAT3 time;
 
 	};
 
 	ParticleComponent();
 	~ParticleComponent();
+	void Initialize() override;
 	void EngineUpdate() override;
 	void Update() override;
+#ifdef _ENGINE_MODE
 	void CreateInspector() override;
+#endif
 
 	void IO_Data(I_ioHelper* io) override;
 
@@ -44,6 +47,8 @@ public:
 	ConstantBuffer<CBChangesPaticleParam> mCParticleBuffer;
 	CBChangesPaticleParam mParticleParam;
 	bool mBlendAdd;
+	bool mAutoDestroy;
+	float mTimer;
 	bool mFirstDraw;
-
+	bool mEngineUpdate;
 };

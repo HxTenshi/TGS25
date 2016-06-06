@@ -105,6 +105,7 @@ void DirectionalLightComponent::Update(){
 		render->PopDS();
 	});
 }
+#ifdef _ENGINE_MODE
 void DirectionalLightComponent::CreateInspector(){
 
 
@@ -129,6 +130,7 @@ void DirectionalLightComponent::CreateInspector(){
 
 	Window::ViewInspector("DirectionalLight", this, data);
 }
+#endif
 
 void DirectionalLightComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)

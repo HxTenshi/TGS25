@@ -139,6 +139,55 @@ HRESULT BoneModel::Create(const char* FileName){
 shared_ptr<AnimationBind> BoneModel::BindAnimation(AnimeData* data){
 	auto bind = make_shared<AnimationBind>();
 	bind->Create(mBone, data);
+
+
+	//auto& bones = mBoneAssetDataPtr->GetFileData()->GetBoneData().mBoneBuffer;
+	//auto& boneName = mBoneAssetDataPtr->GetFileData()->GetBoneData().mBoneName;
+	//
+	//DWORD mBoneNum = bones.size();
+	//for (DWORD i = 0; i < mBoneNum; i++){
+	//	auto& bone = bones[i];
+	//
+	//
+	//	mBone[i].mStrName = boneName[i];
+	//	mBone[i].mHierarchy.mIdxSelf = i;
+	//	mBone[i].mHierarchy.mIdxParent = bone.parent_bidx;
+	//	if (bone.parent_bidx >= (int)mBoneNum) mBone[i].mHierarchy.mIdxParent = UINT(-1);
+	//
+	//	XMVECTOR head_pos = XMVectorSet(bone.bone_head_pos[0], bone.bone_head_pos[1], bone.bone_head_pos[2], 0.0f);
+	//	XMVECTOR parent_pos = { 0, 0, 0, 1 };
+	//	if (mBone[i].mHierarchy.mIdxParent < (int)mBoneNum){
+	//		UINT p = mBone[i].mHierarchy.mIdxParent;
+	//		parent_pos = XMVectorSet(bones[p].bone_head_pos[0], bones[p].bone_head_pos[1], bones[p].bone_head_pos[2], 0.0f);
+	//	}
+	//
+	//	XMVECTOR local_pos = XMVectorSubtract(head_pos, parent_pos);
+	//	mBoneInitPos[i] = local_pos;
+	//
+	//	mBone[i].mPos = XMFLOAT3(XMVectorGetX(local_pos), XMVectorGetY(local_pos), XMVectorGetZ(local_pos));
+	//	mBone[i].mScale = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	//	XMVECTOR q = XMQuaternionIdentity();
+	//	mBone[i].mRot = XMFLOAT4(XMVectorGetX(q), XMVectorGetY(q), XMVectorGetZ(q), XMVectorGetW(q));
+	//
+	//	{
+	//		bind->PlayAnimetionSetTime(0.0f);
+	//		auto frame = bind->GetBoneFrame(i);
+	//		q = frame.Quaternion;
+	//
+	//	}
+	//
+	//	//ワールド行列計算
+	//	XMVECTOR scale = { 1, 1, 1, 1 };
+	//	mBone[i].mMtxPose = SRTMatrix(scale, q, local_pos);
+	//	if (mBone[i].mHierarchy.mIdxParent < (int)mBoneNum){
+	//		mBone[i].mMtxPose = XMMatrixMultiply(mBone[i].mMtxPose, mBone[mBone[i].mHierarchy.mIdxParent].mMtxPose);
+	//	}
+	//
+	//	mBone[i].mMtxPoseInit = mBone[i].mMtxPose;
+	//
+	//}
+
+
 	return bind;
 }
 
@@ -164,7 +213,6 @@ void BoneModel::createBone(){
 		mBone[i].mHierarchy.mIdxParent = bone.parent_bidx;
 		if (bone.parent_bidx >= (int)mBoneNum) mBone[i].mHierarchy.mIdxParent = UINT(-1);
 
-
 		XMVECTOR head_pos = XMVectorSet(bone.bone_head_pos[0], bone.bone_head_pos[1], bone.bone_head_pos[2], 0.0f);
 		XMVECTOR parent_pos = { 0, 0, 0, 1 };
 		if (mBone[i].mHierarchy.mIdxParent < (int)mBoneNum){
@@ -186,6 +234,7 @@ void BoneModel::createBone(){
 		if (mBone[i].mHierarchy.mIdxParent < (int)mBoneNum){
 			mBone[i].mMtxPose = XMMatrixMultiply(mBone[i].mMtxPose, mBone[mBone[i].mHierarchy.mIdxParent].mMtxPose);
 		}
+
 		//if (bone.bone_flag & pmx::t_bone::BIT_IK){
 		//	mBone[i].mIkBoneIdx = (WORD)bone.t_ik_data_idx;
 		//
@@ -197,7 +246,10 @@ void BoneModel::createBone(){
 		//}
 
 
-		mBone[i].mMtxPoseInit = mBone[i].mMtxPose;
+		//mBone[i].mMtxPoseInit = mBone[i].mMtxPose;
+
+		XMVECTOR v;
+		mBone[i].mMtxPoseInv = XMMatrixInverse(&v, XMMatrixTranslation(bone.bone_head_pos[0], bone.bone_head_pos[1], bone.bone_head_pos[2]));
 
 	}
 }
@@ -251,8 +303,18 @@ void BoneModel::UpdateAnimation(std::vector<shared_ptr<AnimationBind>>& anime){
 		if (!bind)continue;
 		float wegiht = bind->GetWeight();
 		if (wegiht <= FLT_EPSILON)continue;
+		{
+			//auto t = bind->GetTime();
+			//bind->PlayAnimetionSetTime(120.0f);
+			//for (DWORD id = 0; id < mBoneNum; id++){
+			//	auto frame = bind->GetBoneFrame(id);
+			//	mBone[id].mRot = VectorToFloat(XMQuaternionInverse(frame.Quaternion));
+			//}
+			//bind->PlayAnimetionSetTime(t);
+		}
 
 		for (DWORD id = 0; id < mBoneNum; id++){
+
 
 			auto frame = bind->GetBoneFrame(id);
 			//ワールド行列計算
@@ -283,8 +345,9 @@ void BoneModel::UpdateAnimation(std::vector<shared_ptr<AnimationBind>>& anime){
 	// ボーン差分行列の作成、定数バッファに転送
 	for (DWORD ib = 0; ib<mBoneNum; ++ib){
 		XMVECTOR Determinant;
-		XMMATRIX invmtx = XMMatrixInverse(&Determinant, mBone[ib].mMtxPoseInit);
-		XMMATRIX mtx = XMMatrixMultiplyTranspose(invmtx, mBone[ib].mMtxPose);
+		XMMATRIX invmtx = mBone[ib].mMtxPoseInv;
+		XMMATRIX mtx = XMMatrixMultiply(invmtx, mBone[ib].mMtxPose);
+		mtx = XMMatrixTranspose(mtx);
 		mCBBoneMatrix.mParam[ib].BoneMatrix[0] = XMFLOAT4(mtx.r[0].x, mtx.r[0].y, mtx.r[0].z, mtx.r[0].w);//mtx.r[0];
 		mCBBoneMatrix.mParam[ib].BoneMatrix[1] = XMFLOAT4(mtx.r[1].x, mtx.r[1].y, mtx.r[1].z, mtx.r[1].w);//mtx.r[1];
 		mCBBoneMatrix.mParam[ib].BoneMatrix[2] = XMFLOAT4(mtx.r[2].x, mtx.r[2].y, mtx.r[2].z, mtx.r[2].w);//mtx.r[2];

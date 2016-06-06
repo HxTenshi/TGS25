@@ -96,11 +96,12 @@ void CameraComponent::Update(){
 
 	Game::SetMainCamera(this);
 }
-
+#ifdef _ENGINE_MODE
 void CameraComponent::CreateInspector(){
 	auto data = Window::CreateInspector();
 	Window::ViewInspector("Camera", this, data);
 }
+#endif
 
 void CameraComponent::IO_Data(I_ioHelper* io){
 	(void)io;

@@ -1,4 +1,8 @@
 
+
+
+#ifdef _ENGINE_MODE
+
 #include "SelectActor.h"
 
 #include <set>
@@ -543,3 +547,4 @@ bool SelectActor::ChackHitRay(PhysX3Main* physx, EditorCamera* camera){
 	}
 	return false;
 }
+#endif

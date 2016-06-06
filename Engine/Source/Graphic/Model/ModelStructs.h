@@ -118,7 +118,7 @@ public:
 	XMFLOAT4 mRot;		// 回転（クォータニオン）
 	XMFLOAT3 mPos;		// 位置
 	XMMATRIX mMtxPose;	//
-	XMMATRIX mMtxPoseInit;	//
+	XMMATRIX mMtxPoseInv;	//
 	//WORD mIkBoneIdx;
 	Hierarchy mHierarchy;
 private:
