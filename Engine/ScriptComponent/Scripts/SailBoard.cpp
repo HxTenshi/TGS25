@@ -75,6 +75,7 @@ void SailBoard::Update(){
 		gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
 	}
 	
+	mPlyerHP = min(max(mPlyerHP, -100), 100);
 
 }
 
@@ -121,7 +122,10 @@ void SailBoard::OnCollideEnter(Actor* target){
 
 	if (target->Name() == "Air" || target->Name() == "Floor")
 	{
-		
+		if (IsTrick())
+		{
+			mPlyerHP += RecoveryPoint;
+		}
 		mTrick = false;
 		mJumpYRotate = 0;
 

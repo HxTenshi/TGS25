@@ -8,6 +8,7 @@
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
+#include"Game\Component\MaterialComponent.h"
 
 
 #include"SailBoard.h"
@@ -28,12 +29,38 @@ void HPGauge::Update()
 {
 	
 	//‰¡• = (Žc‚èHP / HPÅ‘å’l) * ŠO˜g‚Ì‰¡•
-	auto playerScript = game->FindActor("Board")->GetScript<SailBoard>();
+	/*auto playerScript = game->FindActor("Board")->GetScript<SailBoard>();
 	if (playerScript)
 	{
 		auto height = (playerScript->GetHitPoint() / 100.0f) * 660;
 		gameObject->mTransform->Scale(XMVectorSet(15, height, 1, 1));
 		gameObject->mTransform->Position(XMVectorSet(1093, 735 - (height / 2), 1, 1));
+	}*/
+
+	auto playerScript = game->FindActor("Board")->GetScript<SailBoard>();
+	if (playerScript)
+	{
+		auto height = (playerScript->GetHitPoint() / 100.0f) * 910;
+		gameObject->mTransform->Scale(XMVectorSet(height, 300, 1, 1));
+		gameObject->mTransform->Position(XMVectorSet((playerScript->GetHitPoint() / 100.0f) * 376 + 129, 672, 1, 1));
+		//gameObject->mTransform->Position(XMVectorSet((gameObject->mTransform->Scale().x / 2) + 50, 672, 1, 1));
+
+		auto mat = gameObject->GetComponent<MaterialComponent>();
+		if (mat)
+		{
+			if (playerScript->GetHitPoint() < 100 / 4)
+			{
+				mat->SetAlbedoColor(XMFLOAT4(1, 0, 0, 1));
+			}
+			else if (playerScript->GetHitPoint() < 100 / 2)
+			{
+				mat->SetAlbedoColor(XMFLOAT4(1, 1, 0, 1));
+			}
+			else
+			{
+				mat->SetAlbedoColor(XMFLOAT4(0, 1, 0, 1));
+			}
+		}
 	}
 }
 

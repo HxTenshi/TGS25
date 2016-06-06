@@ -65,6 +65,8 @@ private:
 	float SlipDamege; //受けるダメージ
 	SERIALIZE
 	float JumpPower; //ジャンプの力
+	SERIALIZE
+	float RecoveryPoint;
 
 	//エフェクト関連
 	std::string bombName;
