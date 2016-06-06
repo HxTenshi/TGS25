@@ -18,7 +18,7 @@ private:
 	Actor* mCreateObj;			// 生成オブジェクト
 	int mVectorCount;
 	SERIALIZE
-	int mCreateCount;			// 生成カウント　０になったら生成
+	int mCreateCount;			// 生成カウント
 	SERIALIZE
 	int mCreateTimeInterval;		// 敵生成の間隔
 	int mInitCreateTimeInterval;	// 初期の生成間隔

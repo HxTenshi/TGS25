@@ -28,6 +28,7 @@ void FlyingFish::Start(){
 
 	Enemy::SetDamage(mSetDamage);
 	Enemy::SetResPawnTime(mSetResPawnTime);
+	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
 	//Enemy::EnemyCGCreate();
 
 	auto floorObj = game->FindActor("Floor");
@@ -149,6 +150,7 @@ void FlyingFish::JampMove() {
 			mJampVelocity =
 				mParentObj->mTransform->Up() * (mUpPowar + (mUpCount / mUpInterval));
 
+			//mJampRestTime = mInitJampRestTime;
 			mIsJamp = true;
 		}
 		else {

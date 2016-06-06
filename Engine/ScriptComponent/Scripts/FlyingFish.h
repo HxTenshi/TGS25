@@ -20,7 +20,6 @@ private:
 	//ÉÅÉìÉoïœêî
 	SERIALIZE
 	int mUpInterval;
-	//SERIALIZE
 	int mUpCount;
 	int mDownCount;
 	SERIALIZE
@@ -38,6 +37,8 @@ private:
 	float mSetSpeed;
 	SERIALIZE
 	float mRotateInterval;
+	SERIALIZE
+	float mAddChaseStopDistance;
 	float mFloorPosition;
 	bool mIsJamp;
 	bool mIsInitSet;

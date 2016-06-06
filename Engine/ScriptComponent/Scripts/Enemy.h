@@ -23,7 +23,7 @@ public:
 	virtual void OnCollideBegin(Actor* target)override;
 	virtual void OnCollideEnter(Actor* target)override;
 	virtual void OnCollideExit(Actor* target)override;
-	// 敵の色の設定です
+	// 敵の色の設定です(デバッグ用)
 	virtual void PlayerColorChange();
 	// 索敵移動します
 	virtual void SearchMove();
@@ -41,8 +41,10 @@ public:
 	virtual void LongDistanceAttack();
 	// プレイヤーに当たったらノックバックします
 	virtual void KnockBack();
-	// 敵の目の前にオブジェを生成します
-	void SetForwardObj(Actor* setObj);
+	// 敵の目の前にオブジェを生成します(親がいる場合)
+	void SetParentForwardObj(Actor* setObj);
+	//// 敵の目の前にオブジェを生成します(親がいない場合)
+	//void SetForwardObj(Actor* setObj);
 	// ダメージの設定です
 	void SetDamage(int damage);
 	// リスポーンタイムです
@@ -51,13 +53,14 @@ public:
 	void ResPawnLine();
 	// 敵の行動関数
 	void Move();
-	// 敵グラフィックの生成
+	// 敵グラフィックの生成です(未使用)
 	void EnemyCGCreate();
-	// 敵のステータスの初期化
+	// 敵のステータスを初期化します
 	void InitStatus();
-	// 敵のステータスのリセット
+	// 敵のステータスをリセットします
 	void ResetStatus();
-	bool IsDead();
+	// プレイヤーの追跡を中止する距離の加算です
+	void AddPlayerChaseStopDistance(float distance);
 
 protected:
 	//メンバ変数
@@ -75,7 +78,7 @@ protected:
 	int mDamage;							// プレイヤーへのダメージ
 	int mResPawnTime;						// リスポーンタイム
 	int mInitResPawnTime;					// 初期リスポーンタイム
-	int mParentCreateCount;					// 親の生成カウント
+	//int mParentCreateCount;					// 親の生成カウント
 	int mCGCreateCount;						// CGの生成カウント(全部のリソースが揃ったら消去する)
 	float mSpeed;							// 敵の速度変更
 	float mHalfSizeZ;						// 敵のZの大きさの半分
@@ -84,6 +87,7 @@ protected:
 	float mScalarX;							// スケール値(X)
 	float mScalarY;							// スケール値(Y)
 	float mScalarZ;							// スケール値(Z)
+	float mAddPlayerChaseStopDistance;
 	//float mInitParentPositionY;				// 親の初期位置(Y)
 	const float mResPawnHeigth = -10.0f;	// リスポーンする高さ
 	bool mIsFloorHit;						// 床と当たったか

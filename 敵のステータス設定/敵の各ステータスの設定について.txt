@@ -1,0 +1,82 @@
+○敵の配置方法
+・敵を直接配置する場合
+場所:Asset/Enemy/EnemyParentObj/
+各Parentオブジェをシーン上に配置するとParentオブジェが生成されます
+プログラム実行時にParentオブジェに応じた敵が生成されます
+
+・敵生成オブジェを配置する場合
+場所:Asset/Enemy/EnemyCreateObj/
+各CreateObjをシーン上に配置するとCreateObjオブジェが生成されます
+CreateObjオブジェに応じた敵が生成されます
+生成される場所はCreateObjの場所と同じになります
+
+○敵の共通ステータス
+mSetResPawnTime　整数
+敵がリスポーンするまでの時間です
+敵が一定の高さまで落ちたら減算します
+１フレーム毎に１消費します
+
+mSetDamage　整数
+敵がプレイヤーに与えるダメージ量です
+
+mAddChaseStopDistance　小数
+敵の追跡中止距離を加算します
+
+mSetSpeed　小数
+敵の１フレーム毎の速度です
+
+○トビウオ
+mUpInterval　整数
+ジャンプ間隔の設定です
+数値が高いほど高く飛びます
+１フレーム毎に１消費します
+
+mJampRestTime　整数
+次にジャンプするまでの休憩時間です
+着地時に１フレーム毎に１消費します
+
+mUpPowar　小数
+１フレーム毎のジャンプ強さです
+「１」の場合はとんでもない高さとなってしまいます
+
+mRotateInterval　小数
+プレイヤー捜索中の回転値です
+１フレーム毎に回転値を加算します
+
+
+○シャチ
+mBulletShotTime　整数
+弾を撃つまでの時間です
+０になった瞬間に水鉄砲の弾を発射します
+１フレーム毎に１消費します
+
+mRecastTime　整数
+弾を撃ったときのリキャスト時間です
+０になった瞬間に次の行動を選択します
+１フレーム毎に１消費します
+
+○水鉄砲
+mDestroyTime　整数
+消滅時間です
+出現時に減算していきます
+１フレーム毎に１消費します
+
+mSetDamege、mSpeedは敵のmSetDamege、mSetSpeedと同様の動きをします
+
+○各敵生成オブジェ
+mCreateCount　整数
+敵を生成する数です
+０になったら生成しません
+
+mCreateTimeInterval　整数
+敵を生成する時間間隔です
+敵を生成したら入力した値に初期化されます
+mCreateDelayTimeが０になったら１フレーム毎に１消費します
+
+mCreateDelayTime　整数
+敵を生成した後に休憩する時間です
+
+mReactionDistance　小数
+敵を生成するかどうかを判断する距離です
+指定範囲内にプレイヤーが入っている場合は、
+mCreateTimeIntervalが減算されます
