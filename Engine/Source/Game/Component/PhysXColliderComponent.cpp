@@ -308,7 +308,7 @@ bool PhysXColliderComponent::GetIsTrigger(){
 physx::PxShape* PhysXColliderComponent::GetShape(){
 	return mShape;
 }
-
+#ifdef _ENGINE_MODE
 void PhysXColliderComponent::CreateInspector() {
 	auto data = Window::CreateInspector();
 	BoolCollback collback = [&](bool value){
@@ -332,6 +332,7 @@ void PhysXColliderComponent::CreateInspector() {
 	Window::AddInspector(new TemplateInspectorDataSet<std::string>("PhysxMaterial", &mPhysicsMaterialFile, collbackmatepath), data);
 	Window::ViewInspector("Collider", this, data);
 }
+#endif
 
 void PhysXColliderComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)

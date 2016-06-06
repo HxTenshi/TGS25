@@ -63,6 +63,8 @@ AssetDataTemplatePtr AssetFactory::Create(const char* filename){
 
 }
 
+#ifdef _ENGINE_MODE
+
 void AssetDataTemplate<MeshFileData>::CreateInspector(){
 
 }
@@ -159,3 +161,5 @@ void AssetDataTemplate<PhysxMaterialFileData>::CreateInspector(){
 
 	Window::ViewInspector("PhysxMaterial", NULL, data);
 }
+
+#endif

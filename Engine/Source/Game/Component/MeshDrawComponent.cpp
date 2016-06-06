@@ -60,12 +60,13 @@ void MeshDrawComponent::Update(){
 	}));
 
 }
-
+#ifdef _ENGINE_MODE
 void MeshDrawComponent::CreateInspector(){
 	auto data = Window::CreateInspector();
 
 	Window::ViewInspector("MeshRender", this, data);
 }
+#endif
 
 void MeshDrawComponent::IO_Data(I_ioHelper* io){
 	(void)io;

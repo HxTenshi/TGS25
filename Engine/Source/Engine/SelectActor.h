@@ -1,5 +1,8 @@
 #pragma once
 
+
+#ifdef _ENGINE_MODE
+
 class Actor;
 class PhysX3Main;
 class EditorCamera;
@@ -69,3 +72,5 @@ private:
 	bool mCreateInspector;
 	std::string mAssetFileName;
 };
+
+#endif

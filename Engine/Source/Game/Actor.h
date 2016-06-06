@@ -77,7 +77,9 @@ public:
 		mComponents.RemoveComponent(comptr);
 	}
 
+#ifdef _ENGINE_MODE
 	void CreateInspector();
+#endif
 
 	std::string Name(){return mName;}
 	void Name(const std::string& name){mName = name;}
