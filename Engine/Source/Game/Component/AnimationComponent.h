@@ -58,7 +58,9 @@ public:
 	void Initialize() override;
 	void Finish() override;
 	void Update() override;
+#ifdef _ENGINE_MODE
 	void CreateInspector() override;
+#endif
 
 	void ChangeAnimetion(int id)override;
 	AnimeParam GetAnimetionParam(int id) override;

@@ -531,6 +531,7 @@ void TransformComponent::SetUndo(const XMVECTOR& pos){
 	}
 }
 
+#ifdef _ENGINE_MODE
 
 void TransformComponent::CreateInspector(){
 
@@ -598,6 +599,7 @@ void TransformComponent::CreateInspector(){
 	//Window::GetInspectorWindow()->AddParam(&mPosition.y, &mFixMatrixFlag);
 	//Window::GetInspectorWindow()->AddParam(&mPosition.z, &mFixMatrixFlag);
 }
+#endif
 
 void TransformComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)

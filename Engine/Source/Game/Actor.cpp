@@ -103,7 +103,7 @@ void Actor::Update(float deltaTime){
 void Actor::SetUpdateStageCollQueue(const std::function<void()> coll){
 	mUpdateStageCollQueue.push(coll);
 }
-
+#ifdef _ENGINE_MODE
 void Actor::CreateInspector(){
 	std::function<void(std::string)> collback = [&](std::string name){
 		mName = name;
@@ -122,6 +122,7 @@ void Actor::CreateInspector(){
 		cmp.second->CreateInspector();
 	}
 }
+#endif
 
 void Actor::ExportSceneDataStart(const std::string& pass, File& sceneFile){
 	for (auto child : mTransform->Children()){

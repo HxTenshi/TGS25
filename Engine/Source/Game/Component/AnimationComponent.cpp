@@ -51,6 +51,7 @@ void AnimationComponent::Update(){
 		bone->UpdateAnimation(binds);
 	}
 }
+#ifdef _ENGINE_MODE
 void AnimationComponent::CreateInspector(){
 	auto data = Window::CreateInspector();
 
@@ -100,6 +101,7 @@ void AnimationComponent::CreateInspector(){
 
 	Window::ViewInspector("Animetion", this, data);
 }
+#endif
 
 void AnimationComponent::IO_Data(I_ioHelper* io){
 #define _KEY(i_,x) io->func( x , (#x + std::to_string(##i_)).c_str() )

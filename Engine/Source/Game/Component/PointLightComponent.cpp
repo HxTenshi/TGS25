@@ -104,6 +104,8 @@ void PointLightComponent::Update(){
 
 	});
 }
+
+#ifdef _ENGINE_MODE
 void PointLightComponent::CreateInspector(){
 
 
@@ -141,6 +143,7 @@ void PointLightComponent::CreateInspector(){
 	//Window::AddInspector(new InspectorSlideBarDataSet("b", 0.0f, 1.0f, &m_Color.z, collbackz), data);
 	Window::ViewInspector("PointLight", this, data);
 }
+#endif
 
 void PointLightComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)

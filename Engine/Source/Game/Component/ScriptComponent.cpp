@@ -22,6 +22,8 @@ typedef void(__cdecl *IDllFunction1)(IDllScriptComponent*,IDllScriptComponent::F
 #include "Game/Script/SGame.h"
 SGame gSGame;
 
+#ifdef _ENGINE_MODE
+
 void CreateScriptFileExtension(const std::string& classNmae, const std::string& extension){
 
 	std::fstream file;
@@ -205,6 +207,8 @@ bool create_cmd_process(){
 	return true;
 }
 
+#endif
+
 //同じDLLを持ってるコンポーネントを管理
 class UseScriptActors{
 public:
@@ -216,10 +220,18 @@ public:
 		mFunction0 = NULL;
 		mFunction1 = NULL;
 
+
+#ifdef _ENGINE_MODE
+#else
+		DllLoad();
+#endif
+
 	}
 	~UseScriptActors(){
 		UnLoad();
 	}
+
+#ifdef _ENGINE_MODE
 	void ReCompile(){
 		for (auto& p : mList){
 			p->SaveParam();
@@ -511,6 +523,7 @@ public:
 			v.push_back(input_string);
 		}
 	}
+#endif
 
 	void UnLoad(){
 		FreeLibrary(hModule);
@@ -524,6 +537,7 @@ public:
 	}
 	void DllLoad(){
 
+#ifdef _ENGINE_MODE
 		// DLLのロード
 #ifdef _DEBUG
 		hModule = LoadLibrary("../ScriptComponent/Debug/ScriptComponent.dll");
@@ -538,6 +552,11 @@ public:
 			hModule = LoadLibrary("ScriptComponent/Release/ScriptComponent.dll");
 #endif
 		}
+
+
+#else
+		hModule = LoadLibrary("ScriptComponent/ExeCompile/ScriptComponent.dll");
+#endif
 		if (!hModule){
 			_SYSTEM_LOG_ERROR("スクリプトDLLの読み込み");
 			return;
@@ -608,6 +627,7 @@ public:
 UseScriptActors actors;
 
 
+#ifdef _ENGINE_MODE
 //static
 void ScriptManager::ReCompile(){
 	actors.ReCompile();
@@ -616,6 +636,7 @@ void ScriptManager::CreateScriptFile(const std::string& className){
 	CreateScriptFileExtension(className, ".h");
 	CreateScriptFileExtension(className, ".cpp");
 }
+#endif
 
 
 
@@ -635,14 +656,14 @@ void ScriptComponent::Initialize(){
 	mCollideMap.clear();
 	Load();
 	actors.mList.push_back(this);
-	mEndInitialize = true;
+
 	if (pDllClass){
 		pDllClass->game = &gSGame;
 		pDllClass->gameObject = gameObject;
-
-		actors.Function(pDllClass,&IDllScriptComponent::Initialize);
-
 	}
+}
+
+void ScriptComponent::Start(){
 }
 void ScriptComponent::Load(){
 	if (pDllClass)return;
@@ -653,23 +674,21 @@ void ScriptComponent::Load(){
 	if (pDllClass){
 		pDllClass->game = &gSGame;
 		pDllClass->gameObject = gameObject;
-
-		if (mEndInitialize)
-			actors.Function(pDllClass, &IDllScriptComponent::Initialize);
-		if (mEndStart)
-			actors.Function(pDllClass, &IDllScriptComponent::Start);
 	}
 }
 void ScriptComponent::Unload(){
 
-
-
 	if (pDllClass){
-		actors.Function(pDllClass, &IDllScriptComponent::Finish);
+		if (mEndInitialize)
+			actors.Function(pDllClass, &IDllScriptComponent::Finish);
 		actors.Deleter(pDllClass);
 	}
 
 	pDllClass = NULL;
+
+
+	mEndInitialize = false;
+	mEndStart = false;
 
 }
 void ScriptComponent::ReCompile(){
@@ -701,15 +720,19 @@ void ScriptComponent::LoadParam(){
 		mSaveParam = NULL;
 	}
 }
-void ScriptComponent::Start(){
-	mEndStart = true;
-	if (pDllClass){
-		actors.Function(pDllClass, &IDllScriptComponent::Start);
-	}
-}
 void ScriptComponent::Update(){
 
 	if (pDllClass){
+
+		if (!mEndInitialize){
+			mEndInitialize = true;
+			actors.Function(pDllClass, &IDllScriptComponent::Initialize);
+		}
+		if (!mEndStart){
+			mEndStart = true;
+			actors.Function(pDllClass, &IDllScriptComponent::Start);
+		}
+
 		actors.Function(pDllClass, &IDllScriptComponent::Update);
 
 		for (auto& tar : mCollideMap){
@@ -723,8 +746,6 @@ void ScriptComponent::Finish(){
 
 	Unload();
 	actors.mList.remove(this);
-	mEndInitialize = false;
-	mEndStart = false;
 }
 
 void ScriptComponent::OnCollide(Actor* target){
@@ -792,6 +813,7 @@ bool reflect_io(MemberInfo& info,I_ioHelper* io){
 	return true;
 }
 
+#ifdef _ENGINE_MODE
 void ScriptComponent::CreateInspector(){
 
 	auto data = Window::CreateInspector();
@@ -819,6 +841,7 @@ void ScriptComponent::CreateInspector(){
 
 	Window::ViewInspector("Script", this, data);
 }
+#endif
 
 void ScriptComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)

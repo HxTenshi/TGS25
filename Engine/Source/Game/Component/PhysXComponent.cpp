@@ -132,6 +132,7 @@ void PhysXComponent::RemoveShape(physx::PxShape& shape){
 		mRigidActor->detachShape(shape);
 }
 
+#ifdef _ENGINE_MODE
 void PhysXComponent::CreateInspector() {
 
 	std::function<void(bool)> collback = [&](bool value){
@@ -142,6 +143,7 @@ void PhysXComponent::CreateInspector() {
 	Window::AddInspector(new TemplateInspectorDataSet<bool>("Kinematic", &mIsKinematic, collback), data);
 	Window::ViewInspector("PhysX", this, data);
 }
+#endif
 
 void PhysXComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)

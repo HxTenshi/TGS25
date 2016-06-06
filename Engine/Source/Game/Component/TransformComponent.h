@@ -97,7 +97,9 @@ public:
 	void AddTorque(const XMVECTOR& force, ForceMode::Enum forceMode = ForceMode::eFORCE) override;
 
 	const XMMATRIX& GetMatrix() const override;
+#ifdef _ENGINE_MODE
 	void CreateInspector() override;
+#endif
 
 	void IO_Data(I_ioHelper* io) override;
 

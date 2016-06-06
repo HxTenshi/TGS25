@@ -287,7 +287,7 @@ PS_OUTPUT_1 PS(PS_INPUT input)
 	[branch]
 	if (UseTexture.y != 0.0){
 		float3 bump = NormalTex.Sample(NormalSamLinear, texcood).rgb * 2 - 1.0;
-			//bump *= MNormaleScale.xyz;
+			bump *= MNormaleScale.xyz;
 
 			//視線ベクトルを頂点座標系に変換する
 			float3x3 normat = float3x3(normalize(input.Tan),
@@ -365,7 +365,7 @@ PS_OUTPUT_1 PS(PS_INPUT input)
 	
 	N = N * 0.5 + 0.5;
 
-	Out.ColorAlbedo = DifColor * MDiffuse;
+	Out.ColorAlbedo = DifColor * MDiffuse * MHightPower.y;
 	Out.ColorSpecular = float4(env.rgb, MAmbient.a);
 	Out.ColorNormal = float4(N, 1+RghColor.r);
 	Out.ColorDepth = float4(D, 1 - LD.z, LD.x, 1.0 - LD.y);

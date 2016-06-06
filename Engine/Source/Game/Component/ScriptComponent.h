@@ -22,7 +22,11 @@ public:
 	void OnCollide(Actor* target);
 	void LostCollide(Actor* target);
 
+
+
+#ifdef _ENGINE_MODE
 	void CreateInspector() override;
+#endif
 
 	void IO_Data(I_ioHelper* io) override;
 	IDllScriptComponent* pDllClass;
@@ -39,6 +43,9 @@ private:
 
 class ScriptManager{
 public:
+
+#ifdef _ENGINE_MODE
 	static void ReCompile();
 	static void CreateScriptFile(const std::string& className);
+#endif
 };

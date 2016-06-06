@@ -30,6 +30,7 @@ void SoundComponent::Update(){
 		Play();
 	}
 }
+#ifdef _ENGINE_MODE
 void SoundComponent::CreateInspector(){
 	auto data = Window::CreateInspector();
 	Window::AddInspector(new TemplateInspectorDataSet<std::string>("File", &mFileName, [&](std::string f){LoadFile(f); }), data);
@@ -47,6 +48,7 @@ void SoundComponent::CreateInspector(){
 	Window::ViewInspector("Sound", this, data);
 
 }
+#endif
 void SoundComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)
 	_KEY(mFileName);
