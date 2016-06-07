@@ -35,6 +35,8 @@ private:
 	int mInitRecastCount;
 	SERIALIZE
 	float mSetSpeed;
+	SERIALIZE
+	float mAddChaseStopDistance;
 
 	bool mIsPlayerHit;
 	XMVECTOR mSRPosition;

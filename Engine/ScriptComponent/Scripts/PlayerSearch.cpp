@@ -19,38 +19,51 @@ void PlayerSearch::Start(){
 	mSizeZ = gameObject->mTransform->Scale().z;
 	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 	collider->SetScale(gameObject->mTransform->Scale());
+
+	mChaseStopDistance = mSizeZ * (5.0f / 3.0f);
 	//game->Debug()->Log(std::to_string(mSizeZ));
 }
 
 //毎フレーム呼ばれます
 void PlayerSearch::Update(){
 	// プレイヤーの捜索
-	auto object = game->FindActor("Board");
-	if(!object) mIsPlayerHit = false;
+	auto playerObj = game->FindActor("Board");
+	if(!playerObj) mIsPlayerHit = false;
+
+	//game->Debug()->Log(std::to_string(mIsPlayerHit));
 
 	if (mIsPlayerHit) {
-		// 親の取得
-		auto parentObj = gameObject->mTransform->GetParent();
-		auto parentPosition = parentObj->mTransform->Position();
-		auto parentRotate = parentObj->mTransform->Rotate();
 
-		// 親の頭部にベクトルを設定する
-		auto parentHeadPoint = XMVectorSet(
-			parentPosition.x - ((mSizeZ / mScalarZ) / 2.0f * sinf(parentRotate.y)),
-			parentPosition.y,
-			parentPosition.z - ((mSizeZ / mScalarZ) / 2.0f * cosf(parentRotate.y)),
-			0.0f);
+		PlayerDistance(playerObj);
+
+		/*game->Debug()->Log("敵の索敵範囲外距離:" + std::to_string(mChaseStopDistance));
+		game->Debug()->Log("プレイヤーとの距離:" + std::to_string(mPlayerDistance));*/
+
+		// mPlayerDistance
+
+		//game->Debug()->Log(std::to_string(mChaseStopDistance));
 		
-		// プレイヤーと親の頭部の距離の計算
-		auto targetRange = XMVector3Length(object->mTransform->Position()- parentHeadPoint);
+		//// 親の取得
+		//auto parentObj = gameObject->mTransform->GetParent();
+		//auto parentPosition = parentObj->mTransform->Position();
+		//auto parentRotate = parentObj->mTransform->Rotate();
 
-		mPlayerDistance = targetRange.z;
-		//game->Debug()->Log(std::to_string(targetRange.z));
+		//// 親の頭部にベクトルを設定する
+		//auto parentHeadPoint = XMVectorSet(
+		//	parentPosition.x - ((mSizeZ / mScalarZ) / 2.0f * sinf(parentRotate.y)),
+		//	parentPosition.y,
+		//	parentPosition.z - ((mSizeZ / mScalarZ) / 2.0f * cosf(parentRotate.y)),
+		//	0.0f);
+		//
+		//// プレイヤーと親の頭部の距離の計算
+		//auto targetRange = XMVector3Length(object->mTransform->Position()- parentHeadPoint);
 
-		if (mPlayerDistance >= mSizeZ * (5.0f / 3.0f)) {
-			//game->Debug()->Log("いない");
-			game->Debug()->Log(std::to_string(mPlayerDistance));
-			game->Debug()->Log(std::to_string(mSizeZ * (5.0f / 3.0f)));
+		//mPlayerDistance = targetRange.z;
+		////game->Debug()->Log(std::to_string(targetRange.z));
+
+		if (mPlayerDistance >= mChaseStopDistance) {
+			game->Debug()->Log("敵の索敵範囲外距離:" + std::to_string(mChaseStopDistance));
+			game->Debug()->Log("プレイヤーとの距離:" + std::to_string(mPlayerDistance));
 			mIsPlayerHit = false;
 		}
 	}
@@ -69,8 +82,9 @@ void PlayerSearch::OnCollideBegin(Actor* target){
 	}
 
 	if (target->Name() == "Board") {
-		//game->Debug()->Log("当たり221e23131r2d");
 		playerObj = target;
+		PlayerDistance(target);
+
 		// 視野角が壁と当たったら
 		if (mIsWallHit) {
 			auto playerLength = XMVector3Length(
@@ -94,7 +108,6 @@ void PlayerSearch::OnCollideEnter(Actor* target){
 	}
 
 	if (target->Name() == "Board") {
-		//game->Debug()->Log("当たり221e23131r2d");
 		playerObj = target;
 		// 視野角が壁と当たったら
 		if (mIsWallHit) {
@@ -124,13 +137,39 @@ void PlayerSearch::OnCollideExit(Actor* target){
 void PlayerSearch::SetScalarZ(const float scalarZ) {
 	mScalarZ = scalarZ;
 }
+// プレイヤーとの距離を計算します
+void PlayerSearch::PlayerDistance(Actor* playerObj) {
+	// 親の取得
+	auto parentObj = gameObject->mTransform->GetParent();
+	auto parentPosition = parentObj->mTransform->Position();
+	auto parentRotate = parentObj->mTransform->Rotate();
+	// 親の頭部にベクトルを設定する
+	auto parentHeadPoint = XMVectorSet(
+		parentPosition.x - ((mSizeZ / mScalarZ) / 2.0f * sinf(parentRotate.y)),
+		parentPosition.y,
+		parentPosition.z - ((mSizeZ / mScalarZ) / 2.0f * cosf(parentRotate.y)),
+		0.0f);
+
+	// プレイヤーと親の頭部の距離の計算
+	auto targetRange = XMVector3Length(playerObj->mTransform->Position() - parentHeadPoint);
+
+	mPlayerDistance = targetRange.z;
+}
 
 // プレイヤーと索敵範囲の始点との距離を返します
-float PlayerSearch::PlayerDistance() {
+float PlayerSearch::GetPlayerDistance() {
 	return mPlayerDistance;
 }
 
 // プレイヤーに当たったかを返します
 bool PlayerSearch::IsPlayerSearch() {
 	return mIsPlayerHit;
+}
+// プレイヤーを追跡中止する距離に加算します
+void PlayerSearch::AddChaseStopDistance(float distance) {
+	mChaseStopDistance += distance;
+
+	/*game->Debug()->Log("加算");
+	game->Debug()->Log(std::to_string(mChaseStopDistance));*/
+
 }

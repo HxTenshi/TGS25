@@ -14,7 +14,6 @@ void KillerWhale::Initialize(){
 	mSpeed = mSetSpeed;
 	mIsShot = false;
 	mIsDistanceAct = true;
-	mIsAttckMode = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -22,6 +21,7 @@ void KillerWhale::Start(){
 	Enemy::Start();
 	Enemy::SetDamage(mSetDamage);
 	Enemy::SetResPawnTime(mSetResPawnTime);
+	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
 	//EnemyCGCreate("Shachi/shachi", 0.1f, 0.1f, 0.1f);
 
 	/*mBulletShotTime *= 60;
@@ -43,6 +43,8 @@ void KillerWhale::Update(){
 	}*/
 
 	Enemy::Move();
+
+	//game->Debug()->Log(std::to_string(mIsAttckMode));
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -72,24 +74,19 @@ void KillerWhale::SearchMove() {
 
 void KillerWhale::ShortDistanceAttack() {
 
+	mIsAttckMode = true;
+
+	// 発射時間が0になるまでプレイヤーの方向を向く
 	mBulletShotTime--;
 	//game->Debug()->Log("発射");
 	if (mBulletShotTime <= 0) {
 		if (!mIsShot) {
-
-			//// 新しい水鉄砲の弾の生成
-			//auto createBullet = game->CreateActor("Assets/tgs/WaterShot");
-			//game->AddObject(createBullet);
-			//Enemy::SetForwardObj(createBullet);
-
-			//createBullet->mTransform->SetParent(gameObject);
-			//createBullet->mTransform->Rotate(gameObject->mTransform->Up() * (3.14f));
-
 			// 水鉄砲の弾の生成
-			auto GunBullet = game->CreateActor("Assets/Enemy/WaterGunBullet");
-			game->AddObject(GunBullet);
+			auto gunBullet = game->CreateActor("Assets/Enemy/WaterGunBullet");
+			game->AddObject(gunBullet);
 			// 位置の変更
-			Enemy::SetForwardObj(GunBullet);
+			Enemy::SetParentForwardObj(gunBullet);
+
 			mIsShot = true;
 		}
 		else {
@@ -115,7 +112,7 @@ void KillerWhale::CenterDistanceAttack() {
 void KillerWhale::LongDistanceAttack() {
 	Enemy::PlayerChaseMode();
 
-	if (!mIsAttckMode) {
+	//if (!mIsAttckMode) {
 		auto parentPosition = mParentObj->mTransform->Position();
 		auto forwardMove = mParentObj->mTransform->Forward() * mSpeed * 0.01f;
 		// Y軸の補正 (敵の一部が海面に出ているようにする)
@@ -126,5 +123,8 @@ void KillerWhale::LongDistanceAttack() {
 		else {
 			mParentObj->mTransform->Position(parentPosition - forwardMove);
 		}
-	}
+	//}
+	/*else {
+		ShortDistanceAttack();
+	}*/
 }

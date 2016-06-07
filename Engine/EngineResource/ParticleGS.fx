@@ -60,6 +60,12 @@ cbuffer CBChangesPaticleParam : register(b10)
 	float4 SmoothAlpha;
 };
 
+cbuffer cbGameParameter : register(b11)
+{
+	//x=AllCount,y=DeltaTimeCount,z=DeltaTime
+	float4 GameTime;
+};
+
 // ƒWƒIƒƒgƒŠƒVƒF[ƒ_[‚Ì“ü—Íƒpƒ‰ƒ[ƒ^
 struct VS_IN
 {
@@ -99,7 +105,7 @@ void GS0_Main(point GS_IN In[1],                   // ƒ|ƒCƒ“ƒg ƒvƒŠƒ~ƒeƒBƒu‚Ì“ü—
 		Out.time.x = -10000.0f;
 		Out.v0.xz = 0;
 	}
-	if (Out.time.x <= -0.017f){
+	if (Out.time.x <= -100.0f){
 		Out.pos = In[0].pos;
 		Out.v0 = In[0].v0;
 		Out.v = In[0].v;
@@ -111,11 +117,11 @@ void GS0_Main(point GS_IN In[1],                   // ƒ|ƒCƒ“ƒg ƒvƒŠƒ~ƒeƒBƒu‚Ì“ü—
 
 			float rand = GetRandomNumber(float2(Param.w / 12345.0f, Param.w / 543.0f), 354 + ID + Param.w / 28.0f);
 			float time = GetRandomNumber(float2(rand, rand), 361 + ID);
-			Out.time.x = -(Time.y)*time * (1 - Param.y);
+			Out.time.x = -(Time.y)*time * (1 - Param.y) - 100.0f;
 
 		}
 		else{
-			Out.time.x = In[0].time.x + 0.016f;
+			Out.time.x = In[0].time.x + GameTime.z;
 		}
 
 	}
@@ -197,32 +203,37 @@ void GS0_Main(point GS_IN In[1],                   // ƒ|ƒCƒ“ƒg ƒvƒŠƒ~ƒeƒBƒu‚Ì“ü—
 				float3 nortar = normalize(tar);
 				//Point
 				float3 posG = nortar * G.w;
-				Out.v += posG;
+				Out.v += posG * GameTime.z;
 
 				//ƒEƒBƒ“ƒh
 				float3 left = cross(nortar,float3(0, 1, 0));
 				float3 up = cross(left, nortar);
 				float3x3 mat= float3x3(left, up, nortar);
 				float3 windVec = mul(Wind.xyz, mat);
-				Out.v += windVec;
+				Out.v += windVec * GameTime.z;
 
 			}
 
 
-		Out.pos = In[0].pos + Out.v;
+		Out.pos = In[0].pos + Out.v * GameTime.z/0.016666666;
 
 
 
+		//ƒp[ƒeƒBƒNƒ‹‚ğ‰æ–Ê‚©‚ç‚İ‚ÄL‚Î‚·
 		if (Time.w != 0){
 			float3 scrV = mul(Out.v, (float3x3)matWVP);
 			Out.v0.y = atan2(scrV.x, scrV.y);
 			Out.v0.z = length(scrV.xy) * Time.w;
 		}
 
-		Out.v *= RotVec.w;
+		float airscale = RotVec.w * GameTime.z;
+		Out.v -= Out.v * airscale;
+		if (airscale>=1){
+			Out.v = float3(0, 0, 0);
+		}
 
 		// ŠÔ‚ği‚ß‚é
-		Out.time.x = In[0].time.x - 0.016f;
+		Out.time.x = In[0].time.x - GameTime.z;
 
 
 		float4 screenpos = mul(float4(Out.pos, 1), matWVP);
@@ -247,7 +258,7 @@ void GS0_Main(point GS_IN In[1],                   // ƒ|ƒCƒ“ƒg ƒvƒŠƒ~ƒeƒBƒu‚Ì“ü—
 			//Out.v += -G.xyz;
 		}
 		else{
-			Out.v += G.xyz;
+			Out.v += G.xyz * GameTime.z;
 		}
 	}
 

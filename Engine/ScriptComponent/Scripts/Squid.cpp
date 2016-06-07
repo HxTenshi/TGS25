@@ -27,6 +27,7 @@ void Squid::Start(){
 	Enemy::Start();
 	Enemy::SetDamage(mSetDamage);
 	Enemy::SetResPawnTime(mSetResPawnTime);
+	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
 	//EnemyCGCreate("Shachi/shachi", 0.1f, 0.1f, 0.1f);
 }
 

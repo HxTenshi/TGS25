@@ -31,5 +31,7 @@ private:
 	int mSetResPawnTime;
 	SERIALIZE
 	float mSetSpeed;
+	SERIALIZE
+	float mAddChaseStopDistance;
 	bool mIsShot;
 };
