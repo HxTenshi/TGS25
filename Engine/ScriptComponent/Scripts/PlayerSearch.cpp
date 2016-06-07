@@ -76,61 +76,70 @@ void PlayerSearch::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void PlayerSearch::OnCollideBegin(Actor* target){
-	if (target->Name() == "Wall") {
-		wallObj = target;
-		mIsWallHit = true;
-	}
+	//if (target->Name() == "Wall") {
+	//	wallObj = target;
+	//	mIsWallHit = true;
+	//}
+
+	//if (target->Name() == "Board") {
+	//	playerObj = target;
+	//	PlayerDistance(target);
+
+	//	// 視野角が壁と当たったら
+	//	if (mIsWallHit) {
+	//		auto playerLength = XMVector3Length(
+	//			playerObj->mTransform->Position() - gameObject->mTransform->Position());
+	//		// プレイヤーと敵の間に壁が無かったらtrue
+	//		if (!XMVector3InBounds(wallObj->mTransform->Position(), playerLength)) {
+	//			mIsPlayerHit = true;
+	//		}
+	//	}
+	//	else {
+	//		mIsPlayerHit = true;
+	//	}
+	//}
 
 	if (target->Name() == "Board") {
-		playerObj = target;
 		PlayerDistance(target);
-
-		// 視野角が壁と当たったら
-		if (mIsWallHit) {
-			auto playerLength = XMVector3Length(
-				playerObj->mTransform->Position() - gameObject->mTransform->Position());
-			// プレイヤーと敵の間に壁が無かったらtrue
-			if (!XMVector3InBounds(wallObj->mTransform->Position(), playerLength)) {
-				mIsPlayerHit = true;
-			}
-		}
-		else {
-			mIsPlayerHit = true;
-		}
+		mIsPlayerHit = true;
 	}
 }
 
 //コライダーとのヒット中に呼ばれます
 void PlayerSearch::OnCollideEnter(Actor* target){
-	if (target->Name() == "Wall") {
-		wallObj = target;
-		mIsWallHit = true;
-	}
+	//if (target->Name() == "Wall") {
+	//	wallObj = target;
+	//	mIsWallHit = true;
+	//}
+
+	//if (target->Name() == "Board") {
+	//	playerObj = target;
+	//	// 視野角が壁と当たったら
+	//	if (mIsWallHit) {
+	//		auto playerLength = XMVector3Length(
+	//			playerObj->mTransform->Position() - gameObject->mTransform->Position());
+	//		// プレイヤーと敵の間に壁が無かったらtrue
+	//		if (!XMVector3InBounds(wallObj->mTransform->Position(), playerLength)) {
+	//			mIsPlayerHit = true;
+	//		}
+	//	}
+	//	else {
+	//		mIsPlayerHit = true;
+	//	}
+	//}
 
 	if (target->Name() == "Board") {
-		playerObj = target;
-		// 視野角が壁と当たったら
-		if (mIsWallHit) {
-			auto playerLength = XMVector3Length(
-				playerObj->mTransform->Position() - gameObject->mTransform->Position());
-			// プレイヤーと敵の間に壁が無かったらtrue
-			if (!XMVector3InBounds(wallObj->mTransform->Position(), playerLength)) {
-				mIsPlayerHit = true;
-			}
-		}
-		else {
-			mIsPlayerHit = true;
-		}
+		mIsPlayerHit = true;
 	}
 }
 
 //コライダーとのロスト時に呼ばれます
 void PlayerSearch::OnCollideExit(Actor* target){
 	(void)target;
-	if (target->Name() == "Wall") {
+	/*if (target->Name() == "Wall") {
 		wallObj = target;
 		mIsWallHit = false;
-	}
+	}*/
 }
 
 // スカラー倍した値の取得

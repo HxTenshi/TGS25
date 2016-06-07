@@ -116,19 +116,26 @@ void FlyingFish::OnCollideExit(Actor* target){
 
 void FlyingFish::SearchMove() {
 
+	auto parentRotate = mParentObj->mTransform->Rotate();
+
 	// “G‚Ì‰ñ“]
 	if (mWallHitCount % 2 == 0) {
-		mRotateY += 3.14f / 180.0f / mRotateInterval;
+		//mRotateY += 3.14f / 180.0f / mRotateInterval;
+		parentRotate.y += 3.14f / 180.0f / mRotateInterval;
 	}
 	else {
-		mRotateY -= 3.14f / 180.0f / mRotateInterval;
+		//mRotateY -= 3.14f / 180.0f / mRotateInterval;
+		parentRotate.y -= 3.14f / 180.0f / mRotateInterval;
 	}
 
 	if (mRotateY >= 3.14f * 2.0f) {
-		mRotateY = 0.0f;
+		//mRotateY = 0.0f;
+		parentRotate.y = 0.0f;
 	}
-	auto rotate = XMVectorSet(0.0f, mRotateY, 0.0f, 0.0f);
-	mParentObj->mTransform->Rotate(rotate);
+
+	//auto rotate = XMVectorSet(0.0f, mRotateY, 0.0f, 0.0f);
+	 
+	mParentObj->mTransform->Rotate(parentRotate);
 	
 	JampMove();
 }

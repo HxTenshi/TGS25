@@ -162,7 +162,6 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 
 	// 索敵オブジェの位置更新
 	mPlayerSearchObj->mTransform->Position(-mSearchObjPosition);
-	//if (searchScript->IsPlayerSearch()|| mIsAttckMode)
 
 	if (mSearchScript->IsPlayerSearch()){
 		if (!mIsDistanceAct) {
@@ -177,8 +176,6 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 					playerDistanceNumber = 2;
 					//game->Debug()->Log(std::to_string(playerDistanceNumber));
 				}
-
-				//game->Debug()->Log(std::to_string(playerDistanceNumber));
 
 				// 敵の追跡行動の決定
 				mEnemyState = mDistanceVector[playerDistanceNumber];
@@ -203,16 +200,37 @@ void  Enemy::PlayerChaseMode() {
 	auto angle = atan2(v.x, v.z);
 
 	auto quaternion = XMQuaternionRotationAxis(mParentObj->mTransform->Up(), angle);
-	auto nomaQua = XMQuaternionNormalize(quaternion);
+	//auto nomaQua = XMQuaternionNormalize(quaternion);
 	//mParentObj->mTransform->Quaternion(quaternion);
-	auto playerLength = XMVector3Length(playerPosition - parentPosition);
 
-	if (abs(parentPosition.x) >= 0.0001f) {
-		//if (playerLength.z > playerObj->mTransform->Scale().z) {
-			mParentObj->mTransform->Quaternion(nomaQua);
-			//game->Debug()->Log("回転");
-		//}
+	//auto playerLength = XMVector3Length(playerPosition - parentPosition);
+	// 二次元の距離を求める
+	auto v2PlayerPosition = XMVectorSet(playerPosition.x, 0.0f, playerPosition.z, 0.0f);
+	auto v2ParentPosition = XMVectorSet(parentPosition.x, 0.0f, parentPosition.z, 0.0f);
+
+	auto playerDistance = XMVector3Length(v2PlayerPosition - v2ParentPosition);
+	//auto playerDistance = GetPlayerDistance(playerObj, mParentObj);
+
+	//プレイヤーの上にいるかどうかの計算ここから
+	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+	auto colliderScale = collider->GetScale();
+	// プレイヤーとの距離がプレイヤーのコライダーの大きさ以下なら回転しない
+	if (playerDistance.z >= colliderScale.x) {
+
+		if (abs(parentPosition.x) >= 0.0001f) {
+			mParentObj->mTransform->Quaternion(quaternion);
+		}
 	}
+
+	//プレイヤーの上にいるかどうかの計算ここまで
+
+	// プレイヤーの方向を向く
+	//if (abs(parentPosition.x) >= 0.0001f) {
+	//	//if (playerLength.z > playerObj->mTransform->Scale().z) {
+	//		mParentObj->mTransform->Quaternion(quaternion);
+	//		//game->Debug()->Log("回転");
+	//	//}
+	//}
 	
 }
 // プレイヤーを追跡します（デフォルト設定）
@@ -403,4 +421,13 @@ void Enemy::ResetStatus() {
 // 
 void Enemy::AddPlayerChaseStopDistance(float distance) {
 	mAddPlayerChaseStopDistance = distance;
+}
+
+// プレイヤーと指定されたオブジェの位置との距離を計算して返します
+float Enemy::GetPlayerDistance(Actor* playerObj, Actor* otherObj) {
+	auto playerPosition = playerObj->mTransform->Position();
+	auto otherPosition = otherObj->mTransform->Position();
+	// プレイヤーとの距離を計算
+	auto distance = XMVector3Length(playerPosition - otherPosition);
+	return distance.z;
 }

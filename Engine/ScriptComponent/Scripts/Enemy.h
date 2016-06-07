@@ -43,8 +43,6 @@ public:
 	virtual void KnockBack();
 	// 敵の目の前にオブジェを生成します(親がいる場合)
 	void SetParentForwardObj(Actor* setObj);
-	//// 敵の目の前にオブジェを生成します(親がいない場合)
-	//void SetForwardObj(Actor* setObj);
 	// ダメージの設定です
 	void SetDamage(int damage);
 	// リスポーンタイムです
@@ -61,6 +59,8 @@ public:
 	void ResetStatus();
 	// プレイヤーの追跡を中止する距離の加算です
 	void AddPlayerChaseStopDistance(float distance);
+	// プレイヤーと指定されたオブジェの位置との距離を計算して返します
+	float GetPlayerDistance(Actor* playerObj, Actor* otherObj);
 
 protected:
 	//メンバ変数
@@ -73,12 +73,11 @@ protected:
 	XMVECTOR mInitPosition;					// 初期位置
 	XMVECTOR mInitRotate;;					// 初期の回転
 	XMVECTOR mSearchObjPosition;			// 索敵範囲の位置
-	XMVECTOR mKnockBackHoukou;
+	XMVECTOR mKnockBackHoukou;				// ノックバックの方向
 	int mAddSearchObjCount;					// 索敵範囲オブジェの作成カウント
 	int mDamage;							// プレイヤーへのダメージ
 	int mResPawnTime;						// リスポーンタイム
 	int mInitResPawnTime;					// 初期リスポーンタイム
-	//int mParentCreateCount;					// 親の生成カウント
 	int mCGCreateCount;						// CGの生成カウント(全部のリソースが揃ったら消去する)
 	float mSpeed;							// 敵の速度変更
 	float mHalfSizeZ;						// 敵のZの大きさの半分
@@ -87,7 +86,7 @@ protected:
 	float mScalarX;							// スケール値(X)
 	float mScalarY;							// スケール値(Y)
 	float mScalarZ;							// スケール値(Z)
-	float mAddPlayerChaseStopDistance;
+	float mAddPlayerChaseStopDistance;		// 追跡中止の距離に加算する値
 	//float mInitParentPositionY;				// 親の初期位置(Y)
 	const float mResPawnHeigth = -10.0f;	// リスポーンする高さ
 	bool mIsFloorHit;						// 床と当たったか
@@ -95,7 +94,7 @@ protected:
 	bool mIsDistanceAct;					// 距離判定の行動をするか
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)
 	bool mIsDead;							// プレイヤーと当たったか
-	// 行動配列(未使用)
+	// 行動配列
 	typedef std::vector<EnemyState> DistanceVector;
 	DistanceVector mDistanceVector;
 };
