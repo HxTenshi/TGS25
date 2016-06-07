@@ -162,6 +162,7 @@
     <ClCompile Include="Scripts\BulletEmiter.cpp" />
     <ClCompile Include="Scripts\CameraController.cpp" />
     <ClCompile Include="Scripts\CreateEnemyObj.cpp" />
+    <ClCompile Include="Scripts\DeltaTimeScale.cpp" />
     <ClCompile Include="Scripts\Enemy.cpp" />
     <ClCompile Include="Scripts\EnemyCG.cpp" />
     <ClCompile Include="Scripts\FlyingFish.cpp" />
@@ -185,12 +186,15 @@
     <ClCompile Include="Scripts\WindArrow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="h_component.h" />
+    <ClInclude Include="h_standard.h" />
     <ClInclude Include="Reflection\ReflectionSetter.h" />
     <ClInclude Include="Script.h" />
     <ClInclude Include="Scripts\Bullet.h" />
     <ClInclude Include="Scripts\BulletEmiter.h" />
     <ClInclude Include="Scripts\CameraController.h" />
     <ClInclude Include="Scripts\CreateEnemyObj.h" />
+    <ClInclude Include="Scripts\DeltaTimeScale.h" />
     <ClInclude Include="Scripts\Enemy.h" />
     <ClInclude Include="Scripts\EnemyCG.h" />
     <ClInclude Include="Scripts\FlyingFish.h" />

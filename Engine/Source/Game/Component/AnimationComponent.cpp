@@ -148,7 +148,7 @@ void AnimationComponent::SetAnimetionParam(int id,const AnimeParam& param){
 
 
 
-
+#include "Game/Game.h"
 
 void AnimeSet::Update(BoneModel* bone){
 	//‚È‚¯‚ê‚Îì¬
@@ -161,7 +161,8 @@ void AnimeSet::Update(BoneModel* bone){
 	}
 
 	if (!mAnimationBind)return;
-
+	auto time = Game::GetDeltaTime()->GetDeltaTime();
 	Param.mTime = mAnimationBind->GetTime();
-	mAnimationBind->PlayAnimetionAddTime(0.5f * Param.mTimeScale);
+	//‚P•b‚Å‚R‚OƒtƒŒ[ƒ€
+	mAnimationBind->PlayAnimetionAddTime((30)*time * Param.mTimeScale);
 }
