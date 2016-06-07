@@ -2,6 +2,7 @@
 #pragma once
 #include "main.h"
 #include "Game/Actor.h"
+#include"Game\Component\AnimationComponent.h"
 
 class Actor;
 
@@ -58,6 +59,8 @@ private:
 
 	//プレイヤーのHP
 	float mPlyerHP;
+
+	Actor* mBird;
 
 	SERIALIZE
 	float AttackSpeed; //攻撃できるスピード

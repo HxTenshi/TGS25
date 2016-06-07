@@ -6,6 +6,7 @@
 #include "Game/Script/IGame.h"
 #include "Game/Component/TransformComponent.h"
 #include "Game/Component/PhysXComponent.h"
+#include"Game\Component\AnimationComponent.h"
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
@@ -32,10 +33,22 @@ void SailBoard::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Start(){
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
+	
 }
 
 //毎フレーム呼ばれます
 void SailBoard::Update(){
+	mBird = game->FindActor("Bird");
+	auto anima1 = mBird->GetComponent<AnimationComponent>()->GetAnimetionParam(0);
+	auto anima2 = mBird->GetComponent<AnimationComponent>()->GetAnimetionParam(1);
+	anima1.mWeight = 0;
+	anima2.mWeight = 1;
+	anima2.mLoop = true;
+	mBird->GetComponent<AnimationComponent>()->SetAnimetionParam(0, anima1);
+	mBird->GetComponent<AnimationComponent>()->SetAnimetionParam(1, anima2);
+	mBird->GetComponent<AnimationComponent>()->mCurrentSet = 1;
+
+
 
 	if (Input::Down(KeyCoord::Key_Z)) mPlyerHP--;
 	mPlyerHP -= SlipDamege;
