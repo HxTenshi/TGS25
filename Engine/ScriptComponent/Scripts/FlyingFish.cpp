@@ -12,28 +12,27 @@ void FlyingFish::Initialize(){
 	Enemy::Initialize();
 
 	mUpCount = mUpInterval / 2;
-	mDownCount = 0;
+	mInitUpCount = mUpInterval;
+	mUpCosine = 0.0f;
 	mWallHitCount = 0;
 	mInitJampRestTime = mJampRestTime;
 	mRotateInterval = 2.0f;
 	mSpeed = mSetSpeed;
 	mIsJamp = true;
 	mIsInitSet = false;
+	mIsFloorHit = false;
 	mJampVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void FlyingFish::Start(){
 	Enemy::Start();
-
 	Enemy::SetDamage(mSetDamage);
 	Enemy::SetResPawnTime(mSetResPawnTime);
 	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
-	//Enemy::EnemyCGCreate();
 
 	auto floorObj = game->FindActor("Floor");
 	mFloorPosition = floorObj->mTransform->Position().y;
-	/*mInitParentPositionY = mParentObj->mTransform->Position().y;*/
 }
 
 //毎フレーム呼ばれます
@@ -42,8 +41,9 @@ void FlyingFish::Update(){
 	Enemy::Move();
 
 	/*if (!mIsInitSet) mInitParentPositionY = -1.5f;*/
-
+	// mIsJampがfalseならジャンプをしていない
 	if (mIsJamp == false) {
+		// mJampRestTimeが０になったら再度ジャンプする
 		if (mJampRestTime <= 0) {
 			mJampRestTime = mInitJampRestTime;
 		}
@@ -52,17 +52,15 @@ void FlyingFish::Update(){
 		}
 
 		mUpCount = mUpInterval / 2;
-		mDownCount = 0;
 	}
 	else {
+		// ジャンプ中
+		// mUpCountが０になると落ちる
 		if (mUpCount > 0) {
 			mUpCount--;
 		}
 		else {
 			mUpCount = 0;
-			if (mDownCount < 30) {
-				mDownCount++;
-			}
 		}
 	}
 }
@@ -70,7 +68,6 @@ void FlyingFish::Update(){
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void FlyingFish::Finish(){
 	Enemy::Finish();
-
 	mUpCount = 0;
 }
 
@@ -86,6 +83,8 @@ void FlyingFish::OnCollideBegin(Actor* target){
 		if (mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsJamp = false;
 		}
+
+		mIsFloorHit = true;
 	}
 
 	if (target->Name() == "Wall") {
@@ -105,19 +104,18 @@ void FlyingFish::OnCollideEnter(Actor* target){
 
 		if (mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsJamp = false;
+			mUpCosine = 0.0f;
 		}
 	}
 }
 
 //コライダーとのロスト時に呼ばれます
 void FlyingFish::OnCollideExit(Actor* target){
-	Enemy::OnCollideExit(target);
+	if (target->Name() == "Floor") mIsFloorHit = false;
 }
 
 void FlyingFish::SearchMove() {
-
 	auto parentRotate = mParentObj->mTransform->Rotate();
-
 	// 敵の回転
 	if (mWallHitCount % 2 == 0) {
 		//mRotateY += 3.14f / 180.0f / mRotateInterval;
@@ -132,9 +130,6 @@ void FlyingFish::SearchMove() {
 		//mRotateY = 0.0f;
 		parentRotate.y = 0.0f;
 	}
-
-	//auto rotate = XMVectorSet(0.0f, mRotateY, 0.0f, 0.0f);
-	 
 	mParentObj->mTransform->Rotate(parentRotate);
 	
 	JampMove();
@@ -143,19 +138,27 @@ void FlyingFish::SearchMove() {
 void FlyingFish::PlayerChase() {
 	Enemy::PlayerChaseMode();
 	JampMove();
-
 }
 
 void FlyingFish::JampMove() {
 	auto parentPosition = mParentObj->mTransform->Position();
 	auto forwardMove = mParentObj->mTransform->Forward() * -mSpeed * 0.01f;
-
 	// ジャンプ間隔
 	if (mJampRestTime <= 0) {
+		/*if (mUptekitou < 3.141593f / 2.0f) {
+			mUptekitou += 3.141593f / mInitUpCount;
+		}*/
+		mUpCosine += 3.141593f / mInitUpCount;
+		mAnimationID = 1;
+
 		if (mUpCount > 0) {
 			// 上げる処理
-			mJampVelocity =
-				mParentObj->mTransform->Up() * (mUpPowar + (mUpCount / mUpInterval));
+			/*mJampVelocity =
+				mParentObj->mTransform->Up() * (mUpPowar + (mUpCount / mUpInterval));*/
+			// コサインによるジャンプ
+			mJampVelocity = mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f;
+			//game->Debug()->Log(std::to_string(cosf(mUpCosine)));
+			
 
 			//mJampRestTime = mInitJampRestTime;
 			mIsJamp = true;
@@ -164,17 +167,27 @@ void FlyingFish::JampMove() {
 			if (parentPosition.y > mFloorPosition) {
 				// 落ちる処理
 				auto downVelocity = XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f);
-				mJampVelocity = downVelocity * -((mUpPowar)+(mDownCount / mUpInterval));
+				/*mJampVelocity = downVelocity * -((mUpPowar)+(mDownCount / mUpInterval));*/
 
-				// 絶対に初期値に戻るように補正
+				mJampVelocity = mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f;
+				//game->Debug()->Log(std::to_string(cosf(mUpCosine)));
+
+				// 床と接触している場合は絶対に初期値に戻るように補正
+				// 接触していなかったら落ちていく
+				/*if (mIsFloorHit) {*/
 				if (parentPosition.y + mJampVelocity.y < mFloorPosition) {
-					auto revasionVelocity = XMVectorSet(
-						0.0f,
-						(float)abs(parentPosition.y) - (float)abs(mFloorPosition)
-						, 0.0f, 0.0f);
-					mJampVelocity = revasionVelocity;
-					//game->Debug()->Log(std::to_string(mJampVelocity.y));
-				}
+					if (mIsFloorHit) {
+						auto revasionVelocity = XMVectorSet(
+							0.0f,
+							(float)abs(parentPosition.y) - (float)abs(mFloorPosition),
+							0.0f, 0.0f);
+						mJampVelocity = revasionVelocity;
+					}
+					else {
+						mJampVelocity = -mParentObj->mTransform->Up() * mUpPowar * 0.01f;
+					}	
+				}			
+				
 			}
 		}
 	}
@@ -186,6 +199,7 @@ void FlyingFish::JampMove() {
 		}
 		else {
 			mParentObj->mTransform->Position(parentPosition + forwardMove);
+			mAnimationID = 0;
 		}
 	}
 	else {

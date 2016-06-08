@@ -34,4 +34,5 @@ private:
 	SERIALIZE
 	float mAddChaseStopDistance;
 	bool mIsShot;
+	XMVECTOR mGRAVITY;
 };

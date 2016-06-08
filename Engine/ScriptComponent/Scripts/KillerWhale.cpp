@@ -22,35 +22,21 @@ void KillerWhale::Start(){
 	Enemy::SetDamage(mSetDamage);
 	Enemy::SetResPawnTime(mSetResPawnTime);
 	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
-	//EnemyCGCreate("Shachi/shachi", 0.1f, 0.1f, 0.1f);
 
-	/*mBulletShotTime *= 60;
-	mRecastTime *= 60;*/
 	mInitBulletShotTime = mBulletShotTime;
 	mInitRecastTime = mRecastTime;
-
-	//Enemy::EnemyCGCreate();
+	mGRAVITY = mParentObj->mTransform->Up() * 0.098f;
 }
 
 //毎フレーム呼ばれます
 void KillerWhale::Update(){
-	/*if (mParentCreateCount == 1) {
-
-		if (mCGCreateCount == 0) {
-			Enemy::EnemyCGCreate();
-			mCGCreateCount = 1;
-		}
-	}*/
-
 	Enemy::Move();
-
-	//game->Debug()->Log(std::to_string(mIsAttckMode));
+	//game->Debug()->Log(std::to_string(mIsFloorHit));
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void KillerWhale::Finish(){
 	Enemy::Finish();
-	
 }
 
 //コライダーとのヒット時に呼ばれます
@@ -69,12 +55,18 @@ void KillerWhale::OnCollideExit(Actor* target){
 }
 
 void KillerWhale::SearchMove() {
-
+	// 何もしない
+	//game->Debug()->Log(std::to_string(mIsFloorHit));
+	if (!mIsFloorHit && mInitSetCount == 1) {
+		auto parentPosition = mParentObj->mTransform->Position();
+		mParentObj->mTransform->Position(parentPosition - mGRAVITY);
+	}
 }
 
 void KillerWhale::ShortDistanceAttack() {
 
 	mIsAttckMode = true;
+	mAnimationID = 1;
 
 	// 発射時間が0になるまでプレイヤーの方向を向く
 	mBulletShotTime--;
@@ -112,19 +104,11 @@ void KillerWhale::CenterDistanceAttack() {
 void KillerWhale::LongDistanceAttack() {
 	Enemy::PlayerChaseMode();
 
-	//if (!mIsAttckMode) {
-		auto parentPosition = mParentObj->mTransform->Position();
-		auto forwardMove = mParentObj->mTransform->Forward() * mSpeed * 0.01f;
-		// Y軸の補正 (敵の一部が海面に出ているようにする)
-		if (mIsFloorHit) {
-			/*auto setPosition = XMVectorSet(objPosition.x, mPositionY, objPosition.z, 0.0f);
-			gameObject->mTransform->Position(setPosition + forwardMove);*/
-		}
-		else {
-			mParentObj->mTransform->Position(parentPosition - forwardMove);
-		}
-	//}
-	/*else {
-		ShortDistanceAttack();
-	}*/
+	mAnimationID = 1;
+	auto parentPosition = mParentObj->mTransform->Position();
+	auto forwardMove = mParentObj->mTransform->Forward() * mSpeed * 0.01f;
+	if (!mIsFloorHit) {
+		forwardMove += mGRAVITY;
+	}
+	mParentObj->mTransform->Position(parentPosition - forwardMove);
 }

@@ -21,7 +21,7 @@ private:
 	SERIALIZE
 	int mUpInterval;
 	int mUpCount;
-	int mDownCount;
+	int mInitUpCount;
 	SERIALIZE
 	int mJampRestTime;
 	int mInitJampRestTime;
@@ -32,7 +32,7 @@ private:
 	int mSetResPawnTime;
 	int mInitSetDamage;
 	SERIALIZE
-	float mUpPowar;
+	int mUpPowar;
 	SERIALIZE
 	float mSetSpeed;
 	SERIALIZE
@@ -40,7 +40,9 @@ private:
 	SERIALIZE
 	float mAddChaseStopDistance;
 	float mFloorPosition;
+	float mUpCosine;
 	bool mIsJamp;
 	bool mIsInitSet;
+	//bool mIsFloorHit;
 	XMVECTOR mJampVelocity;
 };

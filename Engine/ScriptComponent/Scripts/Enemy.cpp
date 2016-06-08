@@ -18,12 +18,14 @@ Enemy::~Enemy() {
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void Enemy::Initialize(){
-	
+
 	mEnemyState = EnemyState::PlayerSearch;
 	mAddSearchObjCount = 0;
 	mDamage = 0;
 	mResPawnTime = 0;
 	mCGCreateCount = 0;
+	mAnimationID = 0;
+	mInitSetCount = 0;
 	mSpeed = 1.0f * 0.01f;
 	mSize = gameObject->mTransform->Scale();
 	mHalfSizeZ = mSize.z / 2.0f;
@@ -49,6 +51,9 @@ void Enemy::Initialize(){
 void Enemy::Start(){
 	// 親の取得	
 	mParentObj = gameObject->mTransform->GetParent();
+	// 初期ステータスを入れる
+	mInitPosition = mParentObj->mTransform->Position();
+	mInitRotate = mParentObj->mTransform->Rotate();
 	//game->Debug()->Log(mParentObj->Name());
 }
 
@@ -79,27 +84,28 @@ void Enemy::OnCollideBegin(Actor* target){
 		playerScript->Damage(mDamage);
 		mIsDead = true;
 
-		game->DestroyObject(mPlayerSearchObj);
+		/*game->DestroyObject(mPlayerSearchObj);
 		game->DestroyObject(gameObject);
-		game->DestroyObject(gameObject->mTransform->GetParent());
+		game->DestroyObject(gameObject->mTransform->GetParent());*/
 
 		/*auto houkou = gameObject->mTransform->Position() - target->mTransform->Position();
 		mKnockBackHoukou = XMVector3Normalize(houkou);*/
+	}
+
+	if (target->Name() == "Floor") {
+		mInitSetCount = 1;
+		mIsFloorHit = true;
 	}
 }
 
 //コライダーとのヒット中に呼ばれます
 void Enemy::OnCollideEnter(Actor* target){
-	if (target->Name() == "Floor") {
-		mIsFloorHit = true;
-	}
+	if (target->Name() == "Floor") mIsFloorHit = true;
 }
 
 //コライダーとのロスト時に呼ばれます
 void Enemy::OnCollideExit(Actor* target){
-	if (target->Name() == "Floor") {
-		mIsFloorHit = false;
-	}
+	if (target->Name() == "Floor") mIsFloorHit = false;
 }
 // 敵の色の設定です(デバッグ用)
 void Enemy::PlayerColorChange() {
@@ -156,6 +162,13 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 		mPlayerSearchObj->mTransform->Position(-setPosition);
 		// 敵の子供に追加する
 		mPlayerSearchObj->mTransform->SetParent(mParentObj);
+
+		// CGの生成
+		std::string baseName = "Assets/Enemy/EnemyCGObj/" + gameObject->Name() + "CG";
+		auto createCGObjName = baseName.c_str();
+		auto CGObj = game->CreateActor(createCGObjName);
+		game->AddObject(CGObj);
+		CGObj->mTransform->SetParent(gameObject);
 
 		mAddSearchObjCount = 1;
 	}
@@ -217,9 +230,10 @@ void  Enemy::PlayerChaseMode() {
 	// プレイヤーとの距離がプレイヤーのコライダーの大きさ以下なら回転しない
 	if (playerDistance.z >= colliderScale.x) {
 
-		if (abs(parentPosition.x) >= 0.0001f) {
+		/*if (abs(parentPosition.x) >= 0.0001f) {
 			mParentObj->mTransform->Quaternion(quaternion);
-		}
+		}*/
+		mParentObj->mTransform->Quaternion(quaternion);
 	}
 
 	//プレイヤーの上にいるかどうかの計算ここまで
@@ -307,8 +321,7 @@ void Enemy::ResPawnLine() {
 	if (mParentObj->mTransform->Position().y <= mResPawnHeigth) {
 
 		if (mResPawnTime < 0) {
-			mParentObj->mTransform->Position(mInitPosition);
-			mParentObj->mTransform->Rotate(mInitRotate);
+			Enemy::InitStatus();
 			mResPawnTime = mInitResPawnTime;
 		}
 
@@ -322,86 +335,62 @@ void Enemy::Move() {
 	// 親の取得	
 	//mParentObj = gameObject->mTransform->GetParent();
 	//game->Debug()->Log(mParentObj->Name());
+	if (!mIsDead) {
+		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+		auto colliderScale = collider->GetScale();
+		PlayerSearchMode(colliderScale);
+		mPlayerSearchObj->mTransform->SetParent(mParentObj);
 
-	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
-	auto colliderScale = collider->GetScale();
-	//PlayerSearchMode(gameObject->mTransform->Scale());
-	PlayerSearchMode(colliderScale);
-	mPlayerSearchObj->mTransform->SetParent(mParentObj);
-
-	//gameObject->mTransform->SetParent(mParentObj);
-
-	if (mEnemyState == EnemyState::PlayerSearch) {
-		SearchMove();
-	}
-	else {
-		if (!mIsDistanceAct) {
-			if (mEnemyState == EnemyState::PlayerChase) {
-				PlayerChase();
-				//PlayerChaseMode();
-			}
+		if (mEnemyState == EnemyState::PlayerSearch) {
+			SearchMove();
 		}
 		else {
+			if (!mIsDistanceAct) {
+				if (mEnemyState == EnemyState::PlayerChase) {
+					PlayerChase();
+				}
+			}
+			else {
 
-			if (mEnemyState == EnemyState::PlayerShortDistance) {
-				ShortDistanceAttack();
-				//game->Debug()->Log("近距離");
+				if (mEnemyState == EnemyState::PlayerShortDistance) {
+					ShortDistanceAttack();
+					//game->Debug()->Log("近距離");
+				}
+				else if (mEnemyState == EnemyState::PlayerCenterDistance) {
+					CenterDistanceAttack();
+					//game->Debug()->Log("中距離");
+				}
+				else if (mEnemyState == EnemyState::PlayerLongDistance) {
+					LongDistanceAttack();
+					//game->Debug()->Log("遠距離");
+				}
 			}
-			else if (mEnemyState == EnemyState::PlayerCenterDistance) {
-				CenterDistanceAttack();
-				//game->Debug()->Log("中距離");
-			}
-			else if (mEnemyState == EnemyState::PlayerLongDistance) {
-				LongDistanceAttack();
-				//game->Debug()->Log("遠距離");
-			}
+		}
+
+		//Enemy::PlayerColorChange();
+		Enemy::ResPawnLine();
+	}
+	else {
+		/*auto rotate = mParentObj->mTransform->Rotate();
+		auto addRotate = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);*/
+		if (mParentObj->mTransform->Rotate().x < 3.141593f) {
+			auto position = mParentObj->mTransform->Position();
+			auto rotate = mParentObj->mTransform->Rotate();
+			// 回転
+			rotate.x += 3.141593f / (180.0f / 4.0f);
+			mParentObj->mTransform->Rotate(rotate);
+			// 上昇
+			auto up = mParentObj->mTransform->Up() * cosf(gameObject->mTransform->Rotate().x) * 0.01f * 20.0f;
+			mParentObj->mTransform->Position(position + up);
+		}
+		else {
+			game->DestroyObject(mPlayerSearchObj);
+			game->DestroyObject(gameObject);
+			game->DestroyObject(gameObject->mTransform->GetParent());
 		}
 	}
 
-	Enemy::PlayerColorChange();
-	Enemy::ResPawnLine();
-	
-
-	//else {
-	//	// 親の作成
-	//	/*auto parentObj = game->CreateActor("Assets/ParentObj");
-	//	game->AddObject(parentObj);
-	//	gameObject->mTransform->SetParent(parentObj);*/
-
-	//	mParentObj = gameObject->mTransform->GetParent();
-	//	mParentObj->mTransform->Position(gameObject->mTransform->Position());
-	//	mParentObj->mTransform->Rotate(gameObject->mTransform->Rotate());
-	//	//mParentObj = gameObject->mTransform->GetParent();
-	//	//mInitParentPositionY = mParentObj->mTransform->Position().y;
-	//	// 初期ステータスを入れる
-	//	mInitPosition = gameObject->mTransform->Position();
-	//	mInitRotate = gameObject->mTransform->Rotate();
-	//	// 子のステータスをリセット
-	//	Enemy::ResetStatus();
-	//	// CGの生成
-	//	//Enemy::EnemyCGCreate();
-	//	game->Debug()->Log("親生成");
-
-	//	mParentCreateCount = 1;
-	//}
-
-	
-}
-
-// 敵グラフィックの生成
-void Enemy::EnemyCGCreate() {
-	//auto model = mEnemyCGObj->GetComponent<ModelComponent>();
-
-	std::string createCGName = "Assets/Enemy/EnemyCGObj/" + gameObject->Name() + "CG";
-	auto cgName = createCGName.c_str();
-
-	mEnemyCGObj = game->CreateActor(cgName);
-	game->AddObject(mEnemyCGObj);
-	mEnemyCGObj->mTransform->SetParent(gameObject);
-	/*game->AddObject(mEnemyCGObj);
-	auto setCGScale = XMVectorSet(sizeX, sizeY, sizeZ, 0.0f);
-	mEnemyCGObj->mTransform->Scale(setCGScale);
-	mEnemyCGObj->mTransform->SetParent(gameObject);*/
+	Enemy::ResetStatus();
 }
 
 // 敵のステータスの初期化
@@ -430,4 +419,9 @@ float Enemy::GetPlayerDistance(Actor* playerObj, Actor* otherObj) {
 	// プレイヤーとの距離を計算
 	auto distance = XMVector3Length(playerPosition - otherPosition);
 	return distance.z;
+}
+
+// アニメーションのIDを渡します
+int Enemy::GetAnimationID() {
+	return mAnimationID;
 }

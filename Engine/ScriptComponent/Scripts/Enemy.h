@@ -51,8 +51,6 @@ public:
 	void ResPawnLine();
 	// 敵の行動関数
 	void Move();
-	// 敵グラフィックの生成です(未使用)
-	void EnemyCGCreate();
 	// 敵のステータスを初期化します
 	void InitStatus();
 	// 敵のステータスをリセットします
@@ -61,6 +59,8 @@ public:
 	void AddPlayerChaseStopDistance(float distance);
 	// プレイヤーと指定されたオブジェの位置との距離を計算して返します
 	float GetPlayerDistance(Actor* playerObj, Actor* otherObj);
+	// アニメーションのIDを渡します
+	int GetAnimationID();
 
 protected:
 	//メンバ変数
@@ -79,10 +79,12 @@ protected:
 	int mResPawnTime;						// リスポーンタイム
 	int mInitResPawnTime;					// 初期リスポーンタイム
 	int mCGCreateCount;						// CGの生成カウント(全部のリソースが揃ったら消去する)
+	int mAnimationID;						// アニメーションのID
+	int mInitSetCount;
 	float mSpeed;							// 敵の速度変更
 	float mHalfSizeZ;						// 敵のZの大きさの半分
 	float mPositionY;						// 敵のYの位置（床との位置補正に使用）
-	float mRotateY;							// 敵の回転角	
+	float mRotateY;							// 敵の回転角
 	float mScalarX;							// スケール値(X)
 	float mScalarY;							// スケール値(Y)
 	float mScalarZ;							// スケール値(Z)

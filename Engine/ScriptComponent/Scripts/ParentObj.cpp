@@ -8,20 +8,11 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void ParentObj::Initialize(){
-	/*auto childrenObj = gameObject->mTransform->Children();
-	mEnemyScript = childrenObj.*/
-
-	//mCreateCount = gameObject->mTransform->Children().size();
 	mCreateCount = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void ParentObj::Start(){
-	// 親がいた場合は位置を調整する
-	/*if (gameObject->mTransform->GetParent() != nullptr) {
-		auto initPosi = XMVectorSet(mPositionX, 0.0f, mPositionZ, 0.0f);
-		gameObject->mTransform->Position(initPosi);
-	}*/
 }
 
 //毎フレーム呼ばれます
