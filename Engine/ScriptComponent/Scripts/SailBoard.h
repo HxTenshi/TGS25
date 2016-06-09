@@ -34,6 +34,7 @@ private:
 	bool Dead();
 	void ReSpawn();
 	bool Shake();
+	void AnimationChange(int id,bool loop);
 	
 
 private:

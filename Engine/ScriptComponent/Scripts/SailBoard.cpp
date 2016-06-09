@@ -33,23 +33,12 @@ void SailBoard::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Start(){
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
-	
+	mBird = game->FindActor("Bird");
 }
 
 //毎フレーム呼ばれます
 void SailBoard::Update(){
-	mBird = game->FindActor("Bird");
-	auto anima1 = mBird->GetComponent<AnimationComponent>()->GetAnimetionParam(0);
-	auto anima2 = mBird->GetComponent<AnimationComponent>()->GetAnimetionParam(1);
-	anima1.mWeight = 0;
-	anima2.mWeight = 1;
-	anima2.mLoop = true;
-	mBird->GetComponent<AnimationComponent>()->SetAnimetionParam(0, anima1);
-	mBird->GetComponent<AnimationComponent>()->SetAnimetionParam(1, anima2);
-	mBird->GetComponent<AnimationComponent>()->mCurrentSet = 1;
-
-
-
+	
 	if (Input::Down(KeyCoord::Key_Z)) mPlyerHP--;
 	mPlyerHP -= SlipDamege;
 	IsUnrivaled();
@@ -139,6 +128,7 @@ void SailBoard::OnCollideEnter(Actor* target){
 		{
 			mPlyerHP += RecoveryPoint;
 		}
+		AnimationChange(0, false);
 		mTrick = false;
 		mJumpYRotate = 0;
 
@@ -272,6 +262,7 @@ void SailBoard::Trick()
 		mTrickPoint = abs(mTrickRotate.x) + abs(mTrickRotate.y);
 		if (mTrickPoint > 0.1f)
 		{
+			AnimationChange(1, false);
 			mTrick = true;
 		}
 
@@ -336,4 +327,22 @@ bool SailBoard::Shake()
 	}
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
 	return false;
+}
+
+void SailBoard::AnimationChange(int id,bool loop)
+{
+	auto animator = mBird->GetComponent<AnimationComponent>();
+	if (animator)
+	{
+		auto anima1 = animator->GetAnimetionParam(animator->mCurrentSet);
+		auto anima2 = animator->GetAnimetionParam(id);
+		anima1.mWeight = 0;
+		anima2.mWeight = 1;
+		anima1.mTime = 0;
+		anima2.mTime = 0;
+		anima2.mLoop = loop;
+		animator->SetAnimetionParam(animator->mCurrentSet, anima1);
+		animator->SetAnimetionParam(id, anima2);
+		animator->mCurrentSet = id;
+	}
 }
