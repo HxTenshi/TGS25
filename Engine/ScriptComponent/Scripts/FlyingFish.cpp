@@ -76,6 +76,8 @@ void FlyingFish::Finish(){
 void FlyingFish::OnCollideBegin(Actor* target){
 	Enemy::OnCollideBegin(target);
 	if (target->Name() == "Floor") {
+		// ÚG‚µ‚½°‚ÌˆÊ’u‚ð“ü‚ê‚é
+		mFloorPosition = target->mTransform->Position().y;
 		// °‚ÉÚG‚µ‚½‚çtrue
 		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsInitSet = true;
