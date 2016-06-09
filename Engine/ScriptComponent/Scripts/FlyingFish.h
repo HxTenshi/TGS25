@@ -41,6 +41,12 @@ private:
 	float mAddChaseStopDistance;
 	float mFloorPosition;
 	float mUpCosine;
+	SERIALIZE
+	float mSetSearchRengeScaleX;
+	SERIALIZE
+	float mSetSearchRengeScaleY;
+	SERIALIZE
+	float mSetSearchRengeScaleZ;
 	bool mIsJamp;
 	bool mIsInitSet;
 	//bool mIsFloorHit;

@@ -80,13 +80,20 @@ void Enemy::OnCollideBegin(Actor* target){
 		//	playerScript->Damage(mDamage);
 		//}
 
+		// 死亡した瞬間に当たり判定をトリガーにする
+		/*auto objPhysxCollider = gameObject->GetComponent<PhysXColliderComponent>();
+		objPhysxCollider->SetIsTrigger(true);*/
+		// プレイヤーの方に回転
+		auto parentPosition = mParentObj->mTransform->Position();
+		auto playerPosition = target->mTransform->Position();
+		auto v = parentPosition - playerPosition;
+		auto angle = atan2(v.x, v.z);
+
+		auto quaternion = XMQuaternionRotationAxis(mParentObj->mTransform->Up(), angle);
+
 		// ダメージを与えて自分を消す(仮設定)
 		playerScript->Damage(mDamage);
 		mIsDead = true;
-
-		/*game->DestroyObject(mPlayerSearchObj);
-		game->DestroyObject(gameObject);
-		game->DestroyObject(gameObject->mTransform->GetParent());*/
 
 		/*auto houkou = gameObject->mTransform->Position() - target->mTransform->Position();
 		mKnockBackHoukou = XMVector3Normalize(houkou);*/
@@ -168,7 +175,7 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 		auto createCGObjName = baseName.c_str();
 		auto CGObj = game->CreateActor(createCGObjName);
 		game->AddObject(CGObj);
-		CGObj->mTransform->SetParent(gameObject);
+		CGObj->mTransform->SetParent(mParentObj);
 
 		mAddSearchObjCount = 1;
 	}
@@ -315,6 +322,13 @@ void Enemy::SetResPawnTime(int time) {
 	mInitResPawnTime = time;
 }
 
+// 索敵範囲のサイズを変更します
+void Enemy::SetSearchRangeScale(const int scaleX, const int scaleY, const int scaleZ) {
+	mScalarX = scaleX;
+	mScalarY = scaleY;
+	mScalarZ = scaleZ;
+}
+
 // 一定距離まで落ちたらリスポーンします
 void Enemy::ResPawnLine() {
 	// 一定の位置まで落ちたらリスポーンタイムを減算
@@ -323,9 +337,33 @@ void Enemy::ResPawnLine() {
 		if (mResPawnTime < 0) {
 			Enemy::InitStatus();
 			mResPawnTime = mInitResPawnTime;
+			mInitSetCount = 0;
 		}
-
+		
 		mResPawnTime--;
+	}
+}
+
+// 敵の死亡行動です
+void Enemy::DeadMove() {
+
+	if (mParentObj->mTransform->Rotate().x < 3.141593f) {
+		auto position = mParentObj->mTransform->Position();
+		auto rotate = mParentObj->mTransform->Rotate();
+		// 回転
+		rotate.x += 3.141593f / (180.0f / 4.0f);
+		mParentObj->mTransform->Rotate(rotate);
+		// 上昇
+		auto up = mParentObj->mTransform->Up() * cosf(gameObject->mTransform->Rotate().x) * 0.01f * 20.0f;
+		mParentObj->mTransform->Position(position + up);
+		
+		// 再度触れてもダメージ無し
+		Enemy::SetDamage(0);
+	}
+	else {
+		game->DestroyObject(mPlayerSearchObj);
+		game->DestroyObject(gameObject);
+		game->DestroyObject(gameObject->mTransform->GetParent());
 	}
 }
 
@@ -371,32 +409,16 @@ void Enemy::Move() {
 		Enemy::ResPawnLine();
 	}
 	else {
-		/*auto rotate = mParentObj->mTransform->Rotate();
-		auto addRotate = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);*/
-		if (mParentObj->mTransform->Rotate().x < 3.141593f) {
-			auto position = mParentObj->mTransform->Position();
-			auto rotate = mParentObj->mTransform->Rotate();
-			// 回転
-			rotate.x += 3.141593f / (180.0f / 4.0f);
-			mParentObj->mTransform->Rotate(rotate);
-			// 上昇
-			auto up = mParentObj->mTransform->Up() * cosf(gameObject->mTransform->Rotate().x) * 0.01f * 20.0f;
-			mParentObj->mTransform->Position(position + up);
-		}
-		else {
-			game->DestroyObject(mPlayerSearchObj);
-			game->DestroyObject(gameObject);
-			game->DestroyObject(gameObject->mTransform->GetParent());
-		}
+		// 死亡行動の呼び出し
+		Enemy::DeadMove();
 	}
-
 	Enemy::ResetStatus();
 }
 
-// 敵のステータスの初期化
+// 親のステータスの初期化
 void Enemy::InitStatus() {
-	gameObject->mTransform->Position(mInitPosition);
-	gameObject->mTransform->Rotate(mInitRotate);
+	mParentObj->mTransform->Position(mInitPosition);
+	mParentObj->mTransform->Rotate(mInitRotate);
 }
 
 // 敵のステータスのリセット

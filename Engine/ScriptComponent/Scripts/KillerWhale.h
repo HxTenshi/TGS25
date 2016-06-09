@@ -33,6 +33,12 @@ private:
 	float mSetSpeed;
 	SERIALIZE
 	float mAddChaseStopDistance;
+	SERIALIZE
+	float mSetSearchRengeScaleX;
+	SERIALIZE
+	float mSetSearchRengeScaleY;
+	SERIALIZE
+	float mSetSearchRengeScaleZ;
 	bool mIsShot;
 	XMVECTOR mGRAVITY;
 };

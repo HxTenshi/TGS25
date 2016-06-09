@@ -22,6 +22,7 @@ void KillerWhale::Start(){
 	Enemy::SetDamage(mSetDamage);
 	Enemy::SetResPawnTime(mSetResPawnTime);
 	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
+	Enemy::SetSearchRangeScale(mSetSearchRengeScaleX, mSetSearchRengeScaleY, mSetSearchRengeScaleZ);
 
 	mInitBulletShotTime = mBulletShotTime;
 	mInitRecastTime = mRecastTime;

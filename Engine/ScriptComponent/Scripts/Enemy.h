@@ -47,11 +47,15 @@ public:
 	void SetDamage(int damage);
 	// リスポーンタイムです
 	void SetResPawnTime(int time);
+	// 索敵範囲のサイズを変更します
+	void SetSearchRangeScale(const int scaleX, const int scaleY, const int scaleZ);
 	// 一定距離まで落ちたらリスポーンします
 	void ResPawnLine();
+	// 敵の死亡行動です
+	void DeadMove();
 	// 敵の行動関数
 	void Move();
-	// 敵のステータスを初期化します
+	// 親のステータスを初期化します
 	void InitStatus();
 	// 敵のステータスをリセットします
 	void ResetStatus();

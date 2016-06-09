@@ -30,6 +30,7 @@ void FlyingFish::Start(){
 	Enemy::SetDamage(mSetDamage);
 	Enemy::SetResPawnTime(mSetResPawnTime);
 	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
+	Enemy::SetSearchRangeScale(mSetSearchRengeScaleX, mSetSearchRengeScaleY, mSetSearchRengeScaleZ);
 
 	auto floorObj = game->FindActor("Floor");
 	mFloorPosition = floorObj->mTransform->Position().y;
