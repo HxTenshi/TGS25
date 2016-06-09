@@ -92,7 +92,7 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 	if (target->Name() == "Air" || target->Name() == "Floor"){
 		isJump = false;
-
+		AnimationChange(0, false);
 		if (!isGround)
 		{
 			auto bomb = game->CreateActor("Assets/tgs/SmokeBomb.json");
@@ -128,7 +128,7 @@ void SailBoard::OnCollideEnter(Actor* target){
 		{
 			mPlyerHP += RecoveryPoint;
 		}
-		AnimationChange(0, false);
+		
 		mTrick = false;
 		mJumpYRotate = 0;
 
@@ -262,7 +262,14 @@ void SailBoard::Trick()
 		mTrickPoint = abs(mTrickRotate.x) + abs(mTrickRotate.y);
 		if (mTrickPoint > 0.1f)
 		{
-			AnimationChange(1, false);
+			auto temp = mBird->GetComponent<AnimationComponent>();
+			if (temp)
+			{
+				if (temp->mCurrentSet != 1)
+				{
+					AnimationChange(1, false);
+				}
+			}
 			mTrick = true;
 		}
 
