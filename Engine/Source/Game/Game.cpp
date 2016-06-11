@@ -164,6 +164,11 @@ Game::Game(){
 		auto act = ((Actor*)p);
 		mSelectActor.SetSelect(act);
 	});
+	Window::SetWPFCollBack(MyWindowMessage::ActorDoubleClick, [&](void* p)
+	{
+		auto act = ((Actor*)p);
+		mCamera.GoActorPosition(act);
+	});
 	Window::SetWPFCollBack(MyWindowMessage::SetActorParent, [&](void* p)
 	{
 		int intptr = gIntPtrStack.top();

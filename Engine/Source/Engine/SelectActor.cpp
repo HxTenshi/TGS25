@@ -265,8 +265,10 @@ void SelectActor::UpdateInspector(){
 			}
 		}
 		else{
-			if (mSelects.SelectNum() == 1)mSelects.GetSelectOne()->CreateInspector();
-
+			if (mSelects.SelectNum() == 1){
+				mSelects.GetSelectOne()->CreateInspector();
+				Window::SelectTreeViewItem(mSelects.GetSelectOne()->mTreeViewPtr);
+			}
 		}
 
 		mCreateInspector = true;
