@@ -10,6 +10,7 @@
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
+#include"../h_component.h"
 
 #include"Game\Component\MaterialComponent.h"
 #include"Sail.h"
@@ -33,12 +34,27 @@ void SailBoard::Initialize(){
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Start(){
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
-	mBird = game->FindActor("Bird");
+	mAnimator = game->FindActor("Bird")->GetComponent<AnimationComponent>();
+	
 }
 
 //毎フレーム呼ばれます
 void SailBoard::Update(){
-	
+
+	auto sail = game->FindActor("Sail")->GetScript<Sail>();
+	if (sail)
+	{
+		if (sail->GetSailRotateRad() < 0 &&  mAnimator->GetAnimetionParam(0).mTimeScale >= 1)
+		{
+			AnimationReverse(-2);
+		}
+		else if(sail->GetSailRotateRad() > 0 &&  mAnimator->GetAnimetionParam(0).mTimeScale <= -1)
+		{
+			AnimationReverse(2);
+		}
+	}
+
+
 	if (Input::Down(KeyCoord::Key_Z)) mPlyerHP--;
 	mPlyerHP -= SlipDamege;
 	IsUnrivaled();
@@ -92,7 +108,7 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 	if (target->Name() == "Air" || target->Name() == "Floor"){
 		isJump = false;
-		AnimationChange(0, false);
+		AnimationChange(0, false,0);
 		if (!isGround)
 		{
 			auto bomb = game->CreateActor("Assets/tgs/SmokeBomb.json");
@@ -104,9 +120,9 @@ void SailBoard::OnCollideBegin(Actor* target){
 			isGround = true;
 		}
 
-		float power = 2.0f;
+		/*float power = 2.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
-		gameObject->mTransform->AddForce(v*power);
+		gameObject->mTransform->AddForce(v*power);*/
 		gameObject->mTransform->Quaternion(XMQuaternionMultiply(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0),gameObject->mTransform->Quaternion()));
 	}
 
@@ -199,6 +215,7 @@ bool SailBoard::IsUnrivaled()
 
 void SailBoard::Damage(int damage)
 {
+	AnimationChange(2, false, 0);
 	mPlyerHP -= damage;
 }
 
@@ -262,13 +279,9 @@ void SailBoard::Trick()
 		mTrickPoint = abs(mTrickRotate.x) + abs(mTrickRotate.y);
 		if (mTrickPoint > 0.1f)
 		{
-			auto temp = mBird->GetComponent<AnimationComponent>();
-			if (temp)
+			if (mAnimator->mCurrentSet != 1)
 			{
-				if (temp->mCurrentSet != 1)
-				{
-					AnimationChange(1, false);
-				}
+				AnimationChange(1, false, 0);
 			}
 			mTrick = true;
 		}
@@ -336,20 +349,44 @@ bool SailBoard::Shake()
 	return false;
 }
 
-void SailBoard::AnimationChange(int id,bool loop)
+void SailBoard::AnimationChange(int id, bool loop, float timer)
 {
-	auto animator = mBird->GetComponent<AnimationComponent>();
-	if (animator)
+	if (!mAnimator) return;
+	AnimeParam newAnime;
+	auto anima1 = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
+	auto anima2 = mAnimator->GetAnimetionParam(id);
+	anima1.mWeight = 0;
+	anima2.mWeight = 1;
+	anima1.mTimeScale = 1;
+	anima2.mTimeScale = 1;
+	anima1.mTime = 0;
+	anima2.mTime = 0;
+	anima2.mLoop = loop;
+	mAnimator->SetAnimetionParam(mAnimator->mCurrentSet, anima1);
+	mAnimator->SetAnimetionParam(id, anima2);
+	mAnimator->mCurrentSet = id;
+}
+
+void SailBoard::AnimationReverse(float TimeScale)
+{
+	if (!mAnimator) return;
+	auto anima = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
+	anima.mTimeScale = TimeScale;
+	mAnimator->SetAnimetionParam(mAnimator->mCurrentSet, anima);
+}
+
+bool SailBoard::IsCurrentAnimation()
+{
+	if (!mAnimator) return false;
+
+	auto param = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
+	if (param.mTimeScale == 1 && param.mTime <= 61)
 	{
-		auto anima1 = animator->GetAnimetionParam(animator->mCurrentSet);
-		auto anima2 = animator->GetAnimetionParam(id);
-		anima1.mWeight = 0;
-		anima2.mWeight = 1;
-		anima1.mTime = 0;
-		anima2.mTime = 0;
-		anima2.mLoop = loop;
-		animator->SetAnimetionParam(animator->mCurrentSet, anima1);
-		animator->SetAnimetionParam(id, anima2);
-		animator->mCurrentSet = id;
+		return true;
 	}
+	else if(param.mTimeScale == -1 && param.mTime >= 0)
+	{
+		return true;
+	}
+	return false;
 }

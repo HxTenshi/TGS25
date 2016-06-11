@@ -16,4 +16,9 @@ public:
 private:
 	//ƒƒ“ƒo•Ï”
 	float mAngel;
+	bool isPlayerFind;
+	SERIALIZE
+		float FindDistance;
+	SERIALIZE
+		float Speed;
 };

@@ -29,11 +29,11 @@ void PlayerManager::Update(){
 	if (mCredit <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
 	if (mMaxPoint <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
 
-	auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();
+	/*auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();
 	auto text2 = game->FindActor("column10")->GetComponent<TextureModelComponent>();
 
 	text1->SetTexture("Assets/num/" +std::to_string(mCredit % 10) + ".png");
-	text2->SetTexture("Assets/num/" + std::to_string((mCredit / 10) % 10) + ".png");
+	text2->SetTexture("Assets/num/" + std::to_string((mCredit / 10) % 10) + ".png");*/
 
 
 	auto hane1 = game->FindActor("hane1")->GetComponent<TextureModelComponent>();

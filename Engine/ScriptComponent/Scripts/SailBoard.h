@@ -34,7 +34,11 @@ private:
 	bool Dead();
 	void ReSpawn();
 	bool Shake();
-	void AnimationChange(int id,bool loop);
+
+
+	void AnimationChange(int id,bool loop,float timer);
+	void AnimationReverse(float TimeScale = 1.0f);
+	bool IsCurrentAnimation();
 	
 
 private:
@@ -60,8 +64,7 @@ private:
 
 	//プレイヤーのHP
 	float mPlyerHP;
-
-	Actor* mBird;
+	weak_ptr<AnimationComponent> mAnimator;
 
 	SERIALIZE
 	float AttackSpeed; //攻撃できるスピード
