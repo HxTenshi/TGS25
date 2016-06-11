@@ -4,6 +4,7 @@
 #include <vector>
 
 class PlayerSearch;
+class EnemyCG;
 
 enum class EnemyState {
 	PlayerSearch,
@@ -30,7 +31,7 @@ public:
 	// 索敵関数です
 	virtual void PlayerSearchMode(const XMVECTOR objScale);
 	// プレイヤーの方向に回転します
-	virtual void PlayerChaseMode();
+	virtual void PlayerChaseMode(const float startPoint, const float endPoint);
 	// プレイヤーを追跡します
 	virtual void PlayerChase();
 	// プレイヤーとの距離が短いときの行動です
@@ -39,6 +40,8 @@ public:
 	virtual void CenterDistanceAttack();
 	// プレイヤーとの距離が長いときの行動です
 	virtual void LongDistanceAttack();
+	// 竜巻から逃げるときの行動です
+	virtual void TornadoEscapeMove(Actor* tornadoObj);
 	// プレイヤーに当たったらノックバックします
 	virtual void KnockBack();
 	// 敵の目の前にオブジェを生成します(親がいる場合)
@@ -48,11 +51,13 @@ public:
 	// リスポーンタイムです
 	void SetResPawnTime(int time);
 	// 索敵範囲のサイズを変更します
-	void SetSearchRangeScale(const int scaleX, const int scaleY, const int scaleZ);
+	void SetSearchRangeScale(const float scaleX, const float scaleY, const float scaleZ);
 	// 一定距離まで落ちたらリスポーンします
 	void ResPawnLine();
 	// 敵の死亡行動です
 	void DeadMove();
+	// 死亡処理を行います
+	void Dead();
 	// 敵の行動関数
 	void Move();
 	// 親のステータスを初期化します
@@ -61,23 +66,31 @@ public:
 	void ResetStatus();
 	// プレイヤーの追跡を中止する距離の加算です
 	void AddPlayerChaseStopDistance(float distance);
+	// 竜巻のステータスを入れます
+	void SetTornadoStatus(const float power, const float interval, const float distance);
 	// プレイヤーと指定されたオブジェの位置との距離を計算して返します
 	float GetPlayerDistance(Actor* playerObj, Actor* otherObj);
-	// アニメーションのIDを渡します
-	int GetAnimationID();
+	// 子供側からアニメーションのIDを変えます
+	void SetAnimationID(int id);
+	// 子供側からアニメーションのタイムスケールを変更します
+	void SetAnimationTimeScale(float timeScale);
+	// 子供側からアニメーションのループを変更します
+	void SetAnimationLoop(bool isLoop);
 
 protected:
 	//メンバ変数
 	Actor* mPlayerSearchObj;				// 索敵範囲オブジェクト
 	Actor* mParentObj;						// 空の親オブジェクト
 	Actor* mEnemyCGObj;						// 敵のグラフィックオブジェクト
+	Actor* mTornadoObj;						// 竜巻のオブジェクト
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
+	EnemyCG* mEnemyCGScript;				// 敵のCGオブジェクトのスクリプト
 	EnemyState mEnemyState;					// enumクラスのEnemyState(敵の行動選択時に使用)
 	XMVECTOR mSize;							// 敵の大きさ
 	XMVECTOR mInitPosition;					// 初期位置
 	XMVECTOR mInitRotate;;					// 初期の回転
 	XMVECTOR mSearchObjPosition;			// 索敵範囲の位置
-	XMVECTOR mKnockBackHoukou;				// ノックバックの方向
+	XMVECTOR mKnockBackDIrection;				// ノックバックの方向
 	int mAddSearchObjCount;					// 索敵範囲オブジェの作成カウント
 	int mDamage;							// プレイヤーへのダメージ
 	int mResPawnTime;						// リスポーンタイム
@@ -93,14 +106,26 @@ protected:
 	float mScalarY;							// スケール値(Y)
 	float mScalarZ;							// スケール値(Z)
 	float mAddPlayerChaseStopDistance;		// 追跡中止の距離に加算する値
+	float mTornadoRotate;					// (未使用？)
+	float mTornadoPower;					// 竜巻の吸い込む力
+	float mTornadoDistance;
+	float mBlowAwayPower;					// 吹き飛ぶ速度
+	float mBlowAwayInterval;				// 吹き飛び間隔
 	//float mInitParentPositionY;				// 親の初期位置(Y)
-	const float mResPawnHeigth = -10.0f;	// リスポーンする高さ
 	bool mIsFloorHit;						// 床と当たったか
+	bool mIsCloudHit;						// 雲と当たったか
 	bool mIsImmortalBody;					// 不死身の敵か(未実装)
 	bool mIsDistanceAct;					// 距離判定の行動をするか
+	bool mIsBlowAway;						// 死亡時に吹き飛ぶかどうか
+	bool mIsKnockBackDirection;				// ノックバックの方向を決めたか
+	bool mIsChaseRotate;					// プレイヤーの方向を向くかどうか
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)
+	bool mIsTornadoRange;					// 竜巻の範囲内か
 	bool mIsDead;							// プレイヤーと当たったか
 	// 行動配列
 	typedef std::vector<EnemyState> DistanceVector;
 	DistanceVector mDistanceVector;
+
+private:
+	const float mResPawnHeigth = -10.0f;	// リスポーンする高さ
 };

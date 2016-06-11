@@ -2,8 +2,6 @@
 #pragma once
 #include "main.h"
 
-class Enemy;
-
 class EnemyCG :public IDllScriptComponent{
 public:
 	void Initialize()override;
@@ -13,9 +11,18 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+	// アニメーションのIDを変更します
+	void SetAnimationID(int id);
+	// アニメーションのタイムスケールを変更します
+	void SetTimeScale(float timeScale);
+	// アニメーションのループを変更します
+	void SetLoop(bool isLoop);
 
 private:
 	//メンバ変数
-	int mAnimationID;
-	Enemy* mEnemyScript;
+	int mCurrentAnimationID;
+	int mPastAnimationID;
+	float mAnimationTimeScale;
+	bool mIsAnimationLoop;
+	bool mChangeStatus;
 };

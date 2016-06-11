@@ -47,6 +47,12 @@ private:
 	float mSetSearchRengeScaleY;
 	SERIALIZE
 	float mSetSearchRengeScaleZ;
+	SERIALIZE
+	float mSetTornadoPower;
+	SERIALIZE
+	float mSetTornadoBlowAwayInterval;
+	SERIALIZE
+	float mSetTornadoDistance;
 	bool mIsJamp;
 	bool mIsInitSet;
 	//bool mIsFloorHit;
