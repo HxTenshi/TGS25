@@ -12,7 +12,7 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PointItem::Initialize(){
-
+	isPlayerFind = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -25,10 +25,14 @@ void PointItem::Update()
 {
 	auto player = game->FindActor("Board");
 	auto v = player->mTransform->Position() - gameObject->mTransform->Position();
-	if (XMVector3Length(v).x < 5)
+	if (XMVector3Length(v).x < FindDistance)
+	{
+		isPlayerFind = true;
+	}
+	if (isPlayerFind)
 	{
 		v = XMVector3Normalize(v);
-		gameObject->mTransform->Position(gameObject->mTransform->Position() + (v * 0.1f));
+		gameObject->mTransform->Position(gameObject->mTransform->Position() + (v * Speed));
 	}
 
 	mAngel += 0.01f;

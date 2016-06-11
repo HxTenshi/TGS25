@@ -33,6 +33,18 @@ private:
 	float mSetSpeed;
 	SERIALIZE
 	float mAddChaseStopDistance;
+	SERIALIZE
+	float mSetSearchRengeScaleX;
+	SERIALIZE
+	float mSetSearchRengeScaleY;
+	SERIALIZE
+	float mSetSearchRengeScaleZ;
+	SERIALIZE
+	float mSetTornadoPower;
+	SERIALIZE
+	float mSetTornadoBlowAwayInterval;
+	SERIALIZE
+	float mSetTornadoDistance;
 	bool mIsShot;
 	XMVECTOR mGRAVITY;
 };

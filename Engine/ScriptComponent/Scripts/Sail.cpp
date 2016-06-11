@@ -13,6 +13,7 @@
 //生成時に呼ばれます（エディター中も呼ばれます）
 void Sail::Initialize(){
 	mSailRotate = 0.00f;
+	mVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -25,9 +26,11 @@ void Sail::Start(){
 void Sail::Update(){
 
 	SailRotate();
-
 	auto parent = gameObject->mTransform->GetParent()->mTransform->GetParent();
-	if(!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * Speed);        //PS4デバック
+	mVelocity = parent->mTransform->Forward() * MovePower() * Speed;// *game->DeltaTime;
+	mVelocity.y = -1;
+	//if(!parent->GetScript<SailBoard>()->GetIsJump()) parent->GetComponent<PhysXComponent>()->SetForceVelocity(mVelocity);
+	if (!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * Speed);
 	//parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);         //PCデバック
 
 }
@@ -75,6 +78,11 @@ float Sail::MovePower()
 	auto rad = XMVector3Dot(windvec, saildir);
 
 	return abs(rad.x);
+}
+
+float Sail::GetSailRotateRad()
+{
+	return mSailRotate;
 }
 
 void Sail::SailRotate()
