@@ -14,9 +14,6 @@
 //生成時に呼ばれます（エディター中も呼ばれます）
 void CreateEnemyObj::Initialize(){
 	mIsCreateObj = false;
-
-	/*auto createName = ("Assets/KillerWhale");
-	game->Debug()->Log(createName);*/
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -105,9 +102,8 @@ void CreateEnemyObj::Update(){
 		else {
 			mCreateTimeInterval--;
 		}
-	
 	}
-
+	// デバッグ用
 	if (mCreateCount <= 0) {
 		auto material = gameObject->GetComponent<MaterialComponent>();
 		auto color = XMFLOAT4(0, 0, 1, 1);
@@ -118,7 +114,6 @@ void CreateEnemyObj::Update(){
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void CreateEnemyObj::Finish(){
-	//gameObject->mTransform->Children().clear();
 	gameObject->mTransform->AllChildrenDestroy();
 }
 
@@ -136,7 +131,6 @@ void CreateEnemyObj::OnCollideEnter(Actor* target){
 void CreateEnemyObj::OnCollideExit(Actor* target){
 	(void)target;
 }
-
 
 int CreateEnemyObj::GetRandom(int min, int max) {
 	// 範囲乱数公式…らしいです

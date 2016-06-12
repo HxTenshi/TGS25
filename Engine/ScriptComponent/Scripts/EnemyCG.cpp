@@ -11,7 +11,7 @@ void EnemyCG::Initialize(){
 	mPastAnimationID = mCurrentAnimationID;
 	mAnimationTimeScale = 1.0f;
 	mIsAnimationLoop = true;
-	mChangeStatus = false;
+	mIsChangeStatus = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -29,46 +29,34 @@ void EnemyCG::Update(){
 	if (mCurrentAnimationID != mPastAnimationID) {
 		// アニメーションを変更
 		animation->ChangeAnimetion(mCurrentAnimationID);
-		// 各アニメーションのWeightを変更
+		// 今のアニメーションの設定を変更する
 		// 仮状態で１・０の変更にする
-		auto nowAnimaParam = animation->GetAnimetionParam(mCurrentAnimationID);
-		nowAnimaParam.mWeight = 1.0f;
-		nowAnimaParam.mTime = 0.0f;
-		nowAnimaParam.mTimeScale = 1.0f;
-
+		auto currentAnimaParam = animation->GetAnimetionParam(mCurrentAnimationID);
+		currentAnimaParam.mWeight = 1.0f;
+		currentAnimaParam.mTime = 0.0f;
+		currentAnimaParam.mTimeScale = 1.0f;
+		// 前に使っていたアニメーションのステータスをリセットする
 		auto pastAnimation = animation->GetAnimetionParam(mPastAnimationID);
 		pastAnimation.mWeight = 0.0f;
 		pastAnimation.mTime = 0.0f;
 		pastAnimation.mTimeScale = 1.0f;
-
-		//auto aParam = gameObject->GetComponent<AnimeParam>();
-
 		// 設定したステータスをセットする
-		animation->SetAnimetionParam(mCurrentAnimationID, nowAnimaParam);
+		animation->SetAnimetionParam(mCurrentAnimationID, currentAnimaParam);
 		animation->SetAnimetionParam(mPastAnimationID, pastAnimation);
 
 		mPastAnimationID = mCurrentAnimationID;
 	}
 
-
 	auto animaParam = animation->GetAnimetionParam(mCurrentAnimationID);
 	// ステータスに変更があった場合は一回だけ変える
-	if (mChangeStatus) {
+	if (mIsChangeStatus) {
 		auto animaParam = animation->GetAnimetionParam(mCurrentAnimationID);
 		animaParam.mTimeScale = mAnimationTimeScale;
 		animaParam.mLoop = mIsAnimationLoop;
-		//pastAnimation.mTime += 
-		/*auto deltaTime = game->DeltaTime()->GetDeltaTime();
-		animaParam.mTime += deltaTime;*/
 		animation->SetAnimetionParam(mCurrentAnimationID, animaParam);
-
-		mChangeStatus = false;
-	}	
-
-	//game->Debug()->Log(std::to_string(animaParam.mTime));
-	//game->DeltaTime()->SetTimeScale(1.0f);
-	//game->Debug()->Log(std::to_string(game->DeltaTime()->GetDeltaTime()));
-	//game->Debug()->Log(std::to_string(mCurrentAnimationID));
+		// ステータスを変えたら連続して変えないようにする
+		mIsChangeStatus = false;
+	}
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -95,15 +83,23 @@ void EnemyCG::OnCollideExit(Actor* target){
 void EnemyCG::SetAnimationID(int id) {
 	if (mCurrentAnimationID != id) {
 		mCurrentAnimationID = id;
-		mChangeStatus = true;
+		mIsChangeStatus = true;
 	}
+}
+
+// アニメーションのタイムを変更します
+void EnemyCG::SetAnimationTime(float time) {
+	auto animation = gameObject->GetComponent<AnimationComponent>();
+	auto currentAnimaParam = animation->GetAnimetionParam(mCurrentAnimationID);
+	currentAnimaParam.mTime = time;
+	animation->SetAnimetionParam(mCurrentAnimationID, currentAnimaParam);
 }
 
 // アニメーションのタイムスケールを変更します
 void EnemyCG::SetTimeScale(float timeScale) {
 	if (mAnimationTimeScale != timeScale) {
 		mAnimationTimeScale = timeScale;
-		mChangeStatus = true;
+		mIsChangeStatus = true;
 	}
 }
 
@@ -111,6 +107,13 @@ void EnemyCG::SetTimeScale(float timeScale) {
 void EnemyCG::SetLoop(bool isLoop) {
 	if (mIsAnimationLoop != isLoop) {
 		mIsAnimationLoop = isLoop;
-		mChangeStatus = true;
+		mIsChangeStatus = true;
 	}
+}
+
+// 現在のアニメーションのタイムを取得します
+float EnemyCG::GetAnimationTime() {
+	auto animation = gameObject->GetComponent<AnimationComponent>();
+	auto currentAnimaParam = animation->GetAnimetionParam(mCurrentAnimationID);
+	return currentAnimaParam.mTime;
 }

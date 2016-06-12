@@ -1,10 +1,10 @@
 #include "KillerWhale.h"
 #include "Enemy.h"
 
-#include "Game/Actor.h"
-#include "Game/Script/IGame.h"
-#include "Game/Component/TransformComponent.h"
-#include "Game/Component/PhysXComponent.h"
+//アクターなど基本のインクルード
+#include "h_standard.h"
+//コンポーネント全てのインクルード
+#include "h_component.h"
 #include "Engine\DebugEngine.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -24,7 +24,9 @@ void KillerWhale::Start(){
 	Enemy::SetResPawnTime(mSetResPawnTime);
 	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
 	Enemy::SetSearchRangeScale(mSetSearchRengeScaleX, mSetSearchRengeScaleY, mSetSearchRengeScaleZ);
-	Enemy::SetTornadoStatus(mSetTornadoPower, mSetTornadoBlowAwayInterval, mSetTornadoDistance);
+	Enemy::SetTornadoStatus(
+		mSetTornadoPower, mSetTornadoRotateScale, mSetAddTornadoRotateScale,
+		mSetTornadoRotatePower, mSetTornadoUpPower, mSetTornadoDistance);
 
 	mInitBulletShotTime = mBulletShotTime;
 	mInitRecastTime = mRecastTime;
@@ -33,7 +35,7 @@ void KillerWhale::Start(){
 
 //毎フレーム呼ばれます
 void KillerWhale::Update(){
-	Enemy::Move();	
+	Enemy::Move();
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -69,13 +71,10 @@ void KillerWhale::SearchMove() {
 }
 
 void KillerWhale::ShortDistanceAttack() {
-
+	// 攻撃モードをオンにする
 	mIsAttckMode = true;
-	//mAnimationID = 1;
 	Enemy::SetAnimationID(1);
-	//Enemy::SetAnimationLoop(false);
-
-	//game->Debug()->Log("発射");
+	// カウントが０になったら水鉄砲の弾を発射
 	if (mBulletShotTime <= 0) {
 		if (!mIsShot) {
 			// 水鉄砲の弾の生成
@@ -83,30 +82,44 @@ void KillerWhale::ShortDistanceAttack() {
 			game->AddObject(gunBullet);
 			// 位置の変更
 			Enemy::SetParentForwardObj(gunBullet);
-
-			Enemy::SetAnimationTimeScale(1.0f);
-
 			mIsShot = true;
-			Enemy::SetAnimationLoop(false);
+			Enemy::SetAnimationTimeScale(1.0f);
+			//Enemy::SetAnimationLoop(false);
 		}
 		else {
-			mRecastTime--;
+			auto deltaTime = game->DeltaTime()->GetDeltaTime();
+			//game->Debug()->Log(std::to_string(deltaTime * 50));
+			//mRecastTime--;
+			mRecastTime -= deltaTime * 30;
+			Enemy::SetAnimationTimeScale(2.0f * (15.0f / mInitRecastTime));
 			if (mRecastTime <= 0) {
 				mBulletShotTime = mInitBulletShotTime;
 				mRecastTime = mInitRecastTime;
 				mIsShot = false;
 				mIsAttckMode = false;
-				Enemy::SetAnimationLoop(true);
+				Enemy::SetAnimationTime(0.0f);
+				//Enemy::SetAnimationLoop(true);
 			}
 		}	
 	}
 	else {
 		// 発射時間が0になるまでプレイヤーの方向を向く
-		mBulletShotTime--;
+		auto deltaTime = game->DeltaTime()->GetDeltaTime();
+		//game->Debug()->Log(std::to_string(deltaTime * 50));
+		//mBulletShotTime--;
+		mBulletShotTime -= deltaTime * 30;
 		Enemy::PlayerChaseMode(0.0f, 0.0f);
-		Enemy::SetAnimationTimeScale(2.0f * (35.0f / mInitBulletShotTime));
+		Enemy::SetAnimationTimeScale(2.0f * (34.0f / mInitBulletShotTime));
+		//game->Debug()->Log(std::to_string(Enemy::GetAnimationTime()));
 	}
 
+	if (Enemy::GetAnimationTime() >= 40.0f) {
+		Enemy::SetAnimationLoop(false);
+	}
+	else {
+		Enemy::SetAnimationLoop(true);
+	}
+	// Enemy::SetAnimationLoop(true);
 }
 
 void KillerWhale::CenterDistanceAttack() {
@@ -118,11 +131,12 @@ void KillerWhale::LongDistanceAttack() {
 
 	Enemy::SetAnimationID(0);
 	Enemy::SetAnimationLoop(true);
-
 	auto parentPosition = mParentObj->mTransform->Position();
 	auto forwardMove = mParentObj->mTransform->Forward() * mSpeed * 0.01f;
+	// 床に当たっていないなら落ちる(あとで書き換える)
 	if (!mIsFloorHit) {
 		forwardMove += mGRAVITY;
 	}
-	mParentObj->mTransform->Position(parentPosition - forwardMove);
+	
+	mParentObj->mTransform->Position((parentPosition - forwardMove) * Enemy::GetEnemyDeltaTime());
 }

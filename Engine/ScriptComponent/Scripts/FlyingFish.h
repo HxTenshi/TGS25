@@ -41,16 +41,24 @@ private:
 	float mAddChaseStopDistance;
 	float mFloorPosition;
 	float mUpCosine;
+	// çıìGîÕàÕä÷òA
 	SERIALIZE
 	float mSetSearchRengeScaleX;
 	SERIALIZE
 	float mSetSearchRengeScaleY;
 	SERIALIZE
 	float mSetSearchRengeScaleZ;
+	// ó≥ä™ä÷òA
 	SERIALIZE
 	float mSetTornadoPower;
 	SERIALIZE
-	float mSetTornadoBlowAwayInterval;
+	float mSetTornadoRotateScale;
+	SERIALIZE
+	float mSetAddTornadoRotateScale;
+	SERIALIZE
+	float mSetTornadoRotatePower;
+	SERIALIZE
+	float mSetTornadoUpPower;
 	SERIALIZE
 	float mSetTornadoDistance;
 	bool mIsJamp;

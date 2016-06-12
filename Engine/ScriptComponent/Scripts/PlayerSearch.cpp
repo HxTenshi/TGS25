@@ -1,11 +1,9 @@
 #include "PlayerSearch.h"
 
-#include "Game/Actor.h"
-#include "Game/Script/IGame.h"
-#include "Game/Component/TransformComponent.h"
-#include "Game/Component/PhysXColliderComponent.h"
-#include "Engine\DebugEngine.h"
-
+//アクターなど基本のインクルード
+#include "h_standard.h"
+//コンポーネント全てのインクルード
+#include "h_component.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PlayerSearch::Initialize(){
@@ -19,51 +17,23 @@ void PlayerSearch::Start(){
 	mSizeZ = gameObject->mTransform->Scale().z;
 	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 	collider->SetScale(gameObject->mTransform->Scale());
-
+	// デフォルトの範囲外設定
 	mChaseStopDistance = mSizeZ * (5.0f / 3.0f);
-	//game->Debug()->Log(std::to_string(mSizeZ));
 }
 
 //毎フレーム呼ばれます
 void PlayerSearch::Update(){
 	// プレイヤーの捜索
 	auto playerObj = game->FindActor("Board");
-	if(!playerObj) mIsPlayerHit = false;
-
-	//game->Debug()->Log(std::to_string(mIsPlayerHit));
-
+	if(playerObj == nullptr) mIsPlayerHit = false;
+	// プレイヤーが当たったら
 	if (mIsPlayerHit) {
-
+		// プレイヤーと親の頭部の距離を求める
 		PlayerDistance(playerObj);
-
-		/*game->Debug()->Log("敵の索敵範囲外距離:" + std::to_string(mChaseStopDistance));
-		game->Debug()->Log("プレイヤーとの距離:" + std::to_string(mPlayerDistance));*/
-
-		// mPlayerDistance
-
-		//game->Debug()->Log(std::to_string(mChaseStopDistance));
-		
-		//// 親の取得
-		//auto parentObj = gameObject->mTransform->GetParent();
-		//auto parentPosition = parentObj->mTransform->Position();
-		//auto parentRotate = parentObj->mTransform->Rotate();
-
-		//// 親の頭部にベクトルを設定する
-		//auto parentHeadPoint = XMVectorSet(
-		//	parentPosition.x - ((mSizeZ / mScalarZ) / 2.0f * sinf(parentRotate.y)),
-		//	parentPosition.y,
-		//	parentPosition.z - ((mSizeZ / mScalarZ) / 2.0f * cosf(parentRotate.y)),
-		//	0.0f);
-		//
-		//// プレイヤーと親の頭部の距離の計算
-		//auto targetRange = XMVector3Length(object->mTransform->Position()- parentHeadPoint);
-
-		//mPlayerDistance = targetRange.z;
-		////game->Debug()->Log(std::to_string(targetRange.z));
-
+		// プレイヤーが索敵範囲から出たら、プレイヤーを見失う
 		if (mPlayerDistance >= mChaseStopDistance) {
-			game->Debug()->Log("敵の索敵範囲外距離:" + std::to_string(mChaseStopDistance));
-			game->Debug()->Log("プレイヤーとの距離:" + std::to_string(mPlayerDistance));
+			/*game->Debug()->Log("敵の索敵範囲外距離:" + std::to_string(mChaseStopDistance));
+			game->Debug()->Log("プレイヤーとの距離:" + std::to_string(mPlayerDistance));*/
 			mIsPlayerHit = false;
 		}
 	}
@@ -71,7 +41,6 @@ void PlayerSearch::Update(){
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void PlayerSearch::Finish(){
-
 }
 
 //コライダーとのヒット時に呼ばれます
@@ -158,10 +127,8 @@ void PlayerSearch::PlayerDistance(Actor* playerObj) {
 		parentPosition.y,
 		parentPosition.z - ((mSizeZ / mScalarZ) / 2.0f * cosf(parentRotate.y)),
 		0.0f);
-
 	// プレイヤーと親の頭部の距離の計算
 	auto targetRange = XMVector3Length(playerObj->mTransform->Position() - parentHeadPoint);
-
 	mPlayerDistance = targetRange.z;
 }
 
@@ -177,8 +144,4 @@ bool PlayerSearch::IsPlayerSearch() {
 // プレイヤーを追跡中止する距離に加算します
 void PlayerSearch::AddChaseStopDistance(float distance) {
 	mChaseStopDistance += distance;
-
-	/*game->Debug()->Log("加算");
-	game->Debug()->Log(std::to_string(mChaseStopDistance));*/
-
 }

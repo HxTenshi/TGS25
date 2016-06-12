@@ -13,10 +13,14 @@ public:
 	void OnCollideExit(Actor* target)override;
 	// アニメーションのIDを変更します
 	void SetAnimationID(int id);
+	// アニメーションのタイムを変更します
+	void SetAnimationTime(float time);
 	// アニメーションのタイムスケールを変更します
 	void SetTimeScale(float timeScale);
 	// アニメーションのループを変更します
 	void SetLoop(bool isLoop);
+	// 現在のアニメーションのタイムを取得します
+	float GetAnimationTime();
 
 private:
 	//メンバ変数
@@ -24,5 +28,5 @@ private:
 	int mPastAnimationID;
 	float mAnimationTimeScale;
 	bool mIsAnimationLoop;
-	bool mChangeStatus;
+	bool mIsChangeStatus;
 };

@@ -1,21 +1,17 @@
 #include "WaterGunBullet.h"
 #include "SailBoard.h"
 
-#include "Game/Actor.h"
-#include "Game/Script/IGame.h"
-#include "Game/Component/TransformComponent.h"
-#include "Game/Component/PhysXComponent.h"
-#include "Engine\DebugEngine.h"
-
+//アクターなど基本のインクルード
+#include "h_standard.h"
+//コンポーネント全てのインクルード
+#include "h_component.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void WaterGunBullet::Initialize(){
-	
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void WaterGunBullet::Start(){
-
 }
 
 //毎フレーム呼ばれます
@@ -30,7 +26,6 @@ void WaterGunBullet::Update(){
 	if (mDestroyTime <= 0) {
 		game->DestroyObject(gameObject);
 	}
-
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -41,11 +36,10 @@ void WaterGunBullet::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void WaterGunBullet::OnCollideBegin(Actor* target){
-
+	// プレイヤーに当たったら消す
 	if (target->Name() == "Board") {
 		auto playerScript = target->GetScript<SailBoard>();
 		playerScript->Damage(mSetDamege);
-
 		game->DestroyObject(gameObject);
 	}
 }

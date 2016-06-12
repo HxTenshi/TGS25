@@ -39,10 +39,17 @@ private:
 	float mSetSearchRengeScaleY;
 	SERIALIZE
 	float mSetSearchRengeScaleZ;
+	// —³ŠªŠÖ˜A
 	SERIALIZE
 	float mSetTornadoPower;
 	SERIALIZE
-	float mSetTornadoBlowAwayInterval;
+	float mSetTornadoRotateScale;
+	SERIALIZE
+	float mSetAddTornadoRotateScale;
+	SERIALIZE
+	float mSetTornadoRotatePower;
+	SERIALIZE
+	float mSetTornadoUpPower;
 	SERIALIZE
 	float mSetTornadoDistance;
 	bool mIsShot;
