@@ -67,15 +67,23 @@ public:
 	// プレイヤーの追跡を中止する距離の加算です
 	void AddPlayerChaseStopDistance(float distance);
 	// 竜巻のステータスを入れます
-	void SetTornadoStatus(const float power, const float interval, const float distance);
+	void SetTornadoStatus(
+		const float power, const float rotate, const float addRotate,
+		const float rotatePower, const float upPower,const float distance);
 	// プレイヤーと指定されたオブジェの位置との距離を計算して返します
 	float GetPlayerDistance(Actor* playerObj, Actor* otherObj);
 	// 子供側からアニメーションのIDを変えます
 	void SetAnimationID(int id);
+	// 子供側からアニメーションのタイムを変更します(未使用)
+	void SetAnimationTime(float time);
 	// 子供側からアニメーションのタイムスケールを変更します
 	void SetAnimationTimeScale(float timeScale);
 	// 子供側からアニメーションのループを変更します
 	void SetAnimationLoop(bool isLoop);
+	// 現在のアニメーションのタイムを取得します
+	float GetAnimationTime();
+	// デルタタイムを取得します
+	float GetEnemyDeltaTime();
 
 protected:
 	//メンバ変数
@@ -90,14 +98,14 @@ protected:
 	XMVECTOR mInitPosition;					// 初期位置
 	XMVECTOR mInitRotate;;					// 初期の回転
 	XMVECTOR mSearchObjPosition;			// 索敵範囲の位置
-	XMVECTOR mKnockBackDIrection;				// ノックバックの方向
+	XMVECTOR mKnockBackDIrection;			// ノックバックの方向
 	int mAddSearchObjCount;					// 索敵範囲オブジェの作成カウント
 	int mDamage;							// プレイヤーへのダメージ
 	int mResPawnTime;						// リスポーンタイム
 	int mInitResPawnTime;					// 初期リスポーンタイム
 	int mCGCreateCount;						// CGの生成カウント(全部のリソースが揃ったら消去する)
 	int mAnimationID;						// アニメーションのID
-	int mInitSetCount;
+	int mInitSetCount;						// 最初に設定したか
 	float mSpeed;							// 敵の速度変更
 	float mHalfSizeZ;						// 敵のZの大きさの半分
 	float mPositionY;						// 敵のYの位置（床との位置補正に使用）
@@ -106,9 +114,13 @@ protected:
 	float mScalarY;							// スケール値(Y)
 	float mScalarZ;							// スケール値(Z)
 	float mAddPlayerChaseStopDistance;		// 追跡中止の距離に加算する値
-	float mTornadoRotate;					// (未使用？)
 	float mTornadoPower;					// 竜巻の吸い込む力
-	float mTornadoDistance;
+	float mTornadoRotateScale;				// 竜巻に回転する大きさ
+	float mAddTornadoRotateScale;			// 竜巻への回転の加算
+	float mTornadoRotatePower;				// 竜巻の回転力
+	float mTornadoUpPower;					// 竜巻による上昇力
+	float mTornadoDistance;					// 竜巻に反応する距離
+	float mBlowAwayY;						// 竜巻に吹っ飛んだときのYの角度
 	float mBlowAwayPower;					// 吹き飛ぶ速度
 	float mBlowAwayInterval;				// 吹き飛び間隔
 	//float mInitParentPositionY;				// 親の初期位置(Y)
@@ -121,6 +133,7 @@ protected:
 	bool mIsChaseRotate;					// プレイヤーの方向を向くかどうか
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)
 	bool mIsTornadoRange;					// 竜巻の範囲内か
+	bool mIsTornadoBlowAway;				// 竜巻で吹き飛ばすか
 	bool mIsDead;							// プレイヤーと当たったか
 	// 行動配列
 	typedef std::vector<EnemyState> DistanceVector;

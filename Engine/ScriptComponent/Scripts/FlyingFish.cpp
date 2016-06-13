@@ -31,7 +31,9 @@ void FlyingFish::Start(){
 	Enemy::SetResPawnTime(mSetResPawnTime);
 	Enemy::AddPlayerChaseStopDistance(mAddChaseStopDistance);
 	Enemy::SetSearchRangeScale(mSetSearchRengeScaleX, mSetSearchRengeScaleY, mSetSearchRengeScaleZ);
-	Enemy::SetTornadoStatus(mSetTornadoPower, mSetTornadoBlowAwayInterval, mSetTornadoDistance);
+	Enemy::SetTornadoStatus(
+		mSetTornadoPower, mSetTornadoRotateScale, mSetAddTornadoRotateScale,
+		mSetTornadoRotatePower, mSetTornadoUpPower, mSetTornadoDistance);
 
 	auto floorObj = game->FindActor("Floor");
 	mFloorPosition = floorObj->mTransform->Position().y;
@@ -51,6 +53,7 @@ void FlyingFish::Update(){
 			mJampRestTime = mInitJampRestTime;
 		}
 		else if (mJampRestTime > 0) {
+			//mJampRestTime--;
 			mJampRestTime--;
 		}
 
@@ -63,6 +66,7 @@ void FlyingFish::Update(){
 		Enemy::SetAnimationLoop(false);
 		// mUpCountが０になると落ちる
 		if (mUpCount > 0) {
+			//mUpCount--;
 			mUpCount--;
 		}
 		else {
@@ -91,13 +95,13 @@ void FlyingFish::OnCollideBegin(Actor* target){
 		if (mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsJamp = false;
 		}
-
 		mIsFloorHit = true;
 	}
 
 	if (target->Name() == "Wall") {
 		mWallHitCount++;
-		mRotateY =  mRotateY + 3.14f - (3.14f / 180.0f / mRotateInterval);
+		//mRotateY =  mRotateY + 3.14f - (3.14f / 180.0f / mRotateInterval);
+		mRotateY = mRotateY + 3.14f;
 	}
 }
 
@@ -126,12 +130,12 @@ void FlyingFish::SearchMove() {
 	auto parentRotate = mParentObj->mTransform->Rotate();
 	// 敵の回転
 	if (mWallHitCount % 2 == 0) {
-		//mRotateY += 3.14f / 180.0f / mRotateInterval;
-		parentRotate.y += 3.14f / 180.0f / mRotateInterval;
+		//parentRotate.y += 3.14f / 180.0f / mRotateInterval;
+		parentRotate.y += (3.14f / 180.0f / mRotateInterval);
 	}
 	else {
-		//mRotateY -= 3.14f / 180.0f / mRotateInterval;
-		parentRotate.y -= 3.14f / 180.0f / mRotateInterval;
+		//parentRotate.y -= 3.14f / 180.0f / mRotateInterval;
+		parentRotate.y -= (3.14f / 180.0f / mRotateInterval);
 	}
 
 	if (mRotateY >= 3.14f * 2.0f) {
@@ -139,7 +143,7 @@ void FlyingFish::SearchMove() {
 		parentRotate.y = 0.0f;
 	}
 	mParentObj->mTransform->Rotate(parentRotate);
-	
+	// ジャンプ行動
 	JampMove();
 }
 
@@ -153,24 +157,20 @@ void FlyingFish::JampMove() {
 	auto forwardMove = mParentObj->mTransform->Forward() * -mSpeed * 0.01f;
 	// ジャンプ間隔
 	if (mJampRestTime <= 0) {
-		/*if (mUptekitou < 3.141593f / 2.0f) {
-			mUptekitou += 3.141593f / mInitUpCount;
-		}*/
-		mUpCosine += 3.141593f / mInitUpCount;
-
+		//mUpCosine += 3.141593f / mInitUpCount;
+		mUpCosine += (3.141593f / mInitUpCount);
 		if (mUpCount > 0) {
 			// 上げる処理
 			// コサインによるジャンプ
-			mJampVelocity = mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f;
-
+			//mJampVelocity = mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f;
+			mJampVelocity = (mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f);
 			mIsJamp = true;
 		}
 		else {
 			if (parentPosition.y > mFloorPosition) {
 				// 落ちる処理
 				auto downVelocity = XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f);
-				mJampVelocity = mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f;
-
+				mJampVelocity = (mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f);
 				// 床と接触している場合は絶対に初期値に戻るように補正
 				// 接触していなかったら落ちていく
 				/*if (mIsFloorHit) {*/
@@ -183,7 +183,7 @@ void FlyingFish::JampMove() {
 						mJampVelocity = revasionVelocity;
 					}
 					else {
-						mJampVelocity = -mParentObj->mTransform->Up() * mUpPowar * 0.01f;
+						mJampVelocity = (-mParentObj->mTransform->Up() * mUpPowar * 0.01f);
 					}
 				}
 			}
@@ -193,14 +193,15 @@ void FlyingFish::JampMove() {
 	if (mIsInitSet) {
 		// 接触したらジャンプする
 		if (mIsJamp) {
-			mParentObj->mTransform->Position(parentPosition + forwardMove + mJampVelocity);
+			mParentObj->mTransform->Position((parentPosition + forwardMove + mJampVelocity));
 		}
 		else {
-			mParentObj->mTransform->Position(parentPosition + forwardMove);
+			mParentObj->mTransform->Position((parentPosition + forwardMove));
 		}
 	}
 	else {
 		// 床まで落ちる
-		mParentObj->mTransform->Position(parentPosition - mParentObj->mTransform->Up() * (10.0f * 0.01f));
+		mParentObj->mTransform->Position(
+			(parentPosition - mParentObj->mTransform->Up() * (10.0f * 0.01f)));
 	}
 }
