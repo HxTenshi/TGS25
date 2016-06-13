@@ -170,6 +170,7 @@
     <ClCompile Include="Scripts\JumpDai.cpp" />
     <ClCompile Include="Scripts\KillerWhale.cpp" />
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
+    <ClCompile Include="Scripts\MoveSmoke.cpp" />
     <ClCompile Include="Scripts\ParentObj.cpp" />
     <ClCompile Include="Scripts\PlayerManager.cpp" />
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="Scripts\JumpDai.h" />
     <ClInclude Include="Scripts\KillerWhale.h" />
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
+    <ClInclude Include="Scripts\MoveSmoke.h" />
     <ClInclude Include="Scripts\ParentObj.h" />
     <ClInclude Include="Scripts\PlayerManager.h" />
     <ClInclude Include="Scripts\PlayerSearch.h" />
