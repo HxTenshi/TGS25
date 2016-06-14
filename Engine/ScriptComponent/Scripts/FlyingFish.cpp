@@ -1,10 +1,10 @@
 #include "FlyingFish.h"
 #include "Enemy.h"
 
-#include "Game/Actor.h"
-#include "Game/Script/IGame.h"
-#include "Game/Component/TransformComponent.h"
-#include "Game/Component/PhysXComponent.h"
+//アクターなど基本のインクルード
+#include "h_standard.h"
+//コンポーネント全てのインクルード
+#include "h_component.h"
 #include "Engine\DebugEngine.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -54,7 +54,7 @@ void FlyingFish::Update(){
 		}
 		else if (mJampRestTime > 0) {
 			//mJampRestTime--;
-			mJampRestTime--;
+			mJampRestTime -= Enemy::GetEnemyDeltaTime(60.0f);
 		}
 
 		mUpCount = mUpInterval / 2;
@@ -67,7 +67,7 @@ void FlyingFish::Update(){
 		// mUpCountが０になると落ちる
 		if (mUpCount > 0) {
 			//mUpCount--;
-			mUpCount--;
+			mUpCount -= Enemy::GetEnemyDeltaTime(60.0f);
 		}
 		else {
 			mUpCount = 0;
@@ -101,7 +101,7 @@ void FlyingFish::OnCollideBegin(Actor* target){
 	if (target->Name() == "Wall") {
 		mWallHitCount++;
 		//mRotateY =  mRotateY + 3.14f - (3.14f / 180.0f / mRotateInterval);
-		mRotateY = mRotateY + 3.14f;
+		mRotateY += 3.14f;
 	}
 }
 
@@ -131,18 +131,18 @@ void FlyingFish::SearchMove() {
 	// 敵の回転
 	if (mWallHitCount % 2 == 0) {
 		//parentRotate.y += 3.14f / 180.0f / mRotateInterval;
-		parentRotate.y += (3.14f / 180.0f / mRotateInterval);
+		parentRotate.y += (3.14f / 180.0f / mRotateInterval) * Enemy::GetEnemyDeltaTime(60.0f);
 	}
 	else {
 		//parentRotate.y -= 3.14f / 180.0f / mRotateInterval;
-		parentRotate.y -= (3.14f / 180.0f / mRotateInterval);
+		parentRotate.y -= (3.14f / 180.0f / mRotateInterval) * Enemy::GetEnemyDeltaTime(60.0f);
 	}
 
 	if (mRotateY >= 3.14f * 2.0f) {
 		//mRotateY = 0.0f;
 		parentRotate.y = 0.0f;
 	}
-	mParentObj->mTransform->Rotate(parentRotate);
+	if (mIsInitSet)mParentObj->mTransform->Rotate(parentRotate);
 	// ジャンプ行動
 	JampMove();
 }
@@ -193,15 +193,20 @@ void FlyingFish::JampMove() {
 	if (mIsInitSet) {
 		// 接触したらジャンプする
 		if (mIsJamp) {
-			mParentObj->mTransform->Position((parentPosition + forwardMove + mJampVelocity));
+			mParentObj->mTransform->Position(
+				(parentPosition + (forwardMove + mJampVelocity) *
+					Enemy::GetEnemyDeltaTime(60.0f)));
 		}
 		else {
-			mParentObj->mTransform->Position((parentPosition + forwardMove));
+			mParentObj->mTransform->Position(
+				(parentPosition + forwardMove * 
+					Enemy::GetEnemyDeltaTime(60.0f)));
 		}
 	}
 	else {
 		// 床まで落ちる
 		mParentObj->mTransform->Position(
-			(parentPosition - mParentObj->mTransform->Up() * (10.0f * 0.01f)));
+			(parentPosition - (mParentObj->mTransform->Up() * (10.0f * 0.01f)
+				* Enemy::GetEnemyDeltaTime(60.0f))));
 	}
 }

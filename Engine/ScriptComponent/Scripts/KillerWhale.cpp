@@ -60,10 +60,11 @@ void KillerWhale::OnCollideExit(Actor* target){
 
 void KillerWhale::SearchMove() {
 	// ‰½‚à‚µ‚È‚¢
+	mIsMove = false;
 	//game->Debug()->Log(std::to_string(mIsFloorHit));
 	if (!mIsFloorHit && mInitSetCount == 1) {
 		auto parentPosition = mParentObj->mTransform->Position();
-		mParentObj->mTransform->Position(parentPosition - mGRAVITY);
+		mParentObj->mTransform->Position(parentPosition - mGRAVITY * Enemy::GetEnemyDeltaTime(60.0f));
 	}
 	Enemy::SetAnimationID(0);
 	Enemy::SetAnimationTimeScale(1.0f * mSpeed * 0.2f);
@@ -71,26 +72,25 @@ void KillerWhale::SearchMove() {
 }
 
 void KillerWhale::ShortDistanceAttack() {
+	mIsMove = false;
 	// UŒ‚ƒ‚[ƒh‚ğƒIƒ“‚É‚·‚é
 	mIsAttckMode = true;
 	Enemy::SetAnimationID(1);
 	// ƒJƒEƒ“ƒg‚ª‚O‚É‚È‚Á‚½‚ç…“S–C‚Ì’e‚ğ”­Ë
 	if (mBulletShotTime <= 0) {
 		if (!mIsShot) {
-			// …“S–C‚Ì’e‚Ì¶¬
+			//// …“S–C‚Ì’e‚Ì¶¬
 			auto gunBullet = game->CreateActor("Assets/Enemy/WaterGunBullet");
 			game->AddObject(gunBullet);
-			// ˆÊ’u‚Ì•ÏX
+			//// ˆÊ’u‚Ì•ÏX
 			Enemy::SetParentForwardObj(gunBullet);
 			mIsShot = true;
 			Enemy::SetAnimationTimeScale(1.0f);
 			//Enemy::SetAnimationLoop(false);
 		}
 		else {
-			auto deltaTime = game->DeltaTime()->GetDeltaTime();
-			//game->Debug()->Log(std::to_string(deltaTime * 50));
-			//mRecastTime--;
-			mRecastTime -= deltaTime * 30;
+			//mRecastTime -= deltaTime * 30;
+			mRecastTime -= Enemy::GetEnemyDeltaTime(30.0f);
 			Enemy::SetAnimationTimeScale(2.0f * (15.0f / mInitRecastTime));
 			if (mRecastTime <= 0) {
 				mBulletShotTime = mInitBulletShotTime;
@@ -104,10 +104,8 @@ void KillerWhale::ShortDistanceAttack() {
 	}
 	else {
 		// ”­ËŠÔ‚ª0‚É‚È‚é‚Ü‚ÅƒvƒŒƒCƒ„[‚Ì•ûŒü‚ğŒü‚­
-		auto deltaTime = game->DeltaTime()->GetDeltaTime();
-		//game->Debug()->Log(std::to_string(deltaTime * 50));
 		//mBulletShotTime--;
-		mBulletShotTime -= deltaTime * 30;
+		mBulletShotTime -= Enemy::GetEnemyDeltaTime(30.0f);
 		Enemy::PlayerChaseMode(0.0f, 0.0f);
 		Enemy::SetAnimationTimeScale(2.0f * (34.0f / mInitBulletShotTime));
 		//game->Debug()->Log(std::to_string(Enemy::GetAnimationTime()));
@@ -127,6 +125,7 @@ void KillerWhale::CenterDistanceAttack() {
 }
 
 void KillerWhale::LongDistanceAttack() {
+	mIsMove = true;
 	Enemy::PlayerChaseMode(0.0f, 0.0f);
 
 	Enemy::SetAnimationID(0);
@@ -138,5 +137,5 @@ void KillerWhale::LongDistanceAttack() {
 		forwardMove += mGRAVITY;
 	}
 	
-	mParentObj->mTransform->Position((parentPosition - forwardMove) * Enemy::GetEnemyDeltaTime());
+	mParentObj->mTransform->Position((parentPosition - forwardMove * Enemy::GetEnemyDeltaTime(60.0f)));
 }

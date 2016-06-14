@@ -52,6 +52,8 @@ public:
 	void SetResPawnTime(int time);
 	// 索敵範囲のサイズを変更します
 	void SetSearchRangeScale(const float scaleX, const float scaleY, const float scaleZ);
+	// 移動時のスモックオブジェを生成します
+	void EnemyMoveSmoke();
 	// 一定距離まで落ちたらリスポーンします
 	void ResPawnLine();
 	// 敵の死亡行動です
@@ -83,7 +85,7 @@ public:
 	// 現在のアニメーションのタイムを取得します
 	float GetAnimationTime();
 	// デルタタイムを取得します
-	float GetEnemyDeltaTime();
+	float GetEnemyDeltaTime(float framerate);
 
 protected:
 	//メンバ変数
@@ -91,6 +93,8 @@ protected:
 	Actor* mParentObj;						// 空の親オブジェクト
 	Actor* mEnemyCGObj;						// 敵のグラフィックオブジェクト
 	Actor* mTornadoObj;						// 竜巻のオブジェクト
+	Actor* mRightSmokeObj;
+	Actor* mLeftSmokeObj;
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
 	EnemyCG* mEnemyCGScript;				// 敵のCGオブジェクトのスクリプト
 	EnemyState mEnemyState;					// enumクラスのEnemyState(敵の行動選択時に使用)
@@ -124,6 +128,7 @@ protected:
 	float mBlowAwayPower;					// 吹き飛ぶ速度
 	float mBlowAwayInterval;				// 吹き飛び間隔
 	//float mInitParentPositionY;				// 親の初期位置(Y)
+	bool mIsMove;							// 動いているか
 	bool mIsFloorHit;						// 床と当たったか
 	bool mIsCloudHit;						// 雲と当たったか
 	bool mIsImmortalBody;					// 不死身の敵か(未実装)

@@ -17,10 +17,11 @@ void WaterGunBullet::Start(){
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
 void WaterGunBullet::Update(){
 	// ‘O•û‚ÉˆÚ“®
+	auto deltaTime = game->DeltaTime()->GetDeltaTime();
 	mForwardVelocity = gameObject->mTransform->Forward() * -mSpeed * 0.01f;
 
 	auto position = gameObject->mTransform->Position();
-	gameObject->mTransform->Position(position + mForwardVelocity);
+	gameObject->mTransform->Position(position + mForwardVelocity * (deltaTime * 60.0f));
 
 	mDestroyTime--;
 	if (mDestroyTime <= 0) {
