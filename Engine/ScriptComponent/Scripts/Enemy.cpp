@@ -312,10 +312,10 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 	mParentObj->mTransform->Position(
 		parentPosition +
 		((mParentObj->mTransform->Forward() +
-			(mParentObj->mTransform->Left() / 10.0f)) * (mTornadoPower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
-
-	// 吹き飛ぶ間隔をいれる（死亡モーションの値を変更）
-
+			(mParentObj->mTransform->Left() / mTornadoInterval))
+			* (mTornadoPower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
+	auto distance = XMVector3Length(tornadoPosition - parentPosition);
+	if (distance.x <= 8.0f) mTornadoInterval = 2.0f;
 
 	Enemy::SetAnimationID(0);
 }
@@ -559,30 +559,78 @@ void Enemy::Dead() {
 
 // 敵の行動関数
 void Enemy::Move() {
-	//// 竜巻の親検索
-	//auto tornadoParent = game->FindActor("TornadoParent");
-	//if (tornadoParent != nullptr) {
-	//	auto tornadoChildren = tornadoParent->mTransform->Children();
-	//	for (int i = tornadoChildren.begin; i < tornadoChildren.end; ++i) {
-	//		/*auto distance = XMVector3Length(
-	//			tathumaki->mTransform->Position() - mParentObj->mTransform->Position());*/
+	// 竜巻の親検索
+	auto tornadoParent = game->FindActor("Tornados");
+	if(mTornadoMinDistance == 0.0f) mTornadoMinDistance = mTornadoDistance;
+	if (tornadoParent != nullptr) {
+		auto tornadoChildren = tornadoParent->mTransform->Children();
+		// 子供がいるなら竜巻との距離を求める
+		auto size = tornadoChildren.size();		
+		if (size >= 2) {
+			// 子の中から最短距離の竜巻を探す
+			for (std::list<Actor*>::iterator i = tornadoChildren.begin(); i != tornadoChildren.end(); i++) {
+				auto tathumaki = *i;
+				// 竜巻との距離の計算
+				auto tornadoDistance = XMVector3Length(
+					tathumaki->mTransform->Position() -
+					mParentObj->mTransform->Position());
+				// 最短距離なら更新する
+				if (tornadoDistance.x <= mTornadoMinDistance) {
+					// 最短距離を入れる
+					mTornadoMinDistance = tornadoDistance.x;
+					// 竜巻オブジェを入れる
+					mTornadoObj = tathumaki;
+				}
+				//game->Debug()->Log(std::to_string(mTornadoMinDistance));
+			}
+			// 一定距離なら回転
+			// 竜巻との距離が一定距離内なら竜巻の方向に移動する
+			if (mTornadoMinDistance <= mTornadoDistance) {
+				mIsTornadoRange = true;
+			}
+		}
+		else if(size == 1){
+			auto tathumaki = game->FindActor("Tornado");
+			if (tathumaki != nullptr) {
+				auto distance = XMVector3Length(
+					tathumaki->mTransform->Position() - mParentObj->mTransform->Position());
+				// 竜巻との距離が一定距離内なら竜巻の方向に移動する
+				if (distance.x <= mTornadoDistance) {
+					mIsTornadoRange = true;
+					mTornadoObj = tathumaki;
+				}
+			}
+			else {
+				// 途中で竜巻がなくなったら通常行動に戻す
+				mIsTornadoRange = false;
+				mTornadoObj = nullptr;
+				mTornadoMinDistance = mTornadoDistance;
+			}
+		}
+		else if (size == 0) {
+			// いないなら通常行動をする
+			mIsTornadoRange = false;
+			mTornadoObj = nullptr;
+			mTornadoMinDistance = mTornadoDistance;
+		}
+		//game->Debug()->Log(std::to_string(size));
+	}
+
+	//// 竜巻が近くにある場合
+	//auto tathumaki = game->FindActor("Tornado");
+	//if (tathumaki != nullptr) {
+	//	auto distance = XMVector3Length(
+	//		tathumaki->mTransform->Position() - mParentObj->mTransform->Position());
+	//	// 竜巻との距離が一定距離内なら竜巻の方向に移動する
+	//	if (distance.x <= mTornadoDistance) {
+	//		mIsTornadoRange = true;
+	//		mTornadoObj = tathumaki;
 	//	}
 	//}
-	// 竜巻が近くにある場合
-	auto tathumaki = game->FindActor("Tornado");
-	if (tathumaki != nullptr) {
-		auto distance = XMVector3Length(
-			tathumaki->mTransform->Position() - mParentObj->mTransform->Position());
-		// 竜巻との距離が一定距離内なら竜巻の方向に移動する
-		if (distance.x <= mTornadoDistance) {
-			mIsTornadoRange = true;
-			mTornadoObj = tathumaki;
-		}
-	}
-	else {
-		// 途中で竜巻がなくなったら通常行動に戻す
-		mIsTornadoRange = false;
-	}
+	//else {
+	//	// 途中で竜巻がなくなったら通常行動に戻す
+	//	mIsTornadoRange = false;
+	//}
 
 	if (!mIsDead) {
 		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
@@ -653,12 +701,14 @@ void Enemy::AddPlayerChaseStopDistance(float distance) {
 // 竜巻のステータスを入れます
 void Enemy::SetTornadoStatus(
 	const float power, const float rotate, const float addRotate,
-	const float rotatePower, const float upPower, const float distance) {
+	const float rotatePower, const float upPower, const float interval,
+	const float distance) {
 	mTornadoPower = power;
 	mTornadoRotateScale = rotate;
 	mAddTornadoRotateScale = addRotate;
 	mTornadoRotatePower = rotatePower;
 	mTornadoUpPower = upPower;
+	mTornadoInterval = interval;
 	mTornadoDistance = distance;
 }
 

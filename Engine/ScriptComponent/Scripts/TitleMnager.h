@@ -2,7 +2,8 @@
 #pragma once
 #include "main.h"
 
-
+class Actor;
+class SceneCursor;
 
 class TitleMnager :public IDllScriptComponent{
 public:
@@ -16,4 +17,8 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	SERIALIZE
+	float cameraRotateSpeed;
+	Actor* mCursorObj;
+	SceneCursor* mCursorScript;
 };

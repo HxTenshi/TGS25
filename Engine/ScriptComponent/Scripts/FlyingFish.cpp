@@ -33,7 +33,8 @@ void FlyingFish::Start(){
 	Enemy::SetSearchRangeScale(mSetSearchRengeScaleX, mSetSearchRengeScaleY, mSetSearchRengeScaleZ);
 	Enemy::SetTornadoStatus(
 		mSetTornadoPower, mSetTornadoRotateScale, mSetAddTornadoRotateScale,
-		mSetTornadoRotatePower, mSetTornadoUpPower, mSetTornadoDistance);
+		mSetTornadoRotatePower, mSetTornadoUpPower, mSetTornadoInterval,
+		mSetTornadoDistance);
 
 	auto floorObj = game->FindActor("Floor");
 	mFloorPosition = floorObj->mTransform->Position().y;

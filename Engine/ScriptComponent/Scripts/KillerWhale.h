@@ -51,6 +51,8 @@ private:
 	SERIALIZE
 	float mSetTornadoUpPower;
 	SERIALIZE
+	float mSetTornadoInterval;
+	SERIALIZE
 	float mSetTornadoDistance;
 	bool mIsShot;
 	XMVECTOR mGRAVITY;

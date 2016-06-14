@@ -60,6 +60,8 @@ private:
 	SERIALIZE
 	float mSetTornadoUpPower;
 	SERIALIZE
+	float mSetTornadoInterval;
+	SERIALIZE
 	float mSetTornadoDistance;
 	bool mIsJamp;
 	bool mIsInitSet;

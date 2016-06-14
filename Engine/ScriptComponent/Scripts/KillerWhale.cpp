@@ -26,7 +26,8 @@ void KillerWhale::Start(){
 	Enemy::SetSearchRangeScale(mSetSearchRengeScaleX, mSetSearchRengeScaleY, mSetSearchRengeScaleZ);
 	Enemy::SetTornadoStatus(
 		mSetTornadoPower, mSetTornadoRotateScale, mSetAddTornadoRotateScale,
-		mSetTornadoRotatePower, mSetTornadoUpPower, mSetTornadoDistance);
+		mSetTornadoRotatePower, mSetTornadoUpPower, mSetTornadoInterval,
+		mSetTornadoDistance);
 
 	mInitBulletShotTime = mBulletShotTime;
 	mInitRecastTime = mRecastTime;

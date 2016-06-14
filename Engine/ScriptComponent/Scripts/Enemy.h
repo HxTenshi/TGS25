@@ -71,7 +71,8 @@ public:
 	// 竜巻のステータスを入れます
 	void SetTornadoStatus(
 		const float power, const float rotate, const float addRotate,
-		const float rotatePower, const float upPower,const float distance);
+		const float rotatePower, const float upPower, const float interval,
+		const float distance);
 	// プレイヤーと指定されたオブジェの位置との距離を計算して返します
 	float GetPlayerDistance(Actor* playerObj, Actor* otherObj);
 	// 子供側からアニメーションのIDを変えます
@@ -123,7 +124,9 @@ protected:
 	float mAddTornadoRotateScale;			// 竜巻への回転の加算
 	float mTornadoRotatePower;				// 竜巻の回転力
 	float mTornadoUpPower;					// 竜巻による上昇力
+	float mTornadoInterval;					// 竜巻の回転数の間隔です
 	float mTornadoDistance;					// 竜巻に反応する距離
+	float mTornadoMinDistance;				// 最短の竜巻距離を入れます
 	float mBlowAwayY;						// 竜巻に吹っ飛んだときのYの角度
 	float mBlowAwayPower;					// 吹き飛ぶ速度
 	float mBlowAwayInterval;				// 吹き飛び間隔
