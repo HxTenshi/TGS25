@@ -8,7 +8,6 @@
 #include "h_standard.h"
 //コンポーネント全てのインクルード
 #include "h_component.h"
-
 #include "Engine\DebugEngine.h"
 
 Enemy::~Enemy() {
@@ -39,6 +38,7 @@ void Enemy::Initialize(){
 	mBlowAwayY = 3.141593f / 5.0f;
 	mBlowAwayPower = 20.0f;
 	mBlowAwayInterval = 4.0f;
+	mIsMove = true;
 	mIsFloorHit = false;
 	mIsCloudHit = false;
 	mIsImmortalBody = false;
@@ -110,8 +110,9 @@ void Enemy::OnCollideBegin(Actor* target){
 		mIsDead = true;
 		mIsBlowAway = true;
 		mBlowAwayPower = 100.0f;
-		auto parentCollider = mParentObj->GetComponent<PhysXColliderComponent>();
-		parentCollider->SetIsTrigger(true);
+		// コライダーのトリガーをオンにする
+		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+		collider->SetIsTrigger(true);
 		//mBlowAwayInterval = 1.0f;
 	}
 
@@ -150,6 +151,10 @@ void Enemy::PlayerColorChange() {
 	// 色の更新
 	auto mate = gameObject->GetComponent<MaterialComponent>();
 	if (mate) mate->SetAlbedoColor(color);
+	//auto color = mate->GetMaterial();
+	//auto albedoColor = mate->mAlbedo;
+	//auto color = XMVectorSet(albedoColor.x, albedoColor.y, .)
+	//if(mate) mate->SetAlbedoColor()
 }
 // 索敵移動をします（デフォルト設定）
 void Enemy::SearchMove() {
@@ -193,6 +198,7 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 		auto createCGObjName = baseName.c_str();
 		auto CGObj = game->CreateActor(createCGObjName);
 		game->AddObject(CGObj);
+		mEnemyCGObj = CGObj;
 		//CGObj->mTransform->SetParent(gameObject);
 		CGObj->mTransform->SetParent(mParentObj);
 		mEnemyCGScript = CGObj->GetScript<EnemyCG>();
@@ -287,6 +293,7 @@ void Enemy::LongDistanceAttack() {
 
 // 竜巻から逃げるときの行動です
 void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
+	mIsMove = true;
 	auto tornadoPosition = tornadoObj->mTransform->Position();
 	// 親のステータスの取得
 	auto parentPosition = mParentObj->mTransform->Position();
@@ -304,8 +311,8 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 	mParentObj->mTransform->Rotate(mParentObj->mTransform->Up() * (escapeAngle));
 	mParentObj->mTransform->Position(
 		parentPosition +
-		(mParentObj->mTransform->Forward() +
-			(mParentObj->mTransform->Left() / 10.0f)) * (mTornadoPower * 0.01f));
+		((mParentObj->mTransform->Forward() +
+			(mParentObj->mTransform->Left() / 10.0f)) * (mTornadoPower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
 
 	// 吹き飛ぶ間隔をいれる（死亡モーションの値を変更）
 
@@ -329,8 +336,8 @@ void Enemy::KnockBack() {
 	}
 	// 後ろに仰け反って落ちる
 	mParentObj->mTransform->Position(
-		parentPosition + (mKnockBackDIrection * 20.0f * 0.01f) -
-		mParentObj->mTransform->Up() * 5.0f * 0.01f);
+		parentPosition + ((mKnockBackDIrection * 20.0f * 0.01f) -
+		mParentObj->mTransform->Up() * 5.0f * 0.01f) * Enemy::GetEnemyDeltaTime(60.0f));
 	Enemy::Dead();
 }
 
@@ -368,6 +375,59 @@ void Enemy::SetSearchRangeScale(const float scaleX, const float scaleY, const fl
 	mScalarX = scaleX;
 	mScalarY = scaleY;
 	mScalarZ = scaleZ;
+}
+
+// 移動時のスモックオブジェを生成します
+void Enemy::EnemyMoveSmoke() {
+	// 床に触れていたら生成
+	// 床に触れていなかったら削除する
+	if (mIsFloorHit) {
+		if (mIsMove) {
+			if (mRightSmokeObj == nullptr) {
+				// 子の生成 自分の名前から子を選択し生成します
+				std::string baseName = "Assets/Enemy/" + gameObject->Name() + "MoveSmoke";
+				auto createObjName = baseName.c_str();
+				// 右のスモック生成
+				mRightSmokeObj = game->CreateActor(createObjName);
+				game->AddObject(mRightSmokeObj);
+				mRightSmokeObj->mTransform->SetParent(gameObject);
+				// 左のスモック生成
+				mLeftSmokeObj = game->CreateActor(createObjName);
+				game->AddObject(mLeftSmokeObj);
+				mLeftSmokeObj->mTransform->SetParent(gameObject);
+			}
+			// コライダーで調整する
+			auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+			auto colliderScale = collider->GetScale();
+			auto enemyCGPosition = mEnemyCGObj->mTransform->Position();
+			auto radius = 3.141593f / 180.0f;
+			// 右のスモックのステータス設定
+			auto rightX = -colliderScale.x / 2.0f - enemyCGPosition.x;
+			auto rightZ = -colliderScale.z / 2.0f + enemyCGPosition.z;
+			auto rightPosition = XMVectorSet(rightX, 0.0f, rightZ, 0.0f);
+			mRightSmokeObj->mTransform->Position(rightPosition);
+			mRightSmokeObj->mTransform->Rotate(mRightSmokeObj->mTransform->Up() * (radius * 260.0f));
+			// 左のスモックのステータス設定
+			auto leftX = colliderScale.x / 2.0f + enemyCGPosition.x;
+			auto leftPosition = XMVectorSet(leftX, 0.0f, rightZ, 0.0f);
+			mLeftSmokeObj->mTransform->Position(leftPosition);
+			mLeftSmokeObj->mTransform->Rotate(mLeftSmokeObj->mTransform->Up() * (radius * 280.0f));
+		}
+		else {
+			if (mRightSmokeObj == nullptr)return;
+			game->DestroyObject(mRightSmokeObj);
+			mRightSmokeObj = nullptr;
+			game->DestroyObject(mLeftSmokeObj);
+			mLeftSmokeObj = nullptr;
+		}
+	}
+	else {
+		if (mRightSmokeObj == nullptr)return;
+		game->DestroyObject(mRightSmokeObj);
+		mRightSmokeObj = nullptr;
+		game->DestroyObject(mLeftSmokeObj);
+		mLeftSmokeObj = nullptr;
+	}
 }
 
 // 一定距離まで落ちたらリスポーンします
@@ -420,23 +480,22 @@ void Enemy::DeadMove() {
 				if (std::to_string(escapeAngle) == "0.000000") escapeAngle = 0.0f;
 				if (escapeAngle < 0) escapeAngle += 3.141593f * 2.0f;
 				// 竜巻のように回転しながら吹き飛ぶ
-				// addTornadeRotate(Left)を追加する
 				mParentObj->mTransform->Rotate(mParentObj->mTransform->Up() * (escapeAngle));
-				/*mParentObj->mTransform->Position(parentPosition + (up * 0.1f) +
-					(mParentObj->mTransform->Forward() +
-						(mParentObj->mTransform->Left() / 5.0f)) * (mTornadoPower * 5.0f * 0.01f));*/
-				mParentObj->mTransform->Position(parentPosition + (up * mTornadoUpPower * 0.01f) +
+				mParentObj->mTransform->Position(
+					parentPosition + 
+					((up * mTornadoUpPower * 0.01f) +
 					(mParentObj->mTransform->Forward() +
 						(mParentObj->mTransform->Left() / (mTornadoRotateScale))) * 
-					(mTornadoRotatePower * 0.01f));
+					(mTornadoRotatePower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
 
+				mEnemyCGObj->mTransform->Rotate(mParentObj->mTransform->Left() * 1.0f);
 				mTornadoRotateScale += mAddTornadoRotateScale;
 			}
 			else {
 				mParentObj->mTransform->Position(
-					parentPosition + mParentObj->mTransform->Forward()
-					- mParentObj->mTransform->Left() +
-					(mParentObj->mTransform->Up() * cos(mBlowAwayY)));
+					parentPosition + 
+					(mParentObj->mTransform->Forward() +
+					(mParentObj->mTransform->Up() * cos(mBlowAwayY))) * Enemy::GetEnemyDeltaTime(60.0f));
 				if (mBlowAwayY < 3.141593f) {
 					mBlowAwayY += 3.141593f / 180.0f;
 				}
@@ -466,7 +525,7 @@ void Enemy::DeadMove() {
 			// 上昇
 			auto up = mParentObj->mTransform->Up() *
 				cosf(gameObject->mTransform->Rotate().x) * 0.01f * mBlowAwayPower;
-			mParentObj->mTransform->Position(position + up);
+			mParentObj->mTransform->Position(position + up * Enemy::GetEnemyDeltaTime(60.0f));
 		}
 	}
 	else {
@@ -569,6 +628,7 @@ void Enemy::Move() {
 		Enemy::DeadMove();
 	}
 	Enemy::ResetStatus();
+	Enemy::EnemyMoveSmoke();
 }
 
 // 親のステータスの初期化
@@ -637,16 +697,7 @@ float Enemy::GetAnimationTime() {
 }
 
 // デルタタイムを取得します
-float Enemy::GetEnemyDeltaTime() {
-	//auto deltaTime = game->DeltaTime()->GetDeltaTime();
-	// 60.0fの場合
-	//game->Debug()->Log(std::to_string(100.0f * deltaTime / 1.666667f));
-	//return 100.0f * deltaTime / 1.666667f;
-	// 50.0fの場合
-	/*deltaTime *= 100.0f * (100.0f / 2.0f);
-	deltaTime += 0.5f;
-	auto intDeltaTime = (int)deltaTime;
-	auto floatDeltaTime = (float)intDeltaTime / 100.0f;
-	game->Debug()->Log(std::to_string(floatDeltaTime));*/
-	return 1.0f;
+float Enemy::GetEnemyDeltaTime(float framerate) {
+	auto deltaTime = game->DeltaTime()->GetDeltaTime();
+	return deltaTime * framerate;
 }
