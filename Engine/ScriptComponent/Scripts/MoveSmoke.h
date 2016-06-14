@@ -12,6 +12,8 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+	void SetMaxSpeed(float max);
+	void SetSpeed(float speed);
 
 private:
 	//ƒƒ“ƒo•Ï”

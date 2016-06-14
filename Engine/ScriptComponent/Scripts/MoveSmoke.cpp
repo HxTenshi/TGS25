@@ -49,3 +49,13 @@ void MoveSmoke::OnCollideEnter(Actor* target){
 void MoveSmoke::OnCollideExit(Actor* target){
 	(void)target;
 }
+
+void MoveSmoke::SetMaxSpeed(float max)
+{
+	mMaxSpeed = max;
+}
+
+void MoveSmoke::SetSpeed(float speed)
+{
+	mSpeed = speed;
+}

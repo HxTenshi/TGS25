@@ -15,4 +15,13 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	SERIALIZE
+		float x;
+	SERIALIZE
+		float y;
+	SERIALIZE
+		float LimitTime;
+
+	float mTimer;
+
 };

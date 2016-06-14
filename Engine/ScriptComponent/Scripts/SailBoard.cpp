@@ -15,6 +15,7 @@
 #include"Game\Component\MaterialComponent.h"
 #include"Sail.h"
 #include"PlayerManager.h"
+#include"MoveSmoke.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Initialize(){
@@ -66,6 +67,13 @@ void SailBoard::Update(){
 		auto v = physx->GetForceVelocity();
 		v *= -0.5f;
 		gameObject->mTransform->AddForce(v);
+
+		auto smoke = game->FindActor("PlayerMoveSmoke");
+		if (smoke)
+		{
+			smoke->GetScript<MoveSmoke>()->SetMaxSpeed(90);
+			smoke->GetScript<MoveSmoke>()->SetSpeed(XMVector3Length(physx->GetForceVelocity()).x);
+		}
 	}
 
 	if (isJump)
@@ -190,7 +198,7 @@ bool SailBoard::IsUnrivaled()
 	auto physx = gameObject->GetComponent<PhysXComponent>();
 	if (XMVector3Length(physx->GetForceVelocity()).x > AttackSpeed)
 	{
-		auto temp = game->CreateActor("Assets/SpeedWind.json");
+		auto temp = game->CreateActor("Assets/Effect/SpeedWind.json");
 		if (temp)
 		{
 			if (!mSpeedEffect)
@@ -270,6 +278,7 @@ void SailBoard::Trick()
 			mTrickRotate.y -= 0.05f;
 		}
 		if (Input::Down(KeyCoord::Key_D)) {
+
 			mTrickRotate.y += 0.05f;
 		}
 
@@ -282,6 +291,18 @@ void SailBoard::Trick()
 			if (mAnimator->mCurrentSet != 1)
 			{
 				AnimationChange(1, false, 0);
+				//トルネードの追加
+				if (IsUnrivaled())
+				{
+					auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
+					if (tornado)
+					{
+						game->AddObject(tornado);
+						tornado->mTransform->Position(gameObject->mTransform->Position());
+						auto parent = game->FindActor("Tornados");
+						tornado->mTransform->SetParent(parent);
+					}
+				}
 			}
 			mTrick = true;
 		}
