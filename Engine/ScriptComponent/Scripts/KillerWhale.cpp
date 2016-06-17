@@ -87,6 +87,8 @@ void KillerWhale::ShortDistanceAttack() {
 			Enemy::SetParentForwardObj(gunBullet);
 			mIsShot = true;
 			Enemy::SetAnimationTimeScale(1.0f);
+			//// ƒTƒEƒ“ƒh‚ÌÄ¶
+			//Enemy::EnemyPlaySound("tekitou");
 			//Enemy::SetAnimationLoop(false);
 		}
 		else {
@@ -130,6 +132,7 @@ void KillerWhale::LongDistanceAttack() {
 	Enemy::PlayerChaseMode(0.0f, 0.0f);
 
 	Enemy::SetAnimationID(0);
+	Enemy::SetAnimationTimeScale(1.0f * mSpeed * 0.2f);
 	Enemy::SetAnimationLoop(true);
 	auto parentPosition = mParentObj->mTransform->Position();
 	auto forwardMove = mParentObj->mTransform->Forward() * mSpeed * 0.01f;

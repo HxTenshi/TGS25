@@ -4,6 +4,7 @@
 
 class Actor;
 class SceneCursor;
+class Fade;
 
 class TitleMnager :public IDllScriptComponent{
 public:
@@ -18,7 +19,11 @@ public:
 private:
 	//ƒƒ“ƒo•Ï”
 	SERIALIZE
-	float cameraRotateSpeed;
+	float mCameraRotateSpeed;
+	SERIALIZE
+	float mFadeOutSecond;
 	Actor* mCursorObj;
+	Actor* mFadeOutObj;
 	SceneCursor* mCursorScript;
+	Fade*  mFadeOutScript;
 };

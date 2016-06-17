@@ -43,7 +43,7 @@ void EnemyCG::Update(){
 		// 設定したステータスをセットする
 		animation->SetAnimetionParam(mCurrentAnimationID, currentAnimaParam);
 		animation->SetAnimetionParam(mPastAnimationID, pastAnimation);
-
+		// IDの更新
 		mPastAnimationID = mCurrentAnimationID;
 	}
 
@@ -54,7 +54,7 @@ void EnemyCG::Update(){
 		animaParam.mTimeScale = mAnimationTimeScale;
 		animaParam.mLoop = mIsAnimationLoop;
 		animation->SetAnimetionParam(mCurrentAnimationID, animaParam);
-		// ステータスを変えたら連続して変えないようにする
+		// ステータスを変えたら、連続して変えないようにする
 		mIsChangeStatus = false;
 	}
 }

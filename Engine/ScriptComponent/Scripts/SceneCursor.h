@@ -19,7 +19,7 @@ public:
 	// シーンの配列に追加します
 	void AddSceneContainer(const std::string sceneName);
 	// 押されたボタンによってシーンを移動します
-	void OnButtonScene();
+	void OnChangeScene();
 	// ボタンの値を取得します
 	int GetButtonCount();
 	// シーンが変わるを返します

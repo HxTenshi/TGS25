@@ -165,6 +165,7 @@
     <ClCompile Include="Scripts\DeltaTimeScale.cpp" />
     <ClCompile Include="Scripts\Enemy.cpp" />
     <ClCompile Include="Scripts\EnemyCG.cpp" />
+    <ClCompile Include="Scripts\Fade.cpp" />
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\HPGauge.cpp" />
     <ClCompile Include="Scripts\JumpDai.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="Scripts\DeltaTimeScale.h" />
     <ClInclude Include="Scripts\Enemy.h" />
     <ClInclude Include="Scripts\EnemyCG.h" />
+    <ClInclude Include="Scripts\Fade.h" />
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\HPGauge.h" />
     <ClInclude Include="Scripts\JumpDai.h" />
