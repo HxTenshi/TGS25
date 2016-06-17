@@ -16,7 +16,7 @@ public:
 private:
 	//ƒƒ“ƒo•Ï”
 	SERIALIZE
-	int mDestroyTime;
+	float mDestroyTime;
 	SERIALIZE
 	int mSetDamege;
 	SERIALIZE

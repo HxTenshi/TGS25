@@ -105,10 +105,11 @@ mRecastTime　整数
 １フレーム毎に１減算されます
 
 ○水鉄砲
-mDestroyTime　整数
+06/17更新箇所
+mDestroyTime　小数
 消滅時間です
 出現時に減算していきます
-１フレーム毎に１減算されます
+１フレーム毎に約１.０ｆ減算されます
 
 mSetDamege、mSpeedは敵のmSetDamege、mSetSpeedと同様の動きをします
 

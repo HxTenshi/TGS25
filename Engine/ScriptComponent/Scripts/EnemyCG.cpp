@@ -22,7 +22,6 @@ void EnemyCG::Start(){
 
 //毎フレーム呼ばれます
 void EnemyCG::Update(){
-
 	auto animation = gameObject->GetComponent<AnimationComponent>();
 
 	// IDが違った場合は変更処理を行う
