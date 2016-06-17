@@ -5,6 +5,7 @@
 
 class PlayerSearch;
 class EnemyCG;
+class MoveSmoke;
 
 enum class EnemyState {
 	PlayerSearch,
@@ -56,6 +57,8 @@ public:
 	void EnemyMoveSmoke();
 	// 一定距離まで落ちたらリスポーンします
 	void ResPawnLine();
+	// 竜巻を探します
+	void SearchTornado();
 	// 敵の死亡行動です
 	void DeadMove();
 	// 死亡処理を行います
@@ -68,6 +71,8 @@ public:
 	void ResetStatus();
 	// プレイヤーの追跡を中止する距離の加算です
 	void AddPlayerChaseStopDistance(float distance);
+	// サウンドを再生します
+	void EnemyPlaySound(const std::string soundName);
 	// 竜巻のステータスを入れます
 	void SetTornadoStatus(
 		const float power, const float rotate, const float addRotate,
@@ -98,6 +103,8 @@ protected:
 	Actor* mLeftSmokeObj;
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
 	EnemyCG* mEnemyCGScript;				// 敵のCGオブジェクトのスクリプト
+	MoveSmoke* mRightSmokeScript;
+	MoveSmoke* mLeftSmokeScript;
 	EnemyState mEnemyState;					// enumクラスのEnemyState(敵の行動選択時に使用)
 	XMVECTOR mSize;							// 敵の大きさ
 	XMVECTOR mInitPosition;					// 初期位置

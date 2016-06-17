@@ -3,6 +3,7 @@
 #include "SailBoard.h"
 #include "ParentObj.h"
 #include "EnemyCG.h"
+#include "MoveSmoke.h"
 
 //アクターなど基本のインクルード
 #include "h_standard.h"
@@ -77,7 +78,6 @@ void Enemy::Finish(){
 void Enemy::OnCollideBegin(Actor* target){
 	if (target->Name() == "Board"){
 		auto playerScript = target->GetScript<SailBoard>();
-
 		//// プレイヤーが無敵状態なら死亡
 		//// そうでない場合はプレイヤーにダメージを与える
 		//if (playerScript->IsUnrivaled() || playerScript->IsTrick()) {
@@ -87,17 +87,17 @@ void Enemy::OnCollideBegin(Actor* target){
 		//	playerScript->Damage(mDamage);
 		//}
 
+		//// サウンドの再生
+		//Enemy::EnemyPlaySound("hit");
 		// 死亡した瞬間に当たり判定をトリガーにする
-		/*auto objPhysxCollider = gameObject->GetComponent<PhysXColliderComponent>();
-		objPhysxCollider->SetIsTrigger(true);*/
+		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+		collider->SetIsTrigger(true);
 		// プレイヤーの方に回転
 		auto parentPosition = mParentObj->mTransform->Position();
 		auto playerPosition = target->mTransform->Position();
 		auto v = parentPosition - playerPosition;
 		auto angle = atan2(v.x, v.z);
-
 		auto quaternion = XMQuaternionRotationAxis(mParentObj->mTransform->Up(), angle);
-
 		// ダメージを与えて自分を消す(仮設定)
 		playerScript->Damage(mDamage);
 		mIsDead = true;
@@ -300,7 +300,8 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 	// 竜巻との回転方向を計算(逃げるようにする)
 	auto v = parentPosition - tornadoPosition;
 	auto angle = atan2(v.x, v.z);
-	auto escapeAngle = angle + 3.141593f / 2.0f;
+	// angleに90°加算する
+	auto escapeAngle = angle - 3.141593f / 2.0f;
 	// escapeAngle が 0.000000f になっている状態でを足すとエラーな軸となる
 	// ログ表示では escapeAngle が 0.000000f となっているが、0.000000fと認識してくれない
 	// string型だと認識してくれる
@@ -312,7 +313,7 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 	mParentObj->mTransform->Position(
 		parentPosition +
 		((mParentObj->mTransform->Forward() +
-			(mParentObj->mTransform->Left() / mTornadoInterval))
+			(-mParentObj->mTransform->Left() / mTornadoInterval))
 			* (mTornadoPower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
 	auto distance = XMVector3Length(tornadoPosition - parentPosition);
 	if (distance.x <= 8.0f) mTornadoInterval = 2.0f;
@@ -406,27 +407,23 @@ void Enemy::EnemyMoveSmoke() {
 			auto rightZ = -colliderScale.z / 2.0f + enemyCGPosition.z;
 			auto rightPosition = XMVectorSet(rightX, 0.0f, rightZ, 0.0f);
 			mRightSmokeObj->mTransform->Position(rightPosition);
-			mRightSmokeObj->mTransform->Rotate(mRightSmokeObj->mTransform->Up() * (radius * 260.0f));
 			// 左のスモックのステータス設定
 			auto leftX = colliderScale.x / 2.0f + enemyCGPosition.x;
 			auto leftPosition = XMVectorSet(leftX, 0.0f, rightZ, 0.0f);
 			mLeftSmokeObj->mTransform->Position(leftPosition);
-			mLeftSmokeObj->mTransform->Rotate(mLeftSmokeObj->mTransform->Up() * (radius * 280.0f));
+			mRightSmokeScript = mRightSmokeObj->GetScript<MoveSmoke>();
+			mLeftSmokeScript = mLeftSmokeObj->GetScript<MoveSmoke>();
 		}
 		else {
 			if (mRightSmokeObj == nullptr)return;
-			game->DestroyObject(mRightSmokeObj);
-			mRightSmokeObj = nullptr;
-			game->DestroyObject(mLeftSmokeObj);
-			mLeftSmokeObj = nullptr;
+			mRightSmokeScript->SetSpeed(0.0f);
+			mLeftSmokeScript->SetSpeed(0.0f);
 		}
 	}
 	else {
 		if (mRightSmokeObj == nullptr)return;
-		game->DestroyObject(mRightSmokeObj);
-		mRightSmokeObj = nullptr;
-		game->DestroyObject(mLeftSmokeObj);
-		mLeftSmokeObj = nullptr;
+		mRightSmokeScript->SetSpeed(0.0f);
+		mLeftSmokeScript->SetSpeed(0.0f);
 	}
 }
 
@@ -441,6 +438,63 @@ void Enemy::ResPawnLine() {
 			mInitSetCount = 0;
 		}
 		mResPawnTime--;
+	}
+}
+
+// 竜巻を探します
+void Enemy::SearchTornado() {
+	// 竜巻の親検索
+	auto tornadoParent = game->FindActor("Tornados");
+	if (mTornadoMinDistance == 0.0f) mTornadoMinDistance = mTornadoDistance;
+	if (tornadoParent != nullptr) {
+		auto tornadoChildren = tornadoParent->mTransform->Children();
+		// 子供がいるなら竜巻との距離を求める
+		auto size = tornadoChildren.size();
+		if (size >= 2) {
+			// 子の中から最短距離の竜巻を探す
+			for (std::list<Actor*>::iterator i = tornadoChildren.begin(); i != tornadoChildren.end(); i++) {
+				auto tathumaki = *i;
+				// 竜巻との距離の計算
+				auto tornadoDistance = XMVector3Length(
+					tathumaki->mTransform->Position() -
+					mParentObj->mTransform->Position());
+				// 最短距離なら更新する
+				if (tornadoDistance.x <= mTornadoMinDistance) {
+					// 最短距離を入れる
+					mTornadoMinDistance = tornadoDistance.x;
+					// 竜巻オブジェを入れる
+					mTornadoObj = tathumaki;
+				}
+			}
+			// 竜巻との距離が一定距離内なら竜巻の方向に移動する
+			if (mTornadoMinDistance <= mTornadoDistance) {
+				mIsTornadoRange = true;
+			}
+		}
+		else if (size == 1) {
+			auto tathumaki = game->FindActor("Tornado");
+			if (tathumaki != nullptr) {
+				auto distance = XMVector3Length(
+					tathumaki->mTransform->Position() - mParentObj->mTransform->Position());
+				// 竜巻との距離が一定距離内なら竜巻の方向に移動する
+				if (distance.x <= mTornadoDistance) {
+					mIsTornadoRange = true;
+					mTornadoObj = tathumaki;
+				}
+			}
+			else {
+				// 竜巻と当たっていなくて、途中で竜巻がなくなったら通常行動に戻す
+				mIsTornadoRange = false;
+				mTornadoObj = nullptr;
+				mTornadoMinDistance = mTornadoDistance;
+			}
+		}
+		else if (size == 0) {
+			// 竜巻がないなら通常行動をする
+			mIsTornadoRange = false;
+			mTornadoObj = nullptr;
+			mTornadoMinDistance = mTornadoDistance;
+		}
 	}
 }
 
@@ -475,7 +529,7 @@ void Enemy::DeadMove() {
 				// 竜巻との回転方向を計算(逃げる方向と一緒にする)
 				auto v = parentPosition - tornadoPosition;
 				auto angle = atan2(v.x, v.z);
-				auto escapeAngle = angle + 3.141593f / 2.0f;
+				auto escapeAngle = angle - 3.141593f / 2.0f;
 				// 回転補正
 				if (std::to_string(escapeAngle) == "0.000000") escapeAngle = 0.0f;
 				if (escapeAngle < 0) escapeAngle += 3.141593f * 2.0f;
@@ -484,7 +538,7 @@ void Enemy::DeadMove() {
 				mParentObj->mTransform->Position(
 					parentPosition + 
 					((up * mTornadoUpPower * 0.01f) +
-					(mParentObj->mTransform->Forward() +
+					(mParentObj->mTransform->Forward() -
 						(mParentObj->mTransform->Left() / (mTornadoRotateScale))) * 
 					(mTornadoRotatePower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
 
@@ -559,79 +613,9 @@ void Enemy::Dead() {
 
 // 敵の行動関数
 void Enemy::Move() {
-	// 竜巻の親検索
-	auto tornadoParent = game->FindActor("Tornados");
-	if(mTornadoMinDistance == 0.0f) mTornadoMinDistance = mTornadoDistance;
-	if (tornadoParent != nullptr) {
-		auto tornadoChildren = tornadoParent->mTransform->Children();
-		// 子供がいるなら竜巻との距離を求める
-		auto size = tornadoChildren.size();		
-		if (size >= 2) {
-			// 子の中から最短距離の竜巻を探す
-			for (std::list<Actor*>::iterator i = tornadoChildren.begin(); i != tornadoChildren.end(); i++) {
-				auto tathumaki = *i;
-				// 竜巻との距離の計算
-				auto tornadoDistance = XMVector3Length(
-					tathumaki->mTransform->Position() -
-					mParentObj->mTransform->Position());
-				// 最短距離なら更新する
-				if (tornadoDistance.x <= mTornadoMinDistance) {
-					// 最短距離を入れる
-					mTornadoMinDistance = tornadoDistance.x;
-					// 竜巻オブジェを入れる
-					mTornadoObj = tathumaki;
-				}
-				//game->Debug()->Log(std::to_string(mTornadoMinDistance));
-			}
-			// 一定距離なら回転
-			// 竜巻との距離が一定距離内なら竜巻の方向に移動する
-			if (mTornadoMinDistance <= mTornadoDistance) {
-				mIsTornadoRange = true;
-			}
-		}
-		else if(size == 1){
-			auto tathumaki = game->FindActor("Tornado");
-			if (tathumaki != nullptr) {
-				auto distance = XMVector3Length(
-					tathumaki->mTransform->Position() - mParentObj->mTransform->Position());
-				// 竜巻との距離が一定距離内なら竜巻の方向に移動する
-				if (distance.x <= mTornadoDistance) {
-					mIsTornadoRange = true;
-					mTornadoObj = tathumaki;
-				}
-			}
-			else {
-				// 途中で竜巻がなくなったら通常行動に戻す
-				mIsTornadoRange = false;
-				mTornadoObj = nullptr;
-				mTornadoMinDistance = mTornadoDistance;
-			}
-		}
-		else if (size == 0) {
-			// いないなら通常行動をする
-			mIsTornadoRange = false;
-			mTornadoObj = nullptr;
-			mTornadoMinDistance = mTornadoDistance;
-		}
-		//game->Debug()->Log(std::to_string(size));
-	}
-
-	//// 竜巻が近くにある場合
-	//auto tathumaki = game->FindActor("Tornado");
-	//if (tathumaki != nullptr) {
-	//	auto distance = XMVector3Length(
-	//		tathumaki->mTransform->Position() - mParentObj->mTransform->Position());
-	//	// 竜巻との距離が一定距離内なら竜巻の方向に移動する
-	//	if (distance.x <= mTornadoDistance) {
-	//		mIsTornadoRange = true;
-	//		mTornadoObj = tathumaki;
-	//	}
-	//}
-	//else {
-	//	// 途中で竜巻がなくなったら通常行動に戻す
-	//	mIsTornadoRange = false;
-	//}
-
+	// 竜巻を探す
+	Enemy::SearchTornado();
+	// 死んでいなかったら各敵の行動を行う
 	if (!mIsDead) {
 		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 		auto colliderScale = collider->GetScale();
@@ -640,10 +624,12 @@ void Enemy::Move() {
 		// 竜巻の範囲内に入っていなかったら通常行動を行う
 		if (!mIsTornadoRange) {
 			if (mEnemyState == EnemyState::PlayerSearch) {
+				// プレイヤーを捜索する行動
 				SearchMove();
 			}
 			else {
 				if (!mIsDistanceAct) {
+					// プレイヤーを見つけたときの行動
 					if (mEnemyState == EnemyState::PlayerChase) {
 						PlayerChase();
 					}
@@ -652,30 +638,30 @@ void Enemy::Move() {
 					// 距離での行動
 					if (mEnemyState == EnemyState::PlayerShortDistance) {
 						ShortDistanceAttack();
-						//game->Debug()->Log("近距離");
 					}
 					else if (mEnemyState == EnemyState::PlayerCenterDistance) {
 						CenterDistanceAttack();
-						//game->Debug()->Log("中距離");
 					}
 					else if (mEnemyState == EnemyState::PlayerLongDistance) {
 						LongDistanceAttack();
-						//game->Debug()->Log("遠距離");
 					}
 				}
 			}
 		}
 		else {
+			// 竜巻に巻き込まれたときの行動
 			Enemy::TornadoEscapeMove(mTornadoObj);
 		}
-
+		// リスポーンするかの判定
 		Enemy::ResPawnLine();
 	}
 	else {
 		// 死亡行動の呼び出し
 		Enemy::DeadMove();
 	}
+	// ステータスのリセット
 	Enemy::ResetStatus();
+	// スモークの呼び出し
 	Enemy::EnemyMoveSmoke();
 }
 
@@ -696,6 +682,16 @@ void Enemy::ResetStatus() {
 // プレイヤーの追跡を中止する距離の加算です
 void Enemy::AddPlayerChaseStopDistance(float distance) {
 	mAddPlayerChaseStopDistance = distance;
+}
+
+// サウンドを再生します
+void Enemy::EnemyPlaySound(const std::string soundName) {
+	std::string playSoundName = "Assets/" + soundName;
+	//// サウンドを鳴らす
+	auto sound = gameObject->GetComponent<SoundComponent>();
+	if (sound) return;
+	/*sound->LoadFile("playSoundName");
+	sound->Play();*/
 }
 
 // 竜巻のステータスを入れます

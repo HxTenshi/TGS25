@@ -42,6 +42,11 @@ void WaterGunBullet::OnCollideBegin(Actor* target){
 		auto playerScript = target->GetScript<SailBoard>();
 		playerScript->Damage(mSetDamege);
 		game->DestroyObject(gameObject);
+		//// ƒTƒEƒ“ƒh‚ð–Â‚ç‚·
+		//auto sound = gameObject->GetComponent<SoundComponent>();
+		//if (!sound) return;
+		//sound->LoadFile("tekitou");
+		//sound->Play();
 	}
 }
 
