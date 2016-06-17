@@ -38,6 +38,8 @@ private:
 
 
 	void AnimationChange(int id,bool loop,float timer);
+	void AnimationChange(int id, bool loop, float timer,float scale);
+	void AnimationReversePlay(int id, bool loop);
 	void AnimationReverse(float TimeScale = 1.0f);
 	bool IsCurrentAnimation();
 	

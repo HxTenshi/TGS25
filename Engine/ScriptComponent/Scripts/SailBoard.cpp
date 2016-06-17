@@ -43,15 +43,35 @@ void SailBoard::Start(){
 void SailBoard::Update(){
 
 	auto sail = game->FindActor("Sail")->GetScript<Sail>();
-	if (sail)
+	//トリックとダメージのモーション中ではない
+	if (sail && mAnimator->mCurrentSet != 1 && mAnimator->mCurrentSet != 2)
 	{
-		if (sail->GetSailRotateRad() < 0 &&  mAnimator->GetAnimetionParam(0).mTimeScale >= 1)
+		if (sail->GetSailRotateRad() < 0)
 		{
-			AnimationReverse(-2);
+			if(mAnimator->GetAnimetionParam(0).mTimeScale >= 1) AnimationReversePlay(0,false);
+			if (mAnimator->GetAnimetionParam(0).mTime <= 0)
+			{
+				if (!mAnimator) return;
+				AnimeParam newAnime;
+				auto anima1 = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
+				auto anima2 = mAnimator->GetAnimetionParam(4);
+				anima1.mWeight = 0;
+				anima2.mWeight = 1;
+				anima1.mTimeScale = -2;
+				anima2.mTimeScale = 0;
+				anima1.mTime = 0;
+				anima2.mTime = abs(sail->GetSailRotateRad()) * 10;
+				anima2.mLoop = false;
+				mAnimator->SetAnimetionParam(mAnimator->mCurrentSet, anima1);
+				mAnimator->SetAnimetionParam(4, anima2);
+				mAnimator->mCurrentSet = 4;
+				//AnimationChange(4, false, abs(sail->GetSailRotateRad()) * 10);
+			}
 		}
-		else if(sail->GetSailRotateRad() > 0 &&  mAnimator->GetAnimetionParam(0).mTimeScale <= -1)
+		else if(sail->GetSailRotateRad() > 0)
 		{
-			AnimationReverse(2);
+			if(mAnimator->GetAnimetionParam(0).mTimeScale <= -1) AnimationChange(0,false,0,2);
+			if (mAnimator->GetAnimetionParam(0).mTime >= 61)AnimationChange(3, false, abs(sail->GetSailRotateRad()) * 10,0);
 		}
 	}
 
@@ -406,7 +426,43 @@ void SailBoard::AnimationChange(int id, bool loop, float timer)
 	anima1.mTimeScale = 1;
 	anima2.mTimeScale = 1;
 	anima1.mTime = 0;
-	anima2.mTime = 0;
+	anima2.mTime = timer;
+	anima2.mLoop = loop;
+	mAnimator->SetAnimetionParam(mAnimator->mCurrentSet, anima1);
+	mAnimator->SetAnimetionParam(id, anima2);
+	mAnimator->mCurrentSet = id;
+}
+
+void SailBoard::AnimationChange(int id, bool loop, float timer, float scale)
+{
+	if (!mAnimator) return;
+	AnimeParam newAnime;
+	auto anima1 = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
+	auto anima2 = mAnimator->GetAnimetionParam(id);
+	anima1.mWeight = 0;
+	anima2.mWeight = 1;
+	//anima1.mTimeScale = 1;
+	anima2.mTimeScale = scale;
+	//anima1.mTime = 0;
+	anima2.mTime = timer;
+	anima2.mLoop = loop;
+	mAnimator->SetAnimetionParam(mAnimator->mCurrentSet, anima1);
+	mAnimator->SetAnimetionParam(id, anima2);
+	mAnimator->mCurrentSet = id;
+}
+
+void SailBoard::AnimationReversePlay(int id, bool loop)
+{
+	if (!mAnimator) return;
+	AnimeParam newAnime;
+	auto anima1 = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
+	auto anima2 = mAnimator->GetAnimetionParam(id);
+	anima1.mWeight = 0;
+	anima2.mWeight = 1;
+	//anima1.mTimeScale = 1;
+	anima2.mTimeScale = -2;
+	anima1.mTime = 0;
+	anima2.mTime = 61;
 	anima2.mLoop = loop;
 	mAnimator->SetAnimetionParam(mAnimator->mCurrentSet, anima1);
 	mAnimator->SetAnimetionParam(id, anima2);
@@ -416,9 +472,9 @@ void SailBoard::AnimationChange(int id, bool loop, float timer)
 void SailBoard::AnimationReverse(float TimeScale)
 {
 	if (!mAnimator) return;
-	auto anima = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
+	auto anima = mAnimator->GetAnimetionParam(0);
 	anima.mTimeScale = TimeScale;
-	mAnimator->SetAnimetionParam(mAnimator->mCurrentSet, anima);
+	mAnimator->SetAnimetionParam(0, anima);
 }
 
 bool SailBoard::IsCurrentAnimation()
@@ -426,11 +482,11 @@ bool SailBoard::IsCurrentAnimation()
 	if (!mAnimator) return false;
 
 	auto param = mAnimator->GetAnimetionParam(mAnimator->mCurrentSet);
-	if (param.mTimeScale == 1 && param.mTime <= 61)
+	if (param.mTimeScale >= 0 && param.mTime <= 61)
 	{
 		return true;
 	}
-	else if(param.mTimeScale == -1 && param.mTime >= 0)
+	else if(param.mTimeScale <= 0 && param.mTime >= 0)
 	{
 		return true;
 	}
