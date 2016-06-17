@@ -131,4 +131,5 @@ protected:
 	PrefabAssetDataPtr mPrefabAsset;
 
 	UINT mUniqueID;
+	bool mEndStart;
 };

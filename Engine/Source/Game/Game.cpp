@@ -108,18 +108,23 @@ Game::Game(){
 	mRootObject = new Actor();
 	mRootObject->mTransform = mRootObject->AddComponent<TransformComponent>();
 	mRootObject->Initialize();
+	mRootObject->Start();
 
 #ifdef _ENGINE_MODE
 	mEngineRootObject = new Actor();
 	mEngineRootObject->mTransform = mEngineRootObject->AddComponent<TransformComponent>();
 	mEngineRootObject->Initialize();
+	mEngineRootObject->Start();
 
 	mCamera.Initialize();
 	mSelectActor.Initialize();
 #endif
 
-
+#ifdef _ENGINE_MODE
 	LoadScene("./Assets/Scene_.scene");
+#else
+	LoadScene("./Assets/Scenes/Title.scene");
+#endif
 
 	mCBGameParameter = ConstantBuffer<cbGameParameter>::create(11);
 	mCBGameParameter.mParam.Time = XMFLOAT4(0, 0, 0, 0);
@@ -529,6 +534,8 @@ bool Game::IsGamePlay(){
 #endif
 
 void Game::LoadScene(const std::string& FilePath){
+
+	((EngineDeltaTime*)gpDeltaTime)->Reset();
 
 	TransformComponent* t = (TransformComponent*)mRootObject->mTransform.Get();
 	//t->AllChildrenDestroy();

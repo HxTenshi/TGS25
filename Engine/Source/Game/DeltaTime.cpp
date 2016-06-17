@@ -26,6 +26,8 @@ void EngineDeltaTime::Tick(){
 		mNoScaleDeltaTime = ((double)end.QuadPart - (double)mStart.QuadPart) / (double)mFreq.QuadPart;
 	mDeltaTime = mNoScaleDeltaTime * mScale;
 
+	mDeltaTime = min(mDeltaTime, 4.0f/60.0f);
+
 	mStart = end;
 }
 
