@@ -177,6 +177,7 @@
     <ClCompile Include="Scripts\PointItem.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
+    <ClCompile Include="Scripts\SceneCursor.cpp" />
     <ClCompile Include="Scripts\Squid.cpp" />
     <ClCompile Include="Scripts\SquidInk.cpp" />
     <ClCompile Include="Scripts\TextureScroll.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="Scripts\PointItem.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
+    <ClInclude Include="Scripts\SceneCursor.h" />
     <ClInclude Include="Scripts\Squid.h" />
     <ClInclude Include="Scripts\SquidInk.h" />
     <ClInclude Include="Scripts\testhit.h" />

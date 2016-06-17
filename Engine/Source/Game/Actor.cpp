@@ -58,6 +58,19 @@ void Actor::Initialize(){
 void Actor::Start(){
 	mComponents.RunStart();
 }
+#ifdef _ENGINE_MODE
+void Actor::Initialize_Script(){
+	if (auto com = mComponents.GetComponent<ScriptComponent>()){
+		com->Initialize_Script();
+	}
+}
+void Actor::Start_Script(){
+	if (auto com = mComponents.GetComponent<ScriptComponent>()){
+		com->Start_Script();
+	}
+	
+}
+#endif
 void Actor::Finish(){
 	mComponents.RunFinish();
 }

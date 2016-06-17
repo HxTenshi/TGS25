@@ -1,3 +1,3 @@
 #pragma once
 
-#define _BUILD_VERSION 0x0009
+#define _BUILD_VERSION 0x000a

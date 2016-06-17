@@ -476,6 +476,9 @@ void Game::RemovePhysXActor(PxActor* act){
 void Game::RemovePhysXActorEngine(PxActor* act){
 	return gpPhysX3Main->RemoveActorEngine(act);
 }
+Actor* Game::GetRootActor(){
+	return mRootObject;
+}
 Actor* Game::FindActor(Actor* actor){
 
 	for (auto& act : (*gpList)){
@@ -549,11 +552,16 @@ void Game::ChangePlayGame(bool isPlay){
 	gIsPlay = mIsPlay;
 	if (isPlay){
 
+		mDeltaTime.Reset();
+
 		m_Scene.MemorySaveScene();
 
-		//for (auto& act : *gpList){
-		//	act.second->Start();
-		//}
+		for (auto& act : *gpList){
+			act.second->Initialize_Script();
+		}
+		for (auto& act : *gpList){
+			act.second->Start_Script();
+		}
 	}
 	else{
 
@@ -686,9 +694,11 @@ void Game::Draw(){
 
 	{
 		render->PushSet(DepthStencil::Preset::DS_Zero_Alawys);
+		render->PushSet(BlendState::Preset::BS_Alpha);
 
 		PlayDrawList(DrawStage::UI);
 
+		render->PopBS();
 		render->PopDS();
 	}
 

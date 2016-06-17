@@ -195,20 +195,23 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 
 	// ディフューズ角度減衰率計算
 	float DifGen = saturate(NLDot);
-	DifGen *= shadow * 0.75;
-	DifGen = DifGen + 0.25;
+	//DifGen *= shadow * 0.75;
+	//DifGen = DifGen + 0.25;
 
 
 	float roughness = norCol.a - 1;
 	float spec = LightingFuncGGX_REF(N, -normalize(vpos), -L, roughness, 0.1);
 
-	//if (shadow==1){
-	//	Out.Diffuse = LightColor * (DifGen*0.75+0.25);
-	//}
-	//else{
-	//	Out.Diffuse = LightColor * float4(0.2,0.2,0.3,1);
-	//}
-	Out.Diffuse = LightColor * DifGen;
+	float r = 0.75f;
+	float g = 0.83f;
+	float b = 0.95f;
+	if (shadow==1){
+		Out.Diffuse = LightColor * (DifGen* float4(1-r, 1-g, 1-b, 1) + float4(r, g, b, 1));
+	}
+	else{
+		Out.Diffuse = LightColor * float4(r,g,b,1);
+	}
+	//Out.Diffuse = LightColor * DifGen;
 	Out.Diffuse.a = LightColor.a;
 
 	Out.Specular = LightColor * spec;
