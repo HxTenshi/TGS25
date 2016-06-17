@@ -34,6 +34,7 @@ private:
 	bool Dead();
 	void ReSpawn();
 	bool Shake();
+	void PlaySE(std::string filename);
 
 
 	void AnimationChange(int id,bool loop,float timer);
