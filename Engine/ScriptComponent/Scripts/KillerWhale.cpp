@@ -62,13 +62,12 @@ void KillerWhale::OnCollideExit(Actor* target){
 void KillerWhale::SearchMove() {
 	// ‰½‚à‚µ‚È‚¢
 	mIsMove = false;
-	//game->Debug()->Log(std::to_string(mIsFloorHit));
 	if (!mIsFloorHit && mInitSetCount == 1) {
 		auto parentPosition = mParentObj->mTransform->Position();
 		mParentObj->mTransform->Position(parentPosition - mGRAVITY * Enemy::GetEnemyDeltaTime(60.0f));
 	}
 	Enemy::SetAnimationID(0);
-	Enemy::SetAnimationTimeScale(1.0f * mSpeed * 0.2f);
+	Enemy::SetAnimationTimeScale(1.0f * (mSpeed * 0.01f));
 	Enemy::SetAnimationLoop(true);
 }
 
@@ -132,7 +131,7 @@ void KillerWhale::LongDistanceAttack() {
 	Enemy::PlayerChaseMode(0.0f, 0.0f);
 
 	Enemy::SetAnimationID(0);
-	Enemy::SetAnimationTimeScale(1.0f * mSpeed * 0.2f);
+	Enemy::SetAnimationTimeScale(1.0f * (mSpeed * 0.01f));
 	Enemy::SetAnimationLoop(true);
 	auto parentPosition = mParentObj->mTransform->Position();
 	auto forwardMove = mParentObj->mTransform->Forward() * mSpeed * 0.01f;

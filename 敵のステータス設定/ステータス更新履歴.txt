@@ -22,3 +22,6 @@
 　各敵のスモークのステータスは、
 　Asset/Enemy/ の各敵の名前の MoveSmoke で変更できます。
 ・竜巻の変数の mSetTornadoInterval を追加しました。
+
+2016/06/17
+水鉄砲の弾の消去タイム mDestroyTime を整数から小数に変更しました。

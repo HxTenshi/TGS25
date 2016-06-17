@@ -23,7 +23,7 @@ void WaterGunBullet::Update(){
 	auto position = gameObject->mTransform->Position();
 	gameObject->mTransform->Position(position + mForwardVelocity * (deltaTime * 60.0f));
 
-	mDestroyTime--;
+	mDestroyTime -= deltaTime * 60.0f;
 	if (mDestroyTime <= 0) {
 		game->DestroyObject(gameObject);
 	}
@@ -41,12 +41,12 @@ void WaterGunBullet::OnCollideBegin(Actor* target){
 	if (target->Name() == "Board") {
 		auto playerScript = target->GetScript<SailBoard>();
 		playerScript->Damage(mSetDamege);
-		game->DestroyObject(gameObject);
 		//// ƒTƒEƒ“ƒh‚ð–Â‚ç‚·
-		//auto sound = gameObject->GetComponent<SoundComponent>();
-		//if (!sound) return;
-		//sound->LoadFile("tekitou");
-		//sound->Play();
+		/*auto sound = gameObject->GetComponent<SoundComponent>();
+		if (!sound) return;
+		sound->LoadFile("Assets/Enemy/hit.wav");
+		sound->Play();*/
+		game->DestroyObject(gameObject);
 	}
 }
 

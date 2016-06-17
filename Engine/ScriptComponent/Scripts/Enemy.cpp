@@ -76,44 +76,40 @@ void Enemy::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void Enemy::OnCollideBegin(Actor* target){
-	if (target->Name() == "Board"){
-		auto playerScript = target->GetScript<SailBoard>();
-		//// プレイヤーが無敵状態なら死亡
-		//// そうでない場合はプレイヤーにダメージを与える
-		//if (playerScript->IsUnrivaled() || playerScript->IsTrick()) {
-		//	game->DestroyObject(gameObject);
-		//}
-		//else {
-		//	playerScript->Damage(mDamage);
-		//}
-
-		//// サウンドの再生
-		//Enemy::EnemyPlaySound("hit");
-		// 死亡した瞬間に当たり判定をトリガーにする
-		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
-		collider->SetIsTrigger(true);
-		// プレイヤーの方に回転
-		auto parentPosition = mParentObj->mTransform->Position();
-		auto playerPosition = target->mTransform->Position();
-		auto v = parentPosition - playerPosition;
-		auto angle = atan2(v.x, v.z);
-		auto quaternion = XMQuaternionRotationAxis(mParentObj->mTransform->Up(), angle);
-		// ダメージを与えて自分を消す(仮設定)
-		playerScript->Damage(mDamage);
-		mIsDead = true;
-		// 死亡アニメーションの呼び出し
-		Enemy::SetAnimationID(2);
-		Enemy::SetAnimationLoop(false);
-	}
-	// 竜巻に当たったら死亡する
-	if (target->Name() == "Tornado") {
-		mIsDead = true;
-		mIsBlowAway = true;
-		mBlowAwayPower = 100.0f;
-		// コライダーのトリガーをオンにする
-		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
-		collider->SetIsTrigger(true);
-		//mBlowAwayInterval = 1.0f;
+	if (!mIsDead) {
+		if (target->Name() == "Board") {
+			auto playerScript = target->GetScript<SailBoard>();
+			//// プレイヤーが無敵状態なら死亡
+			//// そうでない場合はプレイヤーにダメージを与える
+			if (playerScript->IsUnrivaled()) {
+				playerScript->Damage(-mDamage);
+				// 死亡した瞬間に当たり判定をトリガーにする
+				auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+				collider->SetIsTrigger(true);
+				// プレイヤーの方に回転
+				auto parentPosition = mParentObj->mTransform->Position();
+				auto playerPosition = target->mTransform->Position();
+				auto v = parentPosition - playerPosition;
+				auto angle = atan2(v.x, v.z);
+				auto quaternion = XMQuaternionRotationAxis(mParentObj->mTransform->Up(), angle);
+				mIsDead = true;
+				// 死亡アニメーションの呼び出し
+				Enemy::SetAnimationID(2);
+				Enemy::SetAnimationLoop(false);
+			}
+			else playerScript->Damage(mDamage);
+			//// サウンドの再生
+			Enemy::EnemyPlaySound("hit");
+		}
+		// 竜巻に当たったら死亡する
+		if (target->Name() == "Tornado") {
+			mIsDead = true;
+			mIsBlowAway = true;
+			mBlowAwayPower = 100.0f;
+			// コライダーのトリガーをオンにする
+			auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+			collider->SetIsTrigger(true);
+		}
 	}
 
 	if (target->Name() == "Floor") {
@@ -192,15 +188,13 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 		mPlayerSearchObj->mTransform->Position(-setPosition);
 		// 敵の子供に追加する
 		mPlayerSearchObj->mTransform->SetParent(mParentObj);
-
 		// CGの生成
 		std::string baseName = "Assets/Enemy/EnemyCGObj/" + gameObject->Name() + "CG";
 		auto createCGObjName = baseName.c_str();
 		auto CGObj = game->CreateActor(createCGObjName);
 		game->AddObject(CGObj);
 		mEnemyCGObj = CGObj;
-		//CGObj->mTransform->SetParent(gameObject);
-		CGObj->mTransform->SetParent(mParentObj);
+		mEnemyCGObj->mTransform->SetParent(mParentObj);
 		mEnemyCGScript = CGObj->GetScript<EnemyCG>();
 		// 一度生成したら二度と生成しない
 		mAddSearchObjCount = 1;
@@ -558,7 +552,6 @@ void Enemy::DeadMove() {
 			}
 
 			Enemy::SetAnimationID(2);
-			//Enemy::SetAnimationID(false);
 			if (Enemy::GetAnimationTime() > 10.0f) {
 				Enemy::SetAnimationTime(10.0f);
 			}
@@ -686,12 +679,12 @@ void Enemy::AddPlayerChaseStopDistance(float distance) {
 
 // サウンドを再生します
 void Enemy::EnemyPlaySound(const std::string soundName) {
-	std::string playSoundName = "Assets/" + soundName;
+	std::string playSoundName = "Assets/Enemy/" + soundName + ".wav";
 	//// サウンドを鳴らす
 	auto sound = gameObject->GetComponent<SoundComponent>();
-	if (sound) return;
-	/*sound->LoadFile("playSoundName");
-	sound->Play();*/
+	if (!sound) return;
+	sound->LoadFile(playSoundName);
+	sound->Play();
 }
 
 // 竜巻のステータスを入れます
