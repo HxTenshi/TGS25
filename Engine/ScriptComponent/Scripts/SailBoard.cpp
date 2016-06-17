@@ -71,8 +71,12 @@ void SailBoard::Update(){
 		auto smoke = game->FindActor("PlayerMoveSmoke");
 		if (smoke)
 		{
-			smoke->GetScript<MoveSmoke>()->SetMaxSpeed(90);
-			smoke->GetScript<MoveSmoke>()->SetSpeed(XMVector3Length(physx->GetForceVelocity()).x);
+			auto smokes = smoke->mTransform->Children();
+			for (auto&& s : smokes)
+			{
+				s->GetScript<MoveSmoke>()->SetMaxSpeed(50);
+				s->GetScript<MoveSmoke>()->SetSpeed(XMVector3Length(physx->GetForceVelocity()).x);
+			}
 		}
 	}
 
@@ -151,6 +155,14 @@ void SailBoard::OnCollideEnter(Actor* target){
 		if (IsTrick())
 		{
 			mPlyerHP += RecoveryPoint;
+			auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
+			if (tornado)
+			{
+				game->AddObject(tornado);
+				tornado->mTransform->Position(gameObject->mTransform->Position());
+				auto parent = game->FindActor("Tornados");
+				tornado->mTransform->SetParent(parent);
+			}
 		}
 		
 		mTrick = false;
@@ -294,14 +306,14 @@ void SailBoard::Trick()
 				//トルネードの追加
 				if (IsUnrivaled())
 				{
-					auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
+					/*auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
 					if (tornado)
 					{
 						game->AddObject(tornado);
 						tornado->mTransform->Position(gameObject->mTransform->Position());
 						auto parent = game->FindActor("Tornados");
 						tornado->mTransform->SetParent(parent);
-					}
+					}*/
 				}
 			}
 			mTrick = true;
