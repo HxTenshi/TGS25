@@ -1,4 +1,4 @@
-﻿# �V���[�v�Ŏn�߂�ƃR�����g�s�ɂȂ�
+# �V���[�v�Ŏn�߂�ƃR�����g�s�ɂȂ�
  
 # tmp �t�H���_�܂邲�Ɩ���������
 #tmp/
@@ -39,3 +39,4 @@ Engine/Temp/
 Engine/ScriptComponent/System/factory
 Engine/ScriptComponent/System/include
 Engine/ScriptComponent/System/reflection
+Engine/ScriptComponent/ExeCompile/
