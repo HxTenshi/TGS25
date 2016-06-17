@@ -43,7 +43,8 @@ void SailBoard::Start(){
 void SailBoard::Update(){
 
 	auto sail = game->FindActor("Sail")->GetScript<Sail>();
-	if (sail)
+	//トリックとダメージのモーション中ではない
+	if (sail && mAnimator->mCurrentSet != 1 && mAnimator->mCurrentSet != 2)
 	{
 		if (sail->GetSailRotateRad() < 0)
 		{
