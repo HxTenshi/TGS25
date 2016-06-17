@@ -142,6 +142,7 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 		auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
 		manager->ItemGet();
+		PlaySE("Assets/PlayerSE/recovery.wav");
 		game->DestroyObject(target);
 	}
 }
@@ -154,11 +155,11 @@ void SailBoard::OnCollideEnter(Actor* target){
 	{
 		if (IsTrick())
 		{
-			mPlyerHP += RecoveryPoint;
 			auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
 			if (tornado)
 			{
 				game->AddObject(tornado);
+				PlaySE("Assets/PlayerSE/wind.wav");
 				tornado->mTransform->Position(gameObject->mTransform->Position());
 				auto parent = game->FindActor("Tornados");
 				tornado->mTransform->SetParent(parent);
@@ -347,7 +348,10 @@ bool SailBoard::Dead()
 	}
 	if (mPlyerHP <= 0)
 	{
-		return true;
+		auto physx = gameObject->GetComponent<PhysXComponent>();
+		if (!physx) return false;
+		physx->SetForceVelocity({ 0, -9.8, 0, 0 });
+		gameObject->GetComponent<PhysXColliderComponent>()->SetIsTrigger(true);
 	}
 	return false;
 }
@@ -359,13 +363,13 @@ void SailBoard::ReSpawn()
 		auto point = game->FindActor("ReSpawnPoint");
 		if (point)
 		{
-			mPlyerHP = 100.0f;
-			gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
+			//mPlyerHP = 100.0f;
+			//gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
 			auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
-			manager->CreditDown();
-			auto physx = gameObject->GetComponent<PhysXComponent>();
-			physx->SetForceVelocity(XMVectorSet(0, 0, 0, 1));
-			gameObject->mTransform->Position(point->mTransform->Position());
+			//manager->CreditDown();
+			//auto physx = gameObject->GetComponent<PhysXComponent>();
+			//physx->SetForceVelocity(XMVectorSet(0, 0, 0, 1));
+			//gameObject->mTransform->Position(point->mTransform->Position());
 		}
 	}
 }
@@ -380,6 +384,15 @@ bool SailBoard::Shake()
 	}
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
 	return false;
+}
+
+void SailBoard::PlaySE(std::string filename)
+{
+	auto component = gameObject->GetComponent<SoundComponent>();
+	if (!component) return;
+	component->SetLoop(false);
+	component->LoadFile(filename);
+	component->Play();
 }
 
 void SailBoard::AnimationChange(int id, bool loop, float timer)
