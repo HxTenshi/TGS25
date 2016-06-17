@@ -74,7 +74,7 @@ void SailBoard::Update(){
 			auto smokes = smoke->mTransform->Children();
 			for (auto&& s : smokes)
 			{
-				s->GetScript<MoveSmoke>()->SetMaxSpeed(60);
+				s->GetScript<MoveSmoke>()->SetMaxSpeed(50);
 				s->GetScript<MoveSmoke>()->SetSpeed(XMVector3Length(physx->GetForceVelocity()).x);
 			}
 		}
