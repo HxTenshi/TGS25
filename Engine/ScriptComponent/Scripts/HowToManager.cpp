@@ -1,5 +1,5 @@
 #include "HowToManager.h"
-////アクターなど基本のインクルード
+//アクターなど基本のインクルード
 #include "h_standard.h"
 //コンポーネント全てのインクルード
 #include "h_component.h"

@@ -99,12 +99,12 @@ protected:
 	Actor* mParentObj;						// 空の親オブジェクト
 	Actor* mEnemyCGObj;						// 敵のグラフィックオブジェクト
 	Actor* mTornadoObj;						// 竜巻のオブジェクト
-	Actor* mRightSmokeObj;
-	Actor* mLeftSmokeObj;
+	Actor* mRightSmokeObj;					// 右のスモックオブジェクト
+	Actor* mLeftSmokeObj;					// 左のスモックオブジェクト
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
 	EnemyCG* mEnemyCGScript;				// 敵のCGオブジェクトのスクリプト
-	MoveSmoke* mRightSmokeScript;
-	MoveSmoke* mLeftSmokeScript;
+	MoveSmoke* mRightSmokeScript;			// 右のスモックオブジェクトのスクリプト
+	MoveSmoke* mLeftSmokeScript;			// 左のスモックオブジェクトのスクリプト
 	EnemyState mEnemyState;					// enumクラスのEnemyState(敵の行動選択時に使用)
 	XMVECTOR mSize;							// 敵の大きさ
 	XMVECTOR mInitPosition;					// 初期位置
@@ -118,6 +118,7 @@ protected:
 	int mCGCreateCount;						// CGの生成カウント(全部のリソースが揃ったら消去する)
 	int mAnimationID;						// アニメーションのID
 	int mInitSetCount;						// 最初に設定したか
+	int mTornadosCount;						// 竜巻の数
 	float mSpeed;							// 敵の速度変更
 	float mHalfSizeZ;						// 敵のZの大きさの半分
 	float mPositionY;						// 敵のYの位置（床との位置補正に使用）
@@ -137,7 +138,6 @@ protected:
 	float mBlowAwayY;						// 竜巻に吹っ飛んだときのYの角度
 	float mBlowAwayPower;					// 吹き飛ぶ速度
 	float mBlowAwayInterval;				// 吹き飛び間隔
-	//float mInitParentPositionY;				// 親の初期位置(Y)
 	bool mIsMove;							// 動いているか
 	bool mIsFloorHit;						// 床と当たったか
 	bool mIsCloudHit;						// 雲と当たったか

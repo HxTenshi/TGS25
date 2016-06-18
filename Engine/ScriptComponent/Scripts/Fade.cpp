@@ -16,17 +16,14 @@ void Fade::Initialize(){
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void Fade::Start(){
-
 }
 
 //毎フレーム呼ばれます
 void Fade::Update(){
-
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void Fade::Finish(){
-
 }
 
 //コライダーとのヒット時に呼ばれます
