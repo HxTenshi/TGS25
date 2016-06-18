@@ -386,7 +386,7 @@ void SailBoard::ReSpawn()
 			//mPlyerHP = 100.0f;
 			//gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
 			auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
-			//manager->CreditDown();
+			manager->CreditDown();
 			//auto physx = gameObject->GetComponent<PhysXComponent>();
 			//physx->SetForceVelocity(XMVectorSet(0, 0, 0, 1));
 			//gameObject->mTransform->Position(point->mTransform->Position());

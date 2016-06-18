@@ -9,13 +9,14 @@
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
+#include"Fade.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PlayerManager::Initialize()
 {
-	mCredit = 3;
 	mMaxPoint = 3;
+	mFadeOutObj = nullptr;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -26,7 +27,18 @@ void PlayerManager::Start(){
 //毎フレーム呼ばれます
 void PlayerManager::Update(){
 	if (Input::Trigger(KeyCoord::Key_SPACE)) game->Debug()->Log(std::to_string(mMaxPoint));
-	if (mCredit <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
+	if (mCredit <= 0)
+	{
+		// 一度だけ生成
+		if (mFadeOutObj == nullptr) {
+			mFadeOutObj = game->CreateActor("Assets/Fade");
+			game->AddObject(mFadeOutObj);
+		}
+		auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
+		mFadeOutScript->FadeOut(mFadeOutSecond);
+		// フェードアウト後シーン移動
+		if (mFadeOutScript->IsFadeOut()) game->LoadScene("./Assets/Scenes/Title.scene");
+	}
 	if (mMaxPoint <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
 
 	/*auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();

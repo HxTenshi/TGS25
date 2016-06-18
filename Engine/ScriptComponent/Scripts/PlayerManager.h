@@ -23,4 +23,8 @@ private:
 	int mCredit; //プレイヤーの残機
 	SERIALIZE
 	int mMaxPoint; //回収するアイテムの数
+	SERIALIZE
+	float mFadeOutSecond;
+
+	Actor* mFadeOutObj;
 };
