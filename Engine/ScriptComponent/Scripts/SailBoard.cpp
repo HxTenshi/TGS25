@@ -155,7 +155,8 @@ void SailBoard::OnCollideBegin(Actor* target){
 		/*float power = 2.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
 		gameObject->mTransform->AddForce(v*power);*/
-		gameObject->mTransform->Quaternion(XMQuaternionMultiply(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0),gameObject->mTransform->Quaternion()));
+		XMVECTOR rotate = XMVectorSet(0, gameObject->mTransform->Rotate().y,0, 1);
+		gameObject->mTransform->Rotate(rotate);
 	}
 
 	if (target->Name() == "PointItem"){
