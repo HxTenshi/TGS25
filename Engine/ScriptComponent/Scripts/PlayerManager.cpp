@@ -39,7 +39,7 @@ void PlayerManager::Update(){
 		// フェードアウト後シーン移動
 		if (mFadeOutScript->IsFadeOut()) game->LoadScene("./Assets/Scenes/Title.scene");
 	}
-	if (mMaxPoint <= 0) game->LoadScene("./Assets/Scenes/SampleBall.scene");
+	else if (mMaxPoint <= 0) game->LoadScene("./Assets/Scenes/Title.scene");
 
 	/*auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();
 	auto text2 = game->FindActor("column10")->GetComponent<TextureModelComponent>();
