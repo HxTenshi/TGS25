@@ -288,9 +288,15 @@ void Enemy::LongDistanceAttack() {
 
 // —³Šª‚©‚ç“¦‚°‚é‚Æ‚«‚Ìs“®‚Å‚·
 void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
-	if (!tornadoObj) {
-		mIsTornadoRange = false;
+	auto tornadoParent = game->FindActor("Tornados");
+	auto size = tornadoParent->mTransform->Children().size();
+	if (mTornadosCount != size) {
 		mTornadoObj = nullptr;
+		tornadoObj = nullptr;
+	}
+	if (tornadoObj == nullptr) {
+		mIsTornadoRange = false;
+		//mTornadoObj = nullptr;
 		mTornadoMinDistance = mTornadoDistance;
 		return;
 	}
