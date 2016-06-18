@@ -51,6 +51,11 @@ void DEMOCamera::Update(){
 			if (!mTarget->GetScript<SailBoard>()->GetIsJump())
 			{
 				mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -13) + XMVectorSet(0, 3.5f, 0, 1));
+				if (debugmode)
+				{
+					mPosition = mTarget->mTransform->Position() + offset;
+					gameObject->mTransform->Rotate(rotate);
+				}
 				if (Input::Down(PAD_DS4_KeyCoord::Button_DOWN))
 				{
 					mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * 3) + XMVectorSet(0, 1, 0, 1));

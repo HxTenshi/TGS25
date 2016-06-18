@@ -39,7 +39,10 @@ private:
 	float rotatey;
 	SERIALIZE
 	float rotatez;
+	SERIALIZE
+	bool PlayerDemo;
 
 	XMVECTOR offset;
 	XMVECTOR rotate;
+	
 };
