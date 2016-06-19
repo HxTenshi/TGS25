@@ -57,11 +57,11 @@ void Fade::FadeIn(const float time) {
 }
 
 // 
-void Fade::FadeOut(const float time) {
+void Fade::FadeOut(const float time, const float maxalpha) {
 	// デルタタイムの取得
 	auto deltaTime = game->DeltaTime()->GetDeltaTime();
-	if (mFadeOutAlpha > 1.0f) mFadeOutAlpha = 1.0f;
-	else if(mFadeOutAlpha < 1.0f) mFadeOutAlpha += 1.0f / time * deltaTime;
+	if (mFadeOutAlpha > maxalpha) mFadeOutAlpha = maxalpha;
+	else if(mFadeOutAlpha < maxalpha) mFadeOutAlpha += maxalpha / time * deltaTime;
 	//game->Debug()->Log(std::to_string(mFadeOutAlpha));
 	//mFadeOutAlpha = 0.0f;
 	// 描画
@@ -70,7 +70,7 @@ void Fade::FadeOut(const float time) {
 	auto color = XMFLOAT4(0.0f, 0.0f, 0.0f, mFadeOutAlpha);
 	mate->SetAlbedoColor(color);
 	//if (mate) mate->SetAlbedoColor(color);
-	if (mFadeOutAlpha == 1.0f) mIsFadeOut = true;
+	if (mFadeOutAlpha == maxalpha) mIsFadeOut = true;
 }
 
 // フェードインをしたかを返します

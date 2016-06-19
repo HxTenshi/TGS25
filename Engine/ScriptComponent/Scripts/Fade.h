@@ -15,7 +15,7 @@ public:
 	// 指定した時間でフェードインを行います
 	void FadeIn(const float time);
 	// 指定した時間でフェードアウトを行います
-	void FadeOut(const float time);
+	void FadeOut(const float time,const float maxalpha = 1.0f);
 	// フェードインをしたかを返します
 	bool IsFadeIn();
 	// フェードアウトをしたかを返します

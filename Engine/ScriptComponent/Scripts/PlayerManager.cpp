@@ -10,36 +10,41 @@
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
 #include"Fade.h"
+#include"h_standard.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PlayerManager::Initialize()
 {
 	mMaxPoint = 3;
+	mAlpha = 0.5;
 	mFadeOutObj = nullptr;
+	mGameStart = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
-void PlayerManager::Start(){
-
+void PlayerManager::Start()
+{
 }
 
 //毎フレーム呼ばれます
 void PlayerManager::Update(){
-	if (Input::Trigger(KeyCoord::Key_SPACE)) game->Debug()->Log(std::to_string(mMaxPoint));
+
+	if (!mGameStart)
+	{
+		GameStart();
+	}
+
+
 	if (mCredit <= 0)
 	{
-		// 一度だけ生成
-		if (mFadeOutObj == nullptr) {
-			mFadeOutObj = game->CreateActor("Assets/Fade");
-			game->AddObject(mFadeOutObj);
-		}
-		auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
-		mFadeOutScript->FadeOut(mFadeOutSecond);
-		// フェードアウト後シーン移動
-		if (mFadeOutScript->IsFadeOut()) game->LoadScene("./Assets/Scenes/Title.scene");
+		GameOver();
 	}
-	else if (mMaxPoint <= 0) game->LoadScene("./Assets/Scenes/Title.scene");
+	else if (mMaxPoint <= 0)
+	{
+		GameClear();
+		
+	}
 
 	/*auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();
 	auto text2 = game->FindActor("column10")->GetComponent<TextureModelComponent>();
@@ -101,4 +106,88 @@ void PlayerManager::CreditUp()
 void PlayerManager::ItemGet()
 {
 	mMaxPoint--;
+}
+
+bool PlayerManager::IsGameStart()
+{
+	return mGameStart;
+}
+
+void PlayerManager::GameStart()
+{
+	
+		// 一度だけ生成
+		if (mFadeOutObj == nullptr) {
+			mFadeOutObj = game->FindActor("Fade");
+		}
+		auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
+		mFadeOutScript->FadeIn(mFadeInSecond);
+		if (mFadeOutScript->IsFadeIn())
+		{
+			game->DestroyObject(mFadeOutObj);
+			mFadeOutObj = nullptr;
+			mGameStart = true;
+		}
+}
+
+void PlayerManager::GameClear()
+{
+	auto cleartexture = game->FindActor("Clear");
+	if (!cleartexture)
+	{
+		cleartexture = game->CreateActor("Assets/UIPrefab/Clear.json");
+		game->AddObject(cleartexture);
+	}
+	else
+	{
+		mTitleChangeTime -= game->DeltaTime()->GetDeltaTime();
+		if (mTitleChangeTime < 0)
+		{
+			// 一度だけ生成
+			if (mFadeOutObj == nullptr) {
+				mFadeOutObj = game->CreateActor("Assets/Fade");
+				game->AddObject(mFadeOutObj);
+			}
+			auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
+			mFadeOutScript->FadeOut(mFadeOutSecond);
+			// フェードアウト後シーン移動
+			if (mFadeOutScript->IsFadeOut()) game->LoadScene("./Assets/Scenes/Title.scene");
+		}
+	}
+}
+
+void PlayerManager::GameOver()
+{
+	// 一度だけ生成
+	if (mFadeOutObj == nullptr)
+	{
+		mFadeOutObj = game->CreateActor("Assets/Fade");
+		game->AddObject(mFadeOutObj);
+	}
+	auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
+	mFadeOutScript->FadeOut(mFadeOutSecond, mAlpha);
+	// フェードアウト後シーン移動
+	if (mFadeOutScript->IsFadeOut() && mTitleChangeTime < 0)
+	{
+		game->LoadScene("./Assets/Scenes/Title.scene");
+	}
+	else if (mFadeOutScript->IsFadeOut())
+	{
+		auto cleartexture = game->FindActor("GameOver");
+		if (!cleartexture)
+		{
+			cleartexture = game->CreateActor("Assets/UIPrefab/GameOver.json");
+			game->AddObject(cleartexture);
+		}
+		else
+		{
+			mTitleChangeTime -= game->DeltaTime()->GetDeltaTime();
+			if (mTitleChangeTime < 0)
+			{
+				mAlpha = 1.0f;
+				mFadeOutObj = game->CreateActor("Assets/Fade");
+				game->AddObject(mFadeOutObj);
+			}
+		}
+	}
 }

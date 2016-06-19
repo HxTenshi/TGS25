@@ -16,8 +16,16 @@ public:
 	void CreditDown();
 	void CreditUp();
 	void ItemGet();
+	bool IsGameStart();
 
 private:
+	void GameStart();
+	void GameClear();
+	void GameOver();
+
+private:
+	float mAlpha;
+	bool mGameStart;
 	//メンバ変数
 	SERIALIZE
 	int mCredit; //プレイヤーの残機
@@ -25,6 +33,10 @@ private:
 	int mMaxPoint; //回収するアイテムの数
 	SERIALIZE
 	float mFadeOutSecond;
+	SERIALIZE
+	float mFadeInSecond;
+	SERIALIZE
+	float mTitleChangeTime;
 
 	Actor* mFadeOutObj;
 };

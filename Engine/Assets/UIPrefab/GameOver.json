@@ -1,0 +1,1 @@
+{"children":{},"components":{"TextureModelComponent":{"mTextureName":"Assets\/UI\/GameOver.png"},"TransformComponent":{"mParentUniqueID":0,"mPosition.w":1,"mPosition.x":600,"mPosition.y":400,"mPosition.z":0,"mRotate.w":1,"mRotate.x":0,"mRotate.y":0,"mRotate.z":0,"mScale.w":1,"mScale.x":845,"mScale.y":167,"mScale.z":1}},"mName":"GameOver","mPrefab":"","mUniqueID":282003}

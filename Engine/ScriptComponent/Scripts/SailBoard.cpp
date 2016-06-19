@@ -42,6 +42,13 @@ void SailBoard::Start(){
 //毎フレーム呼ばれます
 void SailBoard::Update(){
 
+	auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
+	if (!manager->IsGameStart())
+	{
+		auto physx = gameObject->GetComponent<PhysXComponent>();
+		if (physx) physx->SetForceVelocity(XMVectorSet(0, 0, 0, 0));
+	}
+
 	auto sail = game->FindActor("Sail")->GetScript<Sail>();
 	//トリックとダメージのモーション中ではない
 	if (sail && mAnimator->mCurrentSet != 1 && mAnimator->mCurrentSet != 2)
