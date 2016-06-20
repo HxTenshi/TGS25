@@ -13,7 +13,6 @@ void HowToManager::Initialize(){
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void HowToManager::Start(){
-
 }
 
 //毎フレーム呼ばれます

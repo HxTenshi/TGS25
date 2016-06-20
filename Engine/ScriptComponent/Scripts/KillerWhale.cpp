@@ -79,19 +79,17 @@ void KillerWhale::ShortDistanceAttack() {
 	// カウントが０になったら水鉄砲の弾を発射
 	if (mBulletShotTime <= 0) {
 		if (!mIsShot) {
-			//// 水鉄砲の弾の生成
+			// 水鉄砲の弾の生成
 			auto gunBullet = game->CreateActor("Assets/Enemy/WaterGunBullet");
 			game->AddObject(gunBullet);
-			//// 位置の変更
+			// 位置の変更
 			Enemy::SetParentForwardObj(gunBullet);
 			mIsShot = true;
 			Enemy::SetAnimationTimeScale(1.0f);
 			//// サウンドの再生
 			//Enemy::EnemyPlaySound("tekitou");
-			//Enemy::SetAnimationLoop(false);
 		}
 		else {
-			//mRecastTime -= deltaTime * 30;
 			mRecastTime -= Enemy::GetEnemyDeltaTime(30.0f);
 			Enemy::SetAnimationTimeScale(2.0f * (15.0f / mInitRecastTime));
 			if (mRecastTime <= 0) {
@@ -100,17 +98,14 @@ void KillerWhale::ShortDistanceAttack() {
 				mIsShot = false;
 				mIsAttckMode = false;
 				Enemy::SetAnimationTime(0.0f);
-				//Enemy::SetAnimationLoop(true);
 			}
 		}	
 	}
 	else {
 		// 発射時間が0になるまでプレイヤーの方向を向く
-		//mBulletShotTime--;
 		mBulletShotTime -= Enemy::GetEnemyDeltaTime(30.0f);
 		Enemy::PlayerChaseMode(0.0f, 0.0f);
 		Enemy::SetAnimationTimeScale(2.0f * (34.0f / mInitBulletShotTime));
-		//game->Debug()->Log(std::to_string(Enemy::GetAnimationTime()));
 	}
 
 	if (Enemy::GetAnimationTime() >= 40.0f) {
@@ -119,7 +114,6 @@ void KillerWhale::ShortDistanceAttack() {
 	else {
 		Enemy::SetAnimationLoop(true);
 	}
-	// Enemy::SetAnimationLoop(true);
 }
 
 void KillerWhale::CenterDistanceAttack() {
@@ -140,5 +134,7 @@ void KillerWhale::LongDistanceAttack() {
 		forwardMove += mGRAVITY;
 	}
 	
-	mParentObj->mTransform->Position((parentPosition - forwardMove * Enemy::GetEnemyDeltaTime(60.0f)));
+	mParentObj->mTransform->Position(
+		(parentPosition - forwardMove
+		* Enemy::GetEnemyDeltaTime(60.0f)));
 }

@@ -61,6 +61,10 @@ public:
 	void SearchTornado();
 	// 敵の死亡行動です
 	void DeadMove();
+
+	void DeadBlowAway();
+	// 
+	void DeadTornadoMove();
 	// 死亡処理を行います
 	void Dead();
 	// 敵の行動関数
@@ -99,6 +103,7 @@ protected:
 	Actor* mParentObj;						// 空の親オブジェクト
 	Actor* mEnemyCGObj;						// 敵のグラフィックオブジェクト
 	Actor* mTornadoObj;						// 竜巻のオブジェクト
+	Actor* mBlowAwayTornadoObj;
 	Actor* mRightSmokeObj;					// 右のスモックオブジェクト
 	Actor* mLeftSmokeObj;					// 左のスモックオブジェクト
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
@@ -144,6 +149,7 @@ protected:
 	bool mIsImmortalBody;					// 不死身の敵か(未実装)
 	bool mIsDistanceAct;					// 距離判定の行動をするか
 	bool mIsBlowAway;						// 死亡時に吹き飛ぶかどうか
+	bool mIsTornadoCatch;
 	bool mIsKnockBackDirection;				// ノックバックの方向を決めたか
 	bool mIsChaseRotate;					// プレイヤーの方向を向くかどうか
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)

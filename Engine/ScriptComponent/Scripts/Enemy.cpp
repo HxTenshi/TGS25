@@ -46,6 +46,7 @@ void Enemy::Initialize(){
 	mIsImmortalBody = false;
 	mIsDistanceAct = false;
 	mIsBlowAway = true;
+	mIsTornadoCatch = false;
 	mIsKnockBackDirection = false;
 	mIsAttckMode = false;
 	mIsChaseRotate = true;
@@ -106,7 +107,9 @@ void Enemy::OnCollideBegin(Actor* target){
 		if (target->Name() == "Tornado" && mIsDead == false) {
 			mIsDead = true;
 			mIsBlowAway = true;
+			mIsTornadoCatch = true;
 			mBlowAwayPower = 100.0f;
+			mBlowAwayTornadoObj = mTornadoObj;
 			// コライダーのトリガーをオンにする
 			auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 			collider->SetIsTrigger(true);
@@ -288,18 +291,21 @@ void Enemy::LongDistanceAttack() {
 
 // 竜巻から逃げるときの行動です
 void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
-	auto tornadoParent = game->FindActor("Tornados");
+	/*auto tornadoParent = game->FindActor("Tornados");
 	auto size = tornadoParent->mTransform->Children().size();
 	if (mTornadosCount != size) {
 		mTornadoObj = nullptr;
 		tornadoObj = nullptr;
-	}
-	if (tornadoObj == nullptr) {
+	}*/
+	//if(tornadoObj != nullptr)game->Debug()->Log(tornadoObj->Name());
+	if (tornadoObj == nullptr) return;
+	if (tornadoObj->Name() != "Tornado") {
 		mIsTornadoRange = false;
-		//mTornadoObj = nullptr;
+		mTornadoObj = nullptr;
 		mTornadoMinDistance = mTornadoDistance;
 		return;
 	}
+	// スモックを動かす
 	mIsMove = true;
 
 	auto tornadoPosition = tornadoObj->mTransform->Position();
@@ -324,7 +330,7 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 			(-mParentObj->mTransform->Left() / mTornadoInterval))
 			* (mTornadoPower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
 	auto distance = XMVector3Length(tornadoPosition - parentPosition);
-	if (distance.x <= 8.0f) mTornadoInterval = 2.0f;
+	if (distance.x <= 10.0f) mTornadoInterval = 1.0f;
 
 	Enemy::SetAnimationID(0);
 }
@@ -453,12 +459,11 @@ void Enemy::ResPawnLine() {
 void Enemy::SearchTornado() {
 	// 竜巻の親検索
 	auto tornadoParent = game->FindActor("Tornados");
-	//if (mTornadoMinDistance == 0.0f) mTornadoMinDistance = mTornadoDistance;
 	if (tornadoParent != nullptr) {
 		auto tornadoChildren = tornadoParent->mTransform->Children();
 		// 子供がいるなら竜巻との距離を求める
 		auto size = tornadoChildren.size();
-		//game->Debug()->Log(std::to_string(size));
+		// 竜巻が消えたなら、一回エラー防止にnullptrを入れる
 		if (mTornadosCount != size) {
 			mTornadosCount = size;
 			mIsTornadoRange = false;
@@ -469,121 +474,65 @@ void Enemy::SearchTornado() {
 		if (size >= 1) {
 			// 子の中から最短距離の竜巻を探す
 			for (auto i = tornadoChildren.begin(); i != tornadoChildren.end(); ++i) {
-				//auto ta = i;
+				// 現在のiの竜巻を入れる
 				auto tathumaki = *i;
-				//game->Debug()->Log(tathumaki->Name());
 				auto tathumakiPosition = XMVectorSet(
 					tathumaki->mTransform->Position().x, 0.0f,
 					tathumaki->mTransform->Position().z, 0.0f);
 				auto parentPosition = XMVectorSet(
 					mParentObj->mTransform->Position().x, 0.0f,
 					mParentObj->mTransform->Position().z, 0.0f);
+				// iに入っている竜巻の距離を計算する
 				auto tornadoDistance = XMVector3Length(tathumakiPosition - parentPosition);
+				// 最短距離の竜巻だったら入れる
 				if (tornadoDistance.x <= mTornadoMinDistance) {
 					mTornadoMinDistance = tornadoDistance.x;
 					mTornadoObj = tathumaki;
-					/*game->Debug()->Log(mTornadoObj->Name());
-					game->Debug()->Log(std::to_string(mTornadoDistance));*/
 				}
 			}
-			if (mTornadoMinDistance <= mTornadoDistance) {
-				//game->Debug()->Log(std::to_string(mTornadoDistance));
-				mIsTornadoRange = true;
-			}
-			else {
-				mIsTornadoRange = false;
-			}
+			// 範囲内なら竜巻に巻き込まれる行動を行う
+			if (mTornadoMinDistance <= mTornadoDistance) mIsTornadoRange = true;
+			else mIsTornadoRange = false;
 		}
 		else {
 			// 竜巻がないなら通常行動をする
-			mIsTornadoRange = false;
-			mTornadoObj = nullptr;
-			mTornadoMinDistance = mTornadoDistance;
+			if (!mIsDead) {
+				mIsTornadoRange = false;
+				mTornadoObj = nullptr;
+				mTornadoMinDistance = mTornadoDistance;
+			}
 		}
 	}
 }
 
 // 敵の死亡行動です
 void Enemy::DeadMove() {
-	auto position = mParentObj->mTransform->Position();
 	// 吹き飛ぶ場合
 	if (mIsBlowAway) {
 		// 竜巻の吹き飛び
-		if (mIsTornadoRange) {
-			// 上昇
-			// 竜巻がなくなっていたらその場で吹き飛ばす
-			if (mTornadoObj == nullptr) {
-				mIsTornadoBlowAway = true;
-			}
-			// 竜巻のコライダーの取得
-			auto tornadoCollider = mTornadoObj->GetComponent<PhysXColliderComponent>();
-			auto tornadoColliderScale = tornadoCollider->GetScale();
-			// 竜巻に沿って回転
-			auto tornadoPosition = mTornadoObj->mTransform->Position();
-			// 親のステータスの取得
-			auto parentPosition = mParentObj->mTransform->Position();
-			// 竜巻の高さ以上になったら別方向に吹き飛ばす
-			if (parentPosition.y >= tornadoColliderScale.y) {
-				mIsTornadoBlowAway = true;
-			}
-			// 条件を満たしたら別方向に吹き飛ばす
+		if (mIsTornadoCatch) {
 			if (!mIsTornadoBlowAway) {
-				// ワールドのY座標で上昇する
-				auto vectorY = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-				auto up = vectorY * cosf(mParentObj->mTransform->Rotate().x) * 0.01f * mBlowAwayPower;
-				// 竜巻との回転方向を計算(逃げる方向と一緒にする)
-				auto v = parentPosition - tornadoPosition;
-				auto angle = atan2(v.x, v.z);
-				auto escapeAngle = angle - 3.141593f / 2.0f;
-				// 回転補正
-				if (std::to_string(escapeAngle) == "0.000000") escapeAngle = 0.0f;
-				if (escapeAngle < 0) escapeAngle += 3.141593f * 2.0f;
-				// 竜巻のように回転しながら吹き飛ぶ
-				mParentObj->mTransform->Rotate(mParentObj->mTransform->Up() * (escapeAngle));
-				mParentObj->mTransform->Position(
-					parentPosition + 
-					((up * mTornadoUpPower * 0.01f) +
-					(mParentObj->mTransform->Forward() -
-						(mParentObj->mTransform->Left() / (mTornadoRotateScale))) * 
-					(mTornadoRotatePower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
-
-				mEnemyCGObj->mTransform->Rotate(mParentObj->mTransform->Left() * 1.0f);
-				mTornadoRotateScale += mAddTornadoRotateScale;
+				// 竜巻に吹き飛ばされた時のモーション
+				Enemy::DeadTornadoMove();
 			}
 			else {
+				auto parentPosition = mParentObj->mTransform->Position();
 				mParentObj->mTransform->Position(
-					parentPosition + 
+					parentPosition +
 					(mParentObj->mTransform->Forward() +
-					(mParentObj->mTransform->Up() * cos(mBlowAwayY))) * Enemy::GetEnemyDeltaTime(60.0f));
+						(mParentObj->mTransform->Up() * cos(mBlowAwayY)))
+					* Enemy::GetEnemyDeltaTime(60.0f));
 				if (mBlowAwayY < 3.141593f) {
-					mBlowAwayY += 3.141593f / 180.0f;
+					mBlowAwayY += (3.141593f / 180.0f) * Enemy::GetEnemyDeltaTime(60.0f);
+					if (mBlowAwayY > 3.141593f) mBlowAwayY = 3.141593f;
 				}
 
 				Enemy::Dead();
 			}
-
-			Enemy::SetAnimationID(2);
-			if (Enemy::GetAnimationTime() > 10.0f) {
-				Enemy::SetAnimationTime(10.0f);
-			}
 		}
 		else {
-			// 当たりモーション
-			// 180度まで回転
-			if (mParentObj->mTransform->Rotate().x < 3.141593f) {
-				// 回転
-				auto rotate = mParentObj->mTransform->Rotate();
-				rotate.x += 3.141593f / (180.0f / mBlowAwayInterval);
-				mParentObj->mTransform->Rotate(rotate);
-			}
-			else {
-				// 回転しきって条件を満たしたら死亡
-				Enemy::Dead();
-			}
-			// 上昇
-			auto up = mParentObj->mTransform->Up() *
-				cosf(gameObject->mTransform->Rotate().x) * 0.01f * mBlowAwayPower;
-			mParentObj->mTransform->Position(position + up * Enemy::GetEnemyDeltaTime(60.0f));
+			// 吹き飛びモーション
+			Enemy::DeadBlowAway();
 		}
 	}
 	else {
@@ -592,6 +541,75 @@ void Enemy::DeadMove() {
 	}
 	// 再度触れてもダメージ無し
 	Enemy::SetDamage(0);
+}
+
+void Enemy::DeadBlowAway() {
+	// 当たりモーション
+	auto position = mParentObj->mTransform->Position();
+	// 180度まで回転
+	if (mParentObj->mTransform->Rotate().x < 3.141593f) {
+		// 回転
+		auto rotate = mParentObj->mTransform->Rotate();
+		rotate.x += 3.141593f / (180.0f / mBlowAwayInterval);
+		mParentObj->mTransform->Rotate(rotate);
+	}
+	else {
+		// 回転しきって条件を満たしたら死亡
+		Enemy::Dead();
+	}
+	// 上昇
+	auto up = mParentObj->mTransform->Up() *
+		cosf(gameObject->mTransform->Rotate().x) * 0.01f * mBlowAwayPower;
+	mParentObj->mTransform->Position(position + up * Enemy::GetEnemyDeltaTime(60.0f));
+}
+
+void Enemy::DeadTornadoMove() {
+	// 上昇
+	// 竜巻がなくなっていたらその場で吹き飛ばす
+	// 死亡した場合はnullptr参照が出来ないのでこうする 一回アクセスエラーとなる
+	if (mBlowAwayTornadoObj->Name() != "Tornado") {
+		mIsTornadoBlowAway = true;
+	}
+	// 竜巻のコライダーの取得
+	auto tornadoCollider = mBlowAwayTornadoObj->GetComponent<PhysXColliderComponent>();
+	auto tornadoColliderScale = tornadoCollider->GetScale();
+	// 竜巻に沿って回転
+	auto tornadoPosition = mBlowAwayTornadoObj->mTransform->Position();
+	// 親のステータスの取得
+	auto parentPosition = mParentObj->mTransform->Position();
+	// 竜巻の高さ以上になったら別方向に吹き飛ばす
+	if (parentPosition.y >= tornadoColliderScale.y) {
+		mIsTornadoBlowAway = true;
+	}
+	// 条件を満たしたら別方向に吹き飛ばす
+	if (!mIsTornadoBlowAway) {
+		// ワールドのY座標で上昇する
+		auto vectorY = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		auto up = vectorY * cosf(mParentObj->mTransform->Rotate().x) * 0.01f * mBlowAwayPower;
+		// 竜巻との回転方向を計算(逃げる方向と一緒にする)
+		auto v = parentPosition - tornadoPosition;
+		auto angle = atan2(v.x, v.z);
+		auto escapeAngle = angle - 3.141593f / 2.0f;
+		// 回転補正
+		if (std::to_string(escapeAngle) == "0.000000") escapeAngle = 0.0f;
+		if (escapeAngle < 0) escapeAngle += 3.141593f * 2.0f;
+		// 竜巻のように回転しながら吹き飛ぶ
+		mParentObj->mTransform->Rotate(mParentObj->mTransform->Up() * (escapeAngle));
+		mParentObj->mTransform->Position(
+			parentPosition +
+			((up * mTornadoUpPower * 0.01f) +
+				(mParentObj->mTransform->Forward() -
+					(mParentObj->mTransform->Left() / (mTornadoRotateScale))) *
+				(mTornadoRotatePower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
+
+		mEnemyCGObj->mTransform->Rotate(mParentObj->mTransform->Left() * 1.0f);
+		mTornadoRotateScale += mAddTornadoRotateScale;
+	}
+
+	Enemy::SetAnimationID(2);
+	if (Enemy::GetAnimationTime() > 10.0f) {
+		Enemy::SetAnimationTime(10.0f);
+	}
 }
 
 // 死亡処理を行います

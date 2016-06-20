@@ -11,6 +11,7 @@ void EnemyCG::Initialize(){
 	mPastAnimationID = mCurrentAnimationID;
 	mAnimationTimeScale = 1.0f;
 	mIsAnimationLoop = true;
+	mIsAnimationChange = false;
 	mIsChangeStatus = false;
 }
 
@@ -23,27 +24,43 @@ void EnemyCG::Start(){
 //毎フレーム呼ばれます
 void EnemyCG::Update(){
 	auto animation = gameObject->GetComponent<AnimationComponent>();
-
+	// mCurrentAnimationID != mPastAnimationID
 	// IDが違った場合は変更処理を行う
-	if (mCurrentAnimationID != mPastAnimationID) {
+	if (mIsAnimationChange) {
 		// アニメーションを変更
 		animation->ChangeAnimetion(mCurrentAnimationID);
 		// 今のアニメーションの設定を変更する
 		// 仮状態で１・０の変更にする
 		auto currentAnimaParam = animation->GetAnimetionParam(mCurrentAnimationID);
-		currentAnimaParam.mWeight = 1.0f;
+		//currentAnimaParam.mWeight = 1.0f;
 		currentAnimaParam.mTime = 0.0f;
 		currentAnimaParam.mTimeScale = 1.0f;
 		// 前に使っていたアニメーションのステータスをリセットする
-		auto pastAnimation = animation->GetAnimetionParam(mPastAnimationID);
-		pastAnimation.mWeight = 0.0f;
-		pastAnimation.mTime = 0.0f;
-		pastAnimation.mTimeScale = 1.0f;
+		auto pastAnimationParam = animation->GetAnimetionParam(mPastAnimationID);
+		//pastAnimationParam.mWeight = 0.0f;
+		pastAnimationParam.mTime = 0.0f;
+		pastAnimationParam.mTimeScale = 1.0f;
 		// 設定したステータスをセットする
 		animation->SetAnimetionParam(mCurrentAnimationID, currentAnimaParam);
-		animation->SetAnimetionParam(mPastAnimationID, pastAnimation);
+		animation->SetAnimetionParam(mPastAnimationID, pastAnimationParam);
+
+		mIsAnimationChange = false;
+	}
+
+	if (mCurrentAnimationID != mPastAnimationID) {
+		auto deltaTime = game->DeltaTime()->GetDeltaTime();
+		auto currentAnimaParam = animation->GetAnimetionParam(mCurrentAnimationID);
+		auto pastAnimationParam = animation->GetAnimetionParam(mPastAnimationID);
+		// ウェイトの変更
+		currentAnimaParam.mWeight += 1.0f * 10.0f * deltaTime;
+		if (currentAnimaParam.mWeight > 1.0f) currentAnimaParam.mWeight = 1.0f;
+		pastAnimationParam.mWeight -= 1.0f * 10.0f * deltaTime;
+		if (pastAnimationParam.mWeight < 0.0f) pastAnimationParam.mWeight = 0.0f;
+		// 設定したステータスをセットする
+		animation->SetAnimetionParam(mCurrentAnimationID, currentAnimaParam);
+		animation->SetAnimetionParam(mPastAnimationID, pastAnimationParam);
 		// IDの更新
-		mPastAnimationID = mCurrentAnimationID;
+		if (currentAnimaParam.mWeight == 1.0f) mPastAnimationID = mCurrentAnimationID;
 	}
 
 	auto animaParam = animation->GetAnimetionParam(mCurrentAnimationID);
@@ -82,6 +99,7 @@ void EnemyCG::OnCollideExit(Actor* target){
 void EnemyCG::SetAnimationID(int id) {
 	if (mCurrentAnimationID != id) {
 		mCurrentAnimationID = id;
+		mIsAnimationChange = true;
 		mIsChangeStatus = true;
 	}
 }

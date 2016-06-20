@@ -28,5 +28,6 @@ private:
 	int mPastAnimationID;
 	float mAnimationTimeScale;
 	bool mIsAnimationLoop;
+	bool mIsAnimationChange;
 	bool mIsChangeStatus;
 };

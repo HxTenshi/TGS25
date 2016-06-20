@@ -20,6 +20,7 @@ void FlyingFish::Initialize(){
 	mSpeed = mSetSpeed;
 	mIsJamp = true;
 	mIsInitSet = false;
+	mIsWallHit = false;
 	mIsFloorHit = false;
 	mJampVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 }
@@ -42,19 +43,14 @@ void FlyingFish::Start(){
 
 //毎フレーム呼ばれます
 void FlyingFish::Update(){
-
 	Enemy::Move();
-	//game->Debug()->Log(std::to_string(mIsJamp));
-
 	// mIsJampがfalseならジャンプをしていない
 	if (mIsJamp == false) {
-		//game->Debug()->Log(std::to_string(mAnimationID));
 		// mJampRestTimeが０になったら再度ジャンプする
 		if (mJampRestTime <= 0) {
 			mJampRestTime = mInitJampRestTime;
 		}
 		else if (mJampRestTime > 0) {
-			//mJampRestTime--;
 			mJampRestTime -= Enemy::GetEnemyDeltaTime(60.0f);
 		}
 
@@ -67,7 +63,6 @@ void FlyingFish::Update(){
 		Enemy::SetAnimationLoop(false);
 		// mUpCountが０になると落ちる
 		if (mUpCount > 0) {
-			//mUpCount--;
 			mUpCount -= Enemy::GetEnemyDeltaTime(60.0f);
 		}
 		else {
@@ -99,10 +94,13 @@ void FlyingFish::OnCollideBegin(Actor* target){
 		mIsFloorHit = true;
 	}
 
-	if (target->Name() == "Wall") {
+	if (target->Name() == "Tower") {
 		mWallHitCount++;
-		//mRotateY =  mRotateY + 3.14f - (3.14f / 180.0f / mRotateInterval);
-		mRotateY += 3.14f;
+		mIsWallHit = true;
+		//game->Debug()->Log("当たった");
+		auto parentRotate = mParentObj->mTransform->Rotate();
+		parentRotate.y += 3.141593f;
+		mParentObj->mTransform->Rotate(parentRotate);
 	}
 }
 
@@ -139,9 +137,12 @@ void FlyingFish::SearchMove() {
 		parentRotate.y -= (3.14f / 180.0f / mRotateInterval) * Enemy::GetEnemyDeltaTime(60.0f);
 	}
 
-	if (mRotateY >= 3.14f * 2.0f) {
+	if (parentRotate.y >= 3.141593f * 2.0f) {
 		//mRotateY = 0.0f;
-		parentRotate.y = 0.0f;
+		parentRotate.y -= 3.141593f * 2.0f;
+	}
+	else if (parentRotate.y < 0.0f) {
+		parentRotate.y += 3.141593f * 2.0f;
 	}
 	if (mIsInitSet)mParentObj->mTransform->Rotate(parentRotate);
 	// ジャンプ行動
@@ -159,11 +160,10 @@ void FlyingFish::JampMove() {
 	// ジャンプ間隔
 	if (mJampRestTime <= 0) {
 		//mUpCosine += 3.141593f / mInitUpCount;
-		mUpCosine += (3.141593f / mInitUpCount);
+		mUpCosine += (3.141593f / mInitUpCount) * Enemy::GetEnemyDeltaTime(60.0f);
 		if (mUpCount > 0) {
 			// 上げる処理
 			// コサインによるジャンプ
-			//mJampVelocity = mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f;
 			mJampVelocity = (mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f);
 			mIsJamp = true;
 		}

@@ -65,6 +65,7 @@ private:
 	float mSetTornadoDistance;
 	bool mIsJamp;
 	bool mIsInitSet;
+	bool mIsWallHit;
 	//bool mIsFloorHit;
 	XMVECTOR mJampVelocity;
 };
