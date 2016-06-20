@@ -126,6 +126,8 @@ void PlayerManager::GameStart()
 		{
 			game->DestroyObject(mFadeOutObj);
 			mFadeOutObj = nullptr;
+			auto startTex = game->CreateActor("Assets/UIPrefab/Start.json");
+			game->AddObject(startTex);
 			mGameStart = true;
 		}
 }

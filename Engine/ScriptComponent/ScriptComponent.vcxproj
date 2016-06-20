@@ -185,6 +185,7 @@
     <ClCompile Include="Scripts\Squid.cpp" />
     <ClCompile Include="Scripts\SquidInk.cpp" />
     <ClCompile Include="Scripts\StageManager.cpp" />
+    <ClCompile Include="Scripts\StartUI.cpp" />
     <ClCompile Include="Scripts\TextureScroll.cpp" />
     <ClCompile Include="Scripts\TitleMnager.cpp" />
     <ClCompile Include="Scripts\Tornado.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="Scripts\Squid.h" />
     <ClInclude Include="Scripts\SquidInk.h" />
     <ClInclude Include="Scripts\StageManager.h" />
+    <ClInclude Include="Scripts\StartUI.h" />
     <ClInclude Include="Scripts\testhit.h" />
     <ClInclude Include="Scripts\TextureScroll.h" />
     <ClInclude Include="Scripts\TitleMnager.h" />
