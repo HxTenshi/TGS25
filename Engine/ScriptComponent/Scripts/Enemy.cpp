@@ -82,8 +82,8 @@ void Enemy::OnCollideBegin(Actor* target){
 	if (!mIsDead) {
 		if (target->Name() == "Board") {
 			auto playerScript = target->GetScript<SailBoard>();
-			//// プレイヤーが無敵状態なら死亡
-			//// そうでない場合はプレイヤーにダメージを与える
+			// プレイヤーが無敵状態なら死亡
+			// そうでない場合はプレイヤーにダメージを与える
 			if (playerScript->IsUnrivaled()) {
 				playerScript->Damage(-mDamage);
 				// 死亡した瞬間に当たり判定をトリガーにする
@@ -111,12 +111,12 @@ void Enemy::OnCollideBegin(Actor* target){
 			mIsTornadoCatch = true;
 			mBlowAwayPower = 100.0f;
 			mBlowAwayTornadoObj = mTornadoObj;
+			mTornadoObj = nullptr;
 			// コライダーのトリガーをオンにする
 			auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 			collider->SetIsTrigger(true);
 		}
 	}
-
 	if (target->Name() == "Floor") {
 		mInitSetCount = 1;
 		mIsFloorHit = true;
@@ -326,6 +326,18 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 			* (mTornadoPower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
 	auto distance = XMVector3Length(tornadoPosition - parentPosition);
 	if (distance.x <= 10.0f) mTornadoInterval = 1.0f;
+	auto tornadoCollider = mTornadoObj->GetComponent<PhysXColliderComponent>();
+	if (distance.x <= tornadoCollider->GetScale().x) {
+		mIsDead = true;
+		mIsBlowAway = true;
+		mIsTornadoCatch = true;
+		mBlowAwayPower = 100.0f;
+		mBlowAwayTornadoObj = mTornadoObj;
+		mTornadoObj = nullptr;
+		// コライダーのトリガーをオンにする
+		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+		collider->SetIsTrigger(true);
+	}
 
 	Enemy::SetAnimationID(0);
 }
@@ -551,6 +563,8 @@ void Enemy::DeadBlowAwayMove() {
 	}
 	else {
 		// 回転しきって条件を満たしたら死亡
+		// プレイヤーの回復
+		Enemy::EnemyPlaySound("heal");
 		Enemy::Dead();
 	}
 	// 上昇
@@ -621,8 +635,6 @@ void Enemy::PlayerHeal() {
 		return;
 	}
 	auto playerScript = player->GetScript<SailBoard>();
-	// プレイヤーの回復
-	Enemy::EnemyPlaySound("heal");
 	playerScript->Damage(-mDamage);
 	mIsPlayerHeal = true;
 
@@ -634,6 +646,7 @@ void Enemy::Dead() {
 	if (!mIsPlayerHeal) {
 		// 回復処理
 		Enemy::PlayerHeal();
+		mIsPlayerHeal = true;
 	}
 	else {
 		// 雲に当たったら消滅 または リスポーン位置まで落ちたら消滅
