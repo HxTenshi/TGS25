@@ -1,6 +1,7 @@
 
 #pragma once
 #include "main.h"
+#include<vector>
 
 
 class PlayerManager :public IDllScriptComponent{
@@ -22,6 +23,8 @@ private:
 	void GameStart();
 	void GameClear();
 	void GameOver();
+	void WingUI();
+	bool IsClear();
 
 private:
 	float mAlpha;
@@ -31,7 +34,8 @@ private:
 	int mCredit; //プレイヤーの残機
 	SERIALIZE
 	int mMaxPoint; //回収するアイテムの数
-	SERIALIZE
+	int mPoint;    //回収したアイテムの数
+ 	SERIALIZE
 	float mFadeOutSecond;
 	SERIALIZE
 	float mFadeInSecond;

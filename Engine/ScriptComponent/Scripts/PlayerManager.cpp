@@ -16,7 +16,7 @@
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PlayerManager::Initialize()
 {
-	mMaxPoint = 3;
+	mPoint = -1;
 	mAlpha = 0.5;
 	mFadeOutObj = nullptr;
 	mGameStart = false;
@@ -25,6 +25,14 @@ void PlayerManager::Initialize()
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void PlayerManager::Start()
 {
+	for (int i = 0 ; i < mMaxPoint; i++)
+	{
+		auto haneTex = game->CreateActor("Assets/UIPrefab/haneUI.json");
+		game->AddObject(haneTex);
+		haneTex->mTransform->Position(XMVectorSet(230 + (70 * i), 630, 0, 0));
+		haneTex->mTransform->Scale(XMVectorSet(100, 100, 0, 0));
+		haneTex->mTransform->SetParent(gameObject);
+	}
 }
 
 //毎フレーム呼ばれます
@@ -40,7 +48,7 @@ void PlayerManager::Update(){
 	{
 		GameOver();
 	}
-	else if (mMaxPoint <= 0)
+	else if (IsClear())
 	{
 		GameClear();
 		
@@ -53,7 +61,7 @@ void PlayerManager::Update(){
 	text2->SetTexture("Assets/num/" + std::to_string((mCredit / 10) % 10) + ".png");*/
 
 
-	auto hane1 = game->FindActor("hane1")->GetComponent<TextureModelComponent>();
+	/*auto hane1 = game->FindActor("hane1")->GetComponent<TextureModelComponent>();
 	auto hane2 = game->FindActor("hane2")->GetComponent<TextureModelComponent>();
 	auto hane3 = game->FindActor("hane3")->GetComponent<TextureModelComponent>();
 
@@ -69,7 +77,7 @@ void PlayerManager::Update(){
 	if (mMaxPoint == 0)
 	{
 		hane3->SetTexture("./Assets/UI/hane.png");
-	}
+	}*/
 
 }
 
@@ -105,7 +113,9 @@ void PlayerManager::CreditUp()
 
 void PlayerManager::ItemGet()
 {
-	mMaxPoint--;
+	mPoint++;
+	mPoint = min(max(0, mPoint), mMaxPoint - 1);
+	WingUI();
 }
 
 bool PlayerManager::IsGameStart()
@@ -192,4 +202,21 @@ void PlayerManager::GameOver()
 			}
 		}
 	}
+}
+
+void PlayerManager::WingUI()
+{
+	std::vector<Actor*> items;
+	auto it = gameObject->mTransform->Children().begin();
+	while (it != gameObject->mTransform->Children().end())
+	{
+		items.push_back(*it);
+		++it;
+	}
+	items[mPoint]->GetComponent<TextureModelComponent>()->SetTexture("./Assets/UI/hane.png");
+}
+
+bool PlayerManager::IsClear()
+{
+	return (mPoint >= mMaxPoint - 1);
 }
