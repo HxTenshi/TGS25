@@ -52,6 +52,7 @@ void Enemy::Initialize(){
 	mIsChaseRotate = true;
 	mIsTornadoRange = false;
 	mIsTornadoBlowAway = false;
+	mIsPlayerHeal = false;
 	mIsDead = false;
 	// 配列に追跡行動のenumクラスを入れる
 	mDistanceVector.push_back(EnemyState::PlayerShortDistance);
@@ -81,8 +82,8 @@ void Enemy::OnCollideBegin(Actor* target){
 	if (!mIsDead) {
 		if (target->Name() == "Board") {
 			auto playerScript = target->GetScript<SailBoard>();
-			//// プレイヤーが無敵状態なら死亡
-			//// そうでない場合はプレイヤーにダメージを与える
+			// プレイヤーが無敵状態なら死亡
+			// そうでない場合はプレイヤーにダメージを与える
 			if (playerScript->IsUnrivaled()) {
 				playerScript->Damage(-mDamage);
 				// 死亡した瞬間に当たり判定をトリガーにする
@@ -104,18 +105,18 @@ void Enemy::OnCollideBegin(Actor* target){
 			Enemy::EnemyPlaySound("hit");
 		}
 		// 竜巻に当たったら死亡する
-		if (target->Name() == "Tornado" && mIsDead == false) {
+		if (target->Name() == "Tornado") {
 			mIsDead = true;
 			mIsBlowAway = true;
 			mIsTornadoCatch = true;
 			mBlowAwayPower = 100.0f;
 			mBlowAwayTornadoObj = mTornadoObj;
+			mTornadoObj = nullptr;
 			// コライダーのトリガーをオンにする
 			auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 			collider->SetIsTrigger(true);
 		}
 	}
-
 	if (target->Name() == "Floor") {
 		mInitSetCount = 1;
 		mIsFloorHit = true;
@@ -131,31 +132,25 @@ void Enemy::OnCollideBegin(Actor* target){
 //コライダーとのヒット中に呼ばれます
 void Enemy::OnCollideEnter(Actor* target){
 	if (target->Name() == "Floor") mIsFloorHit = true;
+
+	// 竜巻に当たったら死亡する
+	if (target->Name() == "Tornado" && mIsDead == false) {
+		mIsDead = true;
+		mIsBlowAway = true;
+		mIsTornadoCatch = true;
+		mBlowAwayPower = 100.0f;
+		mBlowAwayTornadoObj = mTornadoObj;
+		// コライダーのトリガーをオンにする
+		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+		collider->SetIsTrigger(true);
+	}
 }
 
 //コライダーとのロスト時に呼ばれます
 void Enemy::OnCollideExit(Actor* target){
 	if (target->Name() == "Floor") mIsFloorHit = false;
 }
-// 敵の色の設定です(デバッグ用)
-void Enemy::PlayerColorChange() {
-	// 色の設定
-	auto color = XMFLOAT4(1, 1, 1, 1);
-	// 一定距離内だと色の値を変える
-	if (mEnemyState == EnemyState::PlayerChase) {
-		color = XMFLOAT4(1, 0, 0, 1);
-	}
-	else {
-		color = XMFLOAT4(1, 1, 1, 1);
-	}
-	// 色の更新
-	auto mate = gameObject->GetComponent<MaterialComponent>();
-	if (mate) mate->SetAlbedoColor(color);
-	//auto color = mate->GetMaterial();
-	//auto albedoColor = mate->mAlbedo;
-	//auto color = XMVectorSet(albedoColor.x, albedoColor.y, .)
-	//if(mate) mate->SetAlbedoColor()
-}
+
 // 索敵移動をします（デフォルト設定）
 void Enemy::SearchMove() {
 	// デフォルトの移動
@@ -331,6 +326,18 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 			* (mTornadoPower * 0.01f)) * Enemy::GetEnemyDeltaTime(60.0f));
 	auto distance = XMVector3Length(tornadoPosition - parentPosition);
 	if (distance.x <= 10.0f) mTornadoInterval = 1.0f;
+	auto tornadoCollider = mTornadoObj->GetComponent<PhysXColliderComponent>();
+	if (distance.x <= tornadoCollider->GetScale().x) {
+		mIsDead = true;
+		mIsBlowAway = true;
+		mIsTornadoCatch = true;
+		mBlowAwayPower = 100.0f;
+		mBlowAwayTornadoObj = mTornadoObj;
+		mTornadoObj = nullptr;
+		// コライダーのトリガーをオンにする
+		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+		collider->SetIsTrigger(true);
+	}
 
 	Enemy::SetAnimationID(0);
 }
@@ -427,6 +434,8 @@ void Enemy::EnemyMoveSmoke() {
 			mLeftSmokeObj->mTransform->Position(leftPosition);
 			mRightSmokeScript = mRightSmokeObj->GetScript<MoveSmoke>();
 			mLeftSmokeScript = mLeftSmokeObj->GetScript<MoveSmoke>();
+			mRightSmokeScript->SetSpeed(0.1f);
+			mLeftSmokeScript->SetSpeed(0.1f);
 		}
 		else {
 			if (mRightSmokeObj == nullptr)return;
@@ -526,24 +535,23 @@ void Enemy::DeadMove() {
 					mBlowAwayY += (3.141593f / 180.0f) * Enemy::GetEnemyDeltaTime(60.0f);
 					if (mBlowAwayY > 3.141593f) mBlowAwayY = 3.141593f;
 				}
-
+				// 死亡判定
 				Enemy::Dead();
 			}
 		}
 		else {
 			// 吹き飛びモーション
-			Enemy::DeadBlowAway();
+			Enemy::DeadBlowAwayMove();
 		}
 	}
 	else {
 		// ノックバックモーション
 		Enemy::KnockBack();
 	}
-	// 再度触れてもダメージ無し
-	Enemy::SetDamage(0);
 }
 
-void Enemy::DeadBlowAway() {
+// 吹き飛び時の死亡行動です
+void Enemy::DeadBlowAwayMove() {
 	// 当たりモーション
 	auto position = mParentObj->mTransform->Position();
 	// 180度まで回転
@@ -555,6 +563,8 @@ void Enemy::DeadBlowAway() {
 	}
 	else {
 		// 回転しきって条件を満たしたら死亡
+		// プレイヤーの回復
+		Enemy::EnemyPlaySound("heal");
 		Enemy::Dead();
 	}
 	// 上昇
@@ -563,8 +573,11 @@ void Enemy::DeadBlowAway() {
 	mParentObj->mTransform->Position(position + up * Enemy::GetEnemyDeltaTime(60.0f));
 }
 
+// 竜巻に巻き込まれた時の死亡行動です
 void Enemy::DeadTornadoMove() {
 	// 上昇
+	// スモックを止める
+	mIsMove = false;
 	// 竜巻がなくなっていたらその場で吹き飛ばす
 	// 死亡した場合はnullptr参照が出来ないのでこうする 一回アクセスエラーとなる
 	if (mBlowAwayTornadoObj->Name() != "Tornado") {
@@ -605,26 +618,39 @@ void Enemy::DeadTornadoMove() {
 		mEnemyCGObj->mTransform->Rotate(mParentObj->mTransform->Left() * 1.0f);
 		mTornadoRotateScale += mAddTornadoRotateScale;
 	}
-
+	// 死亡アニメーション
 	Enemy::SetAnimationID(2);
 	if (Enemy::GetAnimationTime() > 10.0f) {
 		Enemy::SetAnimationTime(10.0f);
 	}
 }
 
+// プレイヤーボートの耐久力回復処理を行います
+void Enemy::PlayerHeal() {
+	// プレイヤーの捜索
+	auto player = game->FindActor("Board");
+	// プレイヤーがいなければ死亡判定を優先する
+	if (player == nullptr) {
+		mIsPlayerHeal = true;
+		return;
+	}
+	auto playerScript = player->GetScript<SailBoard>();
+	playerScript->Damage(-mDamage);
+	mIsPlayerHeal = true;
+
+}
+
 // 死亡処理を行います
 void Enemy::Dead() {
 	auto parentPosition = mParentObj->mTransform->Position();
-	// 雲に当たったら消滅
-	if (mIsCloudHit) {
-		game->DestroyObject(mPlayerSearchObj);
-		game->DestroyObject(mEnemyCGObj);
-		game->DestroyObject(gameObject);
-		game->DestroyObject(gameObject->mTransform->GetParent());
+	if (!mIsPlayerHeal) {
+		// 回復処理
+		Enemy::PlayerHeal();
+		mIsPlayerHeal = true;
 	}
 	else {
-		// リスポーン位置まで落ちたら消滅
-		if (parentPosition.y <= mResPawnHeigth) {
+		// 雲に当たったら消滅 または リスポーン位置まで落ちたら消滅
+		if (mIsCloudHit || parentPosition.y <= mResPawnHeigth) {
 			game->DestroyObject(mPlayerSearchObj);
 			game->DestroyObject(mEnemyCGObj);
 			game->DestroyObject(gameObject);

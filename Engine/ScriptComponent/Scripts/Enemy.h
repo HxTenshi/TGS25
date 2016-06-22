@@ -25,8 +25,6 @@ public:
 	virtual void OnCollideBegin(Actor* target)override;
 	virtual void OnCollideEnter(Actor* target)override;
 	virtual void OnCollideExit(Actor* target)override;
-	// 敵の色の設定です(デバッグ用)
-	virtual void PlayerColorChange();
 	// 索敵移動します
 	virtual void SearchMove();
 	// 索敵関数です
@@ -61,10 +59,12 @@ public:
 	void SearchTornado();
 	// 敵の死亡行動です
 	void DeadMove();
-
-	void DeadBlowAway();
-	// 
+	// 吹き飛び時の死亡行動です
+	void DeadBlowAwayMove();
+	// 竜巻に巻き込まれた時の死亡行動です
 	void DeadTornadoMove();
+	// プレイヤーボートの耐久力回復処理を行います
+	void PlayerHeal();
 	// 死亡処理を行います
 	void Dead();
 	// 敵の行動関数
@@ -103,7 +103,7 @@ protected:
 	Actor* mParentObj;						// 空の親オブジェクト
 	Actor* mEnemyCGObj;						// 敵のグラフィックオブジェクト
 	Actor* mTornadoObj;						// 竜巻のオブジェクト
-	Actor* mBlowAwayTornadoObj;
+	Actor* mBlowAwayTornadoObj;				// 吹き飛び死亡時の竜巻のオブジェクト
 	Actor* mRightSmokeObj;					// 右のスモックオブジェクト
 	Actor* mLeftSmokeObj;					// 左のスモックオブジェクト
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
@@ -149,14 +149,15 @@ protected:
 	bool mIsImmortalBody;					// 不死身の敵か(未実装)
 	bool mIsDistanceAct;					// 距離判定の行動をするか
 	bool mIsBlowAway;						// 死亡時に吹き飛ぶかどうか
-	bool mIsTornadoCatch;
+	bool mIsTornadoCatch;					// 竜巻に捕まったか
 	bool mIsKnockBackDirection;				// ノックバックの方向を決めたか
 	bool mIsChaseRotate;					// プレイヤーの方向を向くかどうか
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)
 	bool mIsTornadoRange;					// 竜巻の範囲内か
 	bool mIsTornadoBlowAway;				// 竜巻で吹き飛ばすか
+	bool mIsPlayerHeal;						// プレイヤーが回復したか
 	bool mIsDead;							// プレイヤーと当たったか
-	// 行動配列
+	// 行動コンテナ
 	typedef std::vector<EnemyState> DistanceVector;
 	DistanceVector mDistanceVector;
 

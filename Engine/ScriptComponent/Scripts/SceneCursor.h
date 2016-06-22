@@ -22,21 +22,35 @@ public:
 	void OnChangeScene();
 	// ボタンの値を取得します
 	int GetButtonCount();
-	// シーンが変わるを返します
+	// シーンが変わったかを返します
 	bool IsChangeScene();
 
 private:
 	//メンバ変数
-	int mButtonCount;
-	bool mIsChangeScene;
-	bool mIsSetColor;
-	// ボタン配列
+	int mButtonCount;			// 現在指定しているボタンの値
+	SERIALIZE
+	float mCursorScaleX;		// カーソルの大きさ(X)
+	SERIALIZE
+	float mCursorScaleY;		// カーソルの大きさ(Y)
+	SERIALIZE
+	float mAddCursorPositionX;	// カーソルの位置を加算する(X)
+	SERIALIZE
+	float mAddCursorPositionY;	// カーソルの位置を加算する(Y)
+	bool mIsChangeScene;		// シーンが変わったか
+	Actor* mCursorRightTop;		// 右上部分のカーソルオブジェクト
+	Actor* mCursorRightBottom;	// 右下部分のカーソルオブジェクト
+	Actor* mCursorLeftTop;		// 左上部分のカーソルオブジェクト
+	Actor* mCursorLeftBottom;	// 左下部分のカーソルオブジェクト
+	// ボタンコンテナ
 	typedef std::vector<Actor*> ButtonContainer;
 	ButtonContainer mButtonContainer;
-	// 初期の色配列
-	typedef std::vector<XMFLOAT4> InitColorContainer;
-	InitColorContainer mInitColorContainer;
-	// シーン配列
+	// カーソルコンテナ
+	typedef std::vector<Actor*> CursorContainer;
+	CursorContainer mCursorContainer;
+	// カーソル座標コンテナ
+	typedef std::vector<XMVECTOR> CursorVelocityContainer;
+	CursorVelocityContainer mCursorVelocityContainer;
+	// シーンコンテナ
 	typedef std::vector<std::string> SceneContainer;
 	SceneContainer mSceneContainer;
 };
