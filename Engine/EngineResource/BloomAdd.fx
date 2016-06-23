@@ -10,6 +10,12 @@
 Texture2D txDiffuse : register( t0 );
 SamplerState samLinear : register(s0);
 
+cbuffer cbScreen : register(b13)
+{
+	float2 ScreenSize;
+	float2 NULLss;
+};
+
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
@@ -36,7 +42,7 @@ PS_INPUT VS( VS_INPUT input )
 	PS_INPUT output = (PS_INPUT)0;
 	output.Pos = mul(input.Pos, World);
 	output.Pos.z = 0;
-	float y = 800.0 / 1200.0;
+	float y = ScreenSize.y / ScreenSize.x;
 	output.Tex = input.Tex * float2(1, y);
 	
 	return output;

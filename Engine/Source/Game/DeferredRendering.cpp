@@ -236,7 +236,7 @@ void CascadeShadow::CascadeUpdate(){
 	}
 	//デプスシーンのクリップ
 	float DnearClip = 0.01f;
-	float DfarClip = 2000.0f;
+	float DfarClip = 10000.0f;
 	float SlideBack = DfarClip/2;
 
 	float m_Lamda = 0.5f;
@@ -346,7 +346,7 @@ void DownSample::Draw_DownSample(IRenderingEngine* render){
 	{
 		D3D11_RECT rect = CD3D11_RECT(0, 0,
 			(LONG)mWidth,
-			(LONG)mHeight * (WindowState::mHeight / (float)WindowState::mWidth));
+			(LONG)mHeight *(WindowState::mHeight / (float)WindowState::mWidth));
 		render->m_Context->RSSetScissorRects(1, &rect);
 
 		RenderTarget::SetRendererTarget(render->m_Context, (UINT)1, &m_DownSampleRT, NULL);
@@ -407,11 +407,6 @@ void HDRGaussBulr_AND_DownSample::Create(Texture& texture, UINT x, UINT y){
 	m_GaussBuraUAV_P2.Create(x, y, DXGI_FORMAT_R11G11B10_FLOAT);
 
 	bool hdr = m_DownSample.GetHDRFilter();
-
-	std::string sampling = "EngineResource/ScreenTexture.fx";
-	if (hdr){
-		sampling = "EngineResource/ScreenTextureHDR.fx";
-	}
 
 	mResultMaterial.Create("EngineResource/BloomAdd.fx");
 	mResultMaterial.SetTexture(m_GaussBuraUAV_P2.GetTexture(), 0);
@@ -563,6 +558,7 @@ void DeferredRendering::Initialize(){
 
 
 	mMaterialDebugDrawPrePass.Create("EngineResource/DebugDeferredPrePass.fx");
+
 	mMaterialDebugDraw.Create("EngineResource/Texture.fx");
 	mMaterialDebugDraw.SetTexture(m_AlbedoRT.GetTexture(), 0);
 

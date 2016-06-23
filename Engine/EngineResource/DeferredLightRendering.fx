@@ -38,6 +38,13 @@ cbuffer cbChangesLightCamera : register(b10)
 	float4 SplitPosition;
 };
 
+cbuffer cbNearFar : register(b12)
+{
+	float Near;
+	float Far;
+	float2 NULLnf;
+};
+
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
@@ -161,7 +168,7 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 	float NLDot = dot(N, -L);
 
 
-	float offset = 0.0000001 + (NLDot)* 0.0000001;
+	float offset = 0.000000035;// +(NLDot)* 0.00000005;
 	// ライトデプスの準備
 	float4 LVPos = DepthTex.Sample(DepthSamLinear, input.Tex).zwyx;
 
@@ -172,8 +179,8 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 
 		//float4 debugColor = float4(0, 0, 0, 1);
 
-	float dist = vpos.z;
-	float LD;
+	float dist = vpos.z * 10;
+	float LD = 0;
 	if (dist < SplitPosition.x)
 	{
 		LD = LightDepthTex1.Sample(LightDepthSamLinear1, LVPos.xy).x;
@@ -195,8 +202,8 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 
 	// ディフューズ角度減衰率計算
 	float DifGen = saturate(NLDot);
-	//DifGen *= shadow * 0.75;
-	//DifGen = DifGen + 0.25;
+	DifGen *= shadow * 0.75;
+	DifGen = DifGen + 0.25;
 
 
 	float roughness = norCol.a - 1;
@@ -205,11 +212,11 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 	float r = 0.75f;
 	float g = 0.83f;
 	float b = 0.95f;
-	if (shadow==1){
-		Out.Diffuse = LightColor * (DifGen* float4(1-r, 1-g, 1-b, 1) + float4(r, g, b, 1));
+	if (shadow == 1){
+		Out.Diffuse = LightColor * (DifGen* float4(1 - r, 1 - g, 1 - b, 1) + float4(r, g, b, 1));
 	}
 	else{
-		Out.Diffuse = LightColor * float4(r,g,b,1);
+		Out.Diffuse = LightColor * float4(r, g, b, 1);
 	}
 	//Out.Diffuse = LightColor * DifGen;
 	Out.Diffuse.a = LightColor.a;

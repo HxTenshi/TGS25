@@ -146,6 +146,7 @@ private:
 
 
 	ConstantBuffer<cbGameParameter> mCBGameParameter;
+	ConstantBuffer<cbScreen> mCBScreen;
 
 
 };

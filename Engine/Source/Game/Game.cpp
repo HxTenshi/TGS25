@@ -15,6 +15,7 @@
 
 #include "Engine/ModelConverter.h"
 
+
 static std::stack<int> gIntPtrStack;
 
 static Game::ListMapType* gpList;
@@ -56,6 +57,7 @@ std::function<void()> CreateSetParentTreeViewItemColl(Actor* par, Actor* chil){
 Game::Game(){
 	_SYSTEM_LOG_H("ƒQ[ƒ€ƒV[ƒ“‚Ì‰Šú‰»");
 	mGame = this;
+	mMainCamera = NULL;
 
 	gpDeltaTime = &mDeltaTime;
 
@@ -128,6 +130,10 @@ Game::Game(){
 
 	mCBGameParameter = ConstantBuffer<cbGameParameter>::create(11);
 	mCBGameParameter.mParam.Time = XMFLOAT4(0, 0, 0, 0);
+
+	mCBScreen = ConstantBuffer<cbScreen>::create(13);
+	mCBScreen.mParam.ScreenSize = XMFLOAT2((float)WindowState::mWidth,(float)WindowState::mHeight);
+	mCBScreen.mParam.NULLss = XMFLOAT2(0,0);
 #ifdef _ENGINE_MODE
 	Window::SetWPFCollBack(MyWindowMessage::StackIntPtr, [&](void* p)
 	{
@@ -583,7 +589,9 @@ void Game::ChangePlayGame(bool isPlay){
 #endif
 }
 
+#ifdef _ENGINE_MODE
 bool g_DebugRender = true;
+#endif
 
 void Game::Draw(){
 	auto render = RenderingEngine::GetEngine(ContextType::MainDeferrd);
@@ -622,6 +630,12 @@ void Game::Draw(){
 	mCBGameParameter.GSSetConstantBuffers(render->m_Context);
 	mCBGameParameter.CSSetConstantBuffers(render->m_Context);
 
+	mCBScreen.UpdateSubresource(render->m_Context);
+	mCBScreen.CSSetConstantBuffers(render->m_Context);
+	mCBScreen.GSSetConstantBuffers(render->m_Context);
+	mCBScreen.VSSetConstantBuffers(render->m_Context);
+	mCBScreen.PSSetConstantBuffers(render->m_Context);
+
 
 	//const RenderTarget* r[1] = { &mMainViewRenderTarget };
 	//RenderTarget::SetRendererTarget((UINT)1, r[0], Device::mRenderTargetBack);
@@ -635,13 +649,17 @@ void Game::Draw(){
 	ID3D11SamplerState *const pSNULL[4] = { NULL, NULL, NULL, NULL };
 	render->m_Context->PSSetSamplers(0, 4, pSNULL);
 
+	PlayDrawList(DrawStage::Init);
+
+#ifdef _ENGINE_MODE
+
 	if( Input::Trigger(KeyCoord::Key_F1)){
 		g_DebugRender = !g_DebugRender;
 	}
 
-
-	PlayDrawList(DrawStage::Init);
 	if (!g_DebugRender){
+
+#endif
 
 		m_DeferredRendering.ShadowDepth_Buffer_Rendering(render, [&](){
 			PlayDrawList(DrawStage::Diffuse);
@@ -658,17 +676,17 @@ void Game::Draw(){
 		});
 
 		m_DeferredRendering.Deferred_Rendering(render, &mMainViewRenderTarget);
-
+		
 		m_DeferredRendering.Forward_Rendering(render, &mMainViewRenderTarget, [&](){
 			PlayDrawList(DrawStage::Forward);
 		});
-
+		
 		m_DeferredRendering.Particle_Rendering(render, &mMainViewRenderTarget, [&](){
 			PlayDrawList(DrawStage::Particle);
 		});
 
 		m_DeferredRendering.HDR_Rendering(render);
-
+#ifdef _ENGINE_MODE
 	}
 	else{
 
@@ -679,23 +697,27 @@ void Game::Draw(){
 		});
 
 		m_DeferredRendering.Debug_AlbedoOnly_Rendering(render,&mMainViewRenderTarget);
-
-
+		
+		
 		m_DeferredRendering.Forward_Rendering(render, &mMainViewRenderTarget, [&](){
 			PlayDrawList(DrawStage::Forward);
 		});
-
+		
 		m_DeferredRendering.Particle_Rendering(render, &mMainViewRenderTarget, [&](){
 			PlayDrawList(DrawStage::Particle);
 		});
 	}
 
+#endif
+
 	mPostEffectRendering.Rendering(render, [&](){
 		PlayDrawList(DrawStage::PostEffect);
 	});
 
-	PlayDrawList(DrawStage::Engine);
 
+#ifdef _ENGINE_MODE
+	PlayDrawList(DrawStage::Engine);
+#endif
 
 	render->PopDS();
 

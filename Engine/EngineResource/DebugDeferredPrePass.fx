@@ -66,6 +66,18 @@ cbuffer cbChangesLightCamera : register(b10)
 	matrix LViewProjection[4];
 	float4 SplitPosition;
 };
+cbuffer cbNearFar : register(b12)
+{
+	float Near;
+	float Far;
+	float2 NULLnf;
+};
+
+cbuffer cbScreen : register(b13)
+{
+	float2 ScreenSize;
+	float2 NULLss;
+};
 
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
@@ -90,6 +102,7 @@ struct PS_OUTPUT_1
 {
 	float4 ColorAlbedo : SV_Target0;
 };
+
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------

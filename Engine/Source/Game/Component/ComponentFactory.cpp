@@ -17,6 +17,7 @@
 #include "PostEffectComponent.h"
 #include "ParticleComponent.h"
 #include "SoundComponent.h"
+#include "MovieComponent.h"
 #include "Component.h"
 
 
@@ -43,6 +44,7 @@ ComponentFactory::ComponentFactory(){
 	_NewFunc<PhysXComponent>();
 	_NewFunc<PhysXColliderComponent>();
 	_NewFunc<SoundComponent>();
+	_NewFunc<MovieComponent>();
 	_NewFunc<PostEffectComponent>();
 }
 

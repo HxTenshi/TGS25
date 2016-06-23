@@ -45,6 +45,12 @@ cbuffer cbNearFar : register(b12)
 	float2 NULLnf;
 };
 
+cbuffer cbScreen : register(b13)
+{
+	float2 ScreenSize;
+	float2 NULLss;
+};
+
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
@@ -177,7 +183,7 @@ PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 	Out.Specular = float4(0, 0, 0, 0);
 
 	//ジオメトリバッファのテクスチャ座標（法線、デプス値取得用）
-	float2 tex = input.Pos.xy / float2(1200, 800);
+	float2 tex = input.Pos.xy / ScreenSize;
 
 
 		float4 norCol = NormalTex.Sample(NormalSamLinear, tex);
@@ -242,7 +248,7 @@ PS_OUTPUT_1 PS(PS_INPUT input)
 	PS_OUTPUT_1 Out;
 	Out = main(input,1);
 
-	float2 tex = input.Pos.xy / float2(1200, 800);
+	float2 tex = input.Pos.xy / ScreenSize;
 	float rebirth = SpecularTex.Sample(SpecularSamLinear, tex).a;
 
 	//[branch]
