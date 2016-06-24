@@ -333,7 +333,7 @@ void SailBoard::Trick()
 		mTrickRotate.y += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x * 0.1f;
 
 		mTrickPoint = abs(mTrickRotate.x) + abs(mTrickRotate.y);
-		if (mTrickPoint > 0.1f)
+		if (mTrickPoint > 0.f)
 		{
 			if (mAnimator->mCurrentSet != 1)
 			{

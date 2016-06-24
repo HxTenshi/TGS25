@@ -18,6 +18,7 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	float move;
 	float mSailRotate;
 	XMVECTOR mVelocity;
 	XMVECTOR mWindvec;

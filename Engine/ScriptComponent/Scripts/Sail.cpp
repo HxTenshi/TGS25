@@ -6,6 +6,8 @@
 #include "Engine\DebugEngine.h"
 #include "SailBoard.h"
 #include"Game\Component\MaterialComponent.h"
+#include"h_standard.h"
+#include"PlayerManager.h"
 
 #include"Wind.h"
 
@@ -14,6 +16,7 @@
 void Sail::Initialize(){
 	mSailRotate = 0.00f;
 	mVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	move = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -24,13 +27,33 @@ void Sail::Start(){
 
 //毎フレーム呼ばれます
 void Sail::Update(){
-
+	 
 	SailRotate();
 	auto parent = gameObject->mTransform->GetParent()->mTransform->GetParent();
-	mVelocity = parent->mTransform->Forward() * MovePower() * Speed;// *game->DeltaTime;
-	mVelocity.y = -1;
-	//if(!parent->GetScript<SailBoard>()->GetIsJump()) parent->GetComponent<PhysXComponent>()->SetForceVelocity(mVelocity);
-	if (!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * Speed);
+	auto forward = parent->mTransform->Forward();
+	forward.y = 0;
+	forward = XMVector3Normalize(forward);
+
+	if (!parent->GetScript<SailBoard>()->GetIsJump())
+	{
+		move += MovePower() * Speed * game->DeltaTime()->GetDeltaTime();
+	}
+	move -= move * 0.9f * game->DeltaTime()->GetDeltaTime();
+	mVelocity.y = -5 * (60 * game->DeltaTime()->GetDeltaTime());
+	move = min(max(move, 0), 100);
+	
+	if (!parent->GetScript<SailBoard>()->GetIsJump())
+	{
+		parent->GetComponent<PhysXComponent>()->SetForceVelocity(mVelocity + (forward * move));
+	}
+
+
+	auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
+	if (!manager->IsGameStart())
+	{
+		parent->GetComponent<PhysXComponent>()->SetForceVelocity(XMVectorSet(0, 0, 0, 0));
+	}
+	//if (!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * Speed);
 	//parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);         //PCデバック
 
 }
