@@ -35,6 +35,7 @@ private:
 	void ReSpawn();
 	bool Shake();
 	void PlaySE(std::string filename);
+	void ArrowUpdate();
 
 
 	void AnimationChange(int id,bool loop,float timer);
@@ -46,6 +47,8 @@ private:
 
 private:
 	//メンバ変数
+	int mPoint;
+
 	bool isGround;     //地面と接地しているかのチェック
 	bool isJump;       //プレイヤーがジャンプしたかのチェック
 	bool isDead;
@@ -64,6 +67,7 @@ private:
 	float mJumpYRotate; //ジャンプ中の回転
 	float mPrevAcceler;
 	XMVECTOR mWindVector;
+	Actor* mArrow;
 
 	//プレイヤーのHP
 	float mPlyerHP;

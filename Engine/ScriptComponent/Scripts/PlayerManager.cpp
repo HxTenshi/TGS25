@@ -11,6 +11,7 @@
 #include"PhysX\IPhysXEngine.h"
 #include"Fade.h"
 #include"h_standard.h"
+#include"HaneEffect.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）

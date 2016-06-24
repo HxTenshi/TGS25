@@ -16,6 +16,7 @@
 #include"Sail.h"
 #include"PlayerManager.h"
 #include"MoveSmoke.h"
+#include"HaneEffect.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Initialize(){
@@ -30,13 +31,14 @@ void SailBoard::Initialize(){
 	mJumpYRotate = 0;
 	mTrickRotate = XMVectorSet(0, 0, 0, 0);
 	mSpeedEffect = nullptr;
+	mPoint = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void SailBoard::Start(){
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).y;
 	mAnimator = game->FindActor("Bird")->GetComponent<AnimationComponent>();
-	
+	mArrow = game->FindActor("Arrow");
 }
 
 //毎フレーム呼ばれます
@@ -132,6 +134,7 @@ void SailBoard::Update(){
 		gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
 	}
 	
+	ArrowUpdate();
 	mPlyerHP = min(max(mPlyerHP, -100), 100);
 
 }
@@ -168,8 +171,10 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 	if (target->Name() == "PointItem"){
 
-		auto manager = game->FindActor("PlayerManager")->GetScript<PlayerManager>();
-		manager->ItemGet();
+		auto effect = game->CreateActor("Assets/Effect/haneEffect.json");
+		game->AddObject(effect);
+		effect->GetScript<HaneEffect>()->SetPosition(XMVectorSet(230 + (70 * mPoint), 630, 0, 0));
+		mPoint++;
 		PlaySE("Assets/PlayerSE/recovery.wav");
 		game->DestroyObject(target);
 	}
@@ -418,6 +423,28 @@ void SailBoard::PlaySE(std::string filename)
 	component->SetLoop(false);
 	component->LoadFile(filename);
 	component->Play();
+}
+
+void SailBoard::ArrowUpdate()
+{
+	mArrow = game->FindActor("Arrow");
+	if (isJump)
+	{
+		if (mArrow)
+		{
+			game->DestroyObject(mArrow);
+			mArrow = nullptr;
+		}
+	}
+	else
+	{
+		if (mArrow == nullptr)
+		{
+			mArrow = game->CreateActor("Assets/board/Arrow.json");
+			game->AddObject(mArrow);
+		}
+	}
+	
 }
 
 void SailBoard::AnimationChange(int id, bool loop, float timer)

@@ -26,7 +26,7 @@ void WindArrow::Update(){
 
 	if (mPlayer)
 	{
-		gameObject->mTransform->Position(mPlayer->mTransform->Position() + mPlayer->mTransform->Left() * 3 + XMVectorSet(0,2,0,0));
+		gameObject->mTransform->Position(mPlayer->mTransform->Position() + mPlayer->mTransform->Left() * 1.0f + XMVectorSet(0,1.0f,0,0));
 	}
 	auto player = mPlayer->GetScript<SailBoard>();
 	if (player) {
