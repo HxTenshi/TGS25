@@ -17,6 +17,8 @@ public:
 	void CreditDown();
 	void CreditUp();
 	void ItemGet();
+	// サウンドボックス生成関数です
+	void CreateSoundBox(const std::string name);
 	bool IsGameStart();
 
 private:

@@ -101,7 +101,7 @@ void Enemy::OnCollideBegin(Actor* target){
 				Enemy::SetAnimationLoop(false);
 			}
 			else playerScript->Damage(mDamage);
-			//// サウンドの再生
+			// サウンドの再生
 			Enemy::EnemyPlaySound("hit");
 		}
 		// 竜巻に当たったら死亡する
@@ -426,11 +426,11 @@ void Enemy::EnemyMoveSmoke() {
 			// 右のスモックのステータス設定
 			auto rightX = -colliderScale.x / 2.0f - enemyCGPosition.x;
 			auto rightZ = -colliderScale.z / 2.0f + enemyCGPosition.z;
-			auto rightPosition = XMVectorSet(rightX, 0.0f, rightZ, 0.0f);
+			auto rightPosition = XMVectorSet(rightX, 0.3f, rightZ, 0.0f);
 			mRightSmokeObj->mTransform->Position(rightPosition);
 			// 左のスモックのステータス設定
 			auto leftX = colliderScale.x / 2.0f + enemyCGPosition.x;
-			auto leftPosition = XMVectorSet(leftX, 0.0f, rightZ, 0.0f);
+			auto leftPosition = XMVectorSet(leftX, 0.3f, rightZ, 0.0f);
 			mLeftSmokeObj->mTransform->Position(leftPosition);
 			mRightSmokeScript = mRightSmokeObj->GetScript<MoveSmoke>();
 			mLeftSmokeScript = mLeftSmokeObj->GetScript<MoveSmoke>();

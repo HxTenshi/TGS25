@@ -5,14 +5,15 @@
 #include "Game/Script/IGame.h"
 #include "Game/Component/TransformComponent.h"
 #include "Game/Component/PhysXComponent.h"
-#include"Game\Component\TextureModelComponent.h"
+#include "Game\Component\TextureModelComponent.h"
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
 #include"Fade.h"
 #include"h_standard.h"
 #include"HaneEffect.h"
-
+// サウンドボックスのスクリプト
+#include "SoundBox.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PlayerManager::Initialize()
@@ -139,6 +140,8 @@ void PlayerManager::GameStart()
 			mFadeOutObj = nullptr;
 			auto startTex = game->CreateActor("Assets/UIPrefab/Start.json");
 			game->AddObject(startTex);
+			// サウンドボックスの生成
+			CreateSoundBox("start");
 			mGameStart = true;
 		}
 }
@@ -160,6 +163,8 @@ void PlayerManager::GameClear()
 			if (mFadeOutObj == nullptr) {
 				mFadeOutObj = game->CreateActor("Assets/Fade");
 				game->AddObject(mFadeOutObj);
+				// サウンドボックスの生成
+				CreateSoundBox("clear");
 			}
 			auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 			mFadeOutScript->FadeOut(mFadeOutSecond);
@@ -191,6 +196,8 @@ void PlayerManager::GameOver()
 		{
 			cleartexture = game->CreateActor("Assets/UIPrefab/GameOver.json");
 			game->AddObject(cleartexture);
+			// サウンドボックスの生成
+			CreateSoundBox("over");
 		}
 		else
 		{
@@ -215,6 +222,14 @@ void PlayerManager::WingUI()
 		++it;
 	}
 	items[mPoint]->GetComponent<TextureModelComponent>()->SetTexture("./Assets/UI/hane.png");
+}
+
+// サウンドボックス生成関数です
+void PlayerManager::CreateSoundBox(const std::string name) {
+	auto soundBox = game->CreateActor("Assets/SoundBox.json");
+	game->AddObject(soundBox);
+	auto soundBoxScript = soundBox->GetScript<SoundBox>();
+	soundBoxScript->SetSoundName(name);
 }
 
 bool PlayerManager::IsClear()

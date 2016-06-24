@@ -180,9 +180,11 @@
     <ClCompile Include="Scripts\PlayerManager.cpp" />
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
     <ClCompile Include="Scripts\PointItem.cpp" />
+    <ClCompile Include="Scripts\RainbowShiningWing.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
     <ClCompile Include="Scripts\SceneCursor.cpp" />
+    <ClCompile Include="Scripts\SoundBox.cpp" />
     <ClCompile Include="Scripts\Squid.cpp" />
     <ClCompile Include="Scripts\SquidInk.cpp" />
     <ClCompile Include="Scripts\StageManager.cpp" />
@@ -221,9 +223,11 @@
     <ClInclude Include="Scripts\PlayerManager.h" />
     <ClInclude Include="Scripts\PlayerSearch.h" />
     <ClInclude Include="Scripts\PointItem.h" />
+    <ClInclude Include="Scripts\RainbowShiningWing.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
     <ClInclude Include="Scripts\SceneCursor.h" />
+    <ClInclude Include="Scripts\SoundBox.h" />
     <ClInclude Include="Scripts\Squid.h" />
     <ClInclude Include="Scripts\SquidInk.h" />
     <ClInclude Include="Scripts\StageManager.h" />
