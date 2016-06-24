@@ -38,7 +38,7 @@ void FlyingFish::Start(){
 		mSetTornadoDistance);
 
 	auto floorObj = game->FindActor("Floor");
-	mFloorPosition = floorObj->mTransform->Position().y;
+	mFloorPosition = floorObj->mTransform->Position().y + 0.9f;
 }
 
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
@@ -82,7 +82,7 @@ void FlyingFish::OnCollideBegin(Actor* target){
 	Enemy::OnCollideBegin(target);
 	if (target->Name() == "Floor") {
 		// ÚG‚µ‚½°‚ÌˆÊ’u‚ð“ü‚ê‚é
-		mFloorPosition = target->mTransform->Position().y;
+		mFloorPosition = target->mTransform->Position().y + 0.9f;
 		// °‚ÉÚG‚µ‚½‚çtrue
 		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsInitSet = true;
@@ -94,7 +94,9 @@ void FlyingFish::OnCollideBegin(Actor* target){
 		mIsFloorHit = true;
 	}
 
-	if (target->Name() == "Tower") {
+	if (target->Name() == "Tower" ||
+		target->Name() == "bridge" || 
+		target->Name() == "Tree") {
 		mWallHitCount++;
 		mIsWallHit = true;
 		//game->Debug()->Log("“–‚½‚Á‚½");

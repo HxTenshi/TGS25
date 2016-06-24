@@ -31,6 +31,8 @@ private:
 	int mPastButtonCount;		// 過去のボタンの値
 	SERIALIZE
 	int mSetLerpTime;				// 線分補間時間
+	SERIALIZE
+	float mSpeed;
 	float mLerpTime;
 	SERIALIZE
 	float mAddCursorPositionX;	// カーソルの位置を加算する(X)

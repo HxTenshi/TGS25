@@ -640,7 +640,6 @@ void Enemy::Dead() {
 		// 回復処理
 		Enemy::PlayerHeal();
 		mIsPlayerHeal = true;
-		game->Debug()->Log("回復");
 	}
 	else {
 		// 雲に当たったら消滅 または リスポーン位置まで落ちたら消滅
