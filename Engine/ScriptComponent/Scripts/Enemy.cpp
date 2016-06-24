@@ -580,9 +580,7 @@ void Enemy::DeadTornadoMove() {
 	mIsMove = false;
 	// 竜巻がなくなっていたらその場で吹き飛ばす
 	// 死亡した場合はnullptr参照が出来ないのでこうする 一回アクセスエラーとなる
-	if (mBlowAwayTornadoObj->Name() != "Tornado") {
-		mIsTornadoBlowAway = true;
-	}
+	if (mBlowAwayTornadoObj->Name() != "Tornado") mIsTornadoBlowAway = true;
 	// 竜巻のコライダーの取得
 	auto tornadoCollider = mBlowAwayTornadoObj->GetComponent<PhysXColliderComponent>();
 	auto tornadoColliderScale = tornadoCollider->GetScale();
@@ -630,14 +628,9 @@ void Enemy::PlayerHeal() {
 	// プレイヤーの捜索
 	auto player = game->FindActor("Board");
 	// プレイヤーがいなければ死亡判定を優先する
-	if (player == nullptr) {
-		mIsPlayerHeal = true;
-		return;
-	}
+	if (player->Name() != "Board") return;
 	auto playerScript = player->GetScript<SailBoard>();
 	playerScript->Damage(-mDamage);
-	mIsPlayerHeal = true;
-
 }
 
 // 死亡処理を行います
@@ -647,10 +640,11 @@ void Enemy::Dead() {
 		// 回復処理
 		Enemy::PlayerHeal();
 		mIsPlayerHeal = true;
+		game->Debug()->Log("回復");
 	}
 	else {
 		// 雲に当たったら消滅 または リスポーン位置まで落ちたら消滅
-		if (mIsCloudHit || parentPosition.y <= mResPawnHeigth) {
+		if (mIsCloudHit || parentPosition.y <= mResPawnHeigth || parentPosition.y >= 300.0f) {
 			game->DestroyObject(mPlayerSearchObj);
 			game->DestroyObject(mEnemyCGObj);
 			game->DestroyObject(gameObject);

@@ -18,6 +18,7 @@ private:
 	//ƒƒ“ƒo•Ï”
 	SERIALIZE
 	float mFadeOutSecond;
+	float mMovieTimer;
 	bool mIsChangeScene;
 	bool mIsFadeIn;
 	Actor* mFadeOutObj;

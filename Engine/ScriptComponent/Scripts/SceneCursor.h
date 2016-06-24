@@ -28,28 +28,18 @@ public:
 private:
 	//メンバ変数
 	int mButtonCount;			// 現在指定しているボタンの値
+	int mPastButtonCount;		// 過去のボタンの値
 	SERIALIZE
-	float mCursorScaleX;		// カーソルの大きさ(X)
-	SERIALIZE
-	float mCursorScaleY;		// カーソルの大きさ(Y)
+	int mSetLerpTime;				// 線分補間時間
+	float mLerpTime;
 	SERIALIZE
 	float mAddCursorPositionX;	// カーソルの位置を加算する(X)
-	SERIALIZE
-	float mAddCursorPositionY;	// カーソルの位置を加算する(Y)
+	bool mIsCursorMove;			// カーソルが動いているか
 	bool mIsChangeScene;		// シーンが変わったか
-	Actor* mCursorRightTop;		// 右上部分のカーソルオブジェクト
-	Actor* mCursorRightBottom;	// 右下部分のカーソルオブジェクト
-	Actor* mCursorLeftTop;		// 左上部分のカーソルオブジェクト
-	Actor* mCursorLeftBottom;	// 左下部分のカーソルオブジェクト
+	XMVECTOR mLerp;
 	// ボタンコンテナ
 	typedef std::vector<Actor*> ButtonContainer;
 	ButtonContainer mButtonContainer;
-	// カーソルコンテナ
-	typedef std::vector<Actor*> CursorContainer;
-	CursorContainer mCursorContainer;
-	// カーソル座標コンテナ
-	typedef std::vector<XMVECTOR> CursorVelocityContainer;
-	CursorVelocityContainer mCursorVelocityContainer;
 	// シーンコンテナ
 	typedef std::vector<std::string> SceneContainer;
 	SceneContainer mSceneContainer;
