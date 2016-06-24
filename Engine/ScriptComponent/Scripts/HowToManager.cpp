@@ -34,14 +34,14 @@ void HowToManager::Update(){
 	else {
 		// ムービー再生
 		auto movie = gameObject->GetComponent<MovieComponent>();
-		if (mMovieTimer >= 47.5f) {
+		if (mMovieTimer >= 47.5f * 29.0f) {
 			movie->Stop();
 			mIsChangeScene = true;
 		}
 		else {
 			movie->Play();
 			movie->SetLoop(false);
-			mMovieTimer += game->DeltaTime()->GetDeltaTime();
+			mMovieTimer += game->DeltaTime()->GetDeltaTime() * 29.0f;
 		}
 		//if (!movie->IsPlay()) mIsChangeScene = true;
 		// 再生完了がしたらタイトルシーンに遷移

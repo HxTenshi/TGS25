@@ -41,17 +41,20 @@ void SceneCursor::Update(){
 		// 線形補間ように
 		if (mButtonCount != mPastButtonCount) {
 			auto distance = buttonPosition - position;
-			/*auto absDistance = 
-			auto nomeVector = XMVector3Normalize(position - buttonPosition);*/
 			mLerp = (distance - halfScale) / mSetLerpTime;
 			mPastButtonCount = mButtonCount;
 		}
-		//game->Debug()->Log(std::to_string(mLerpTime));
 		// 位置の変更
 		if (mLerpTime != 1.0f) {
 			auto deltaTime = game->DeltaTime()->GetDeltaTime();
-			gameObject->mTransform->Position(position + mLerp * deltaTime);
-			mLerpTime += 1.0f / mSetLerpTime * deltaTime;
+			auto moveVelocity = mLerp * deltaTime * mSpeed;
+			auto distance = buttonPosition - position;
+			if (abs(moveVelocity.x) > abs(distance.x) ||
+				abs(moveVelocity.y) > abs(distance.y))
+				gameObject->mTransform->Position(buttonPosition - halfScale);
+			else gameObject->mTransform->Position(position + moveVelocity);
+			
+			mLerpTime += 1.0f / mSetLerpTime * deltaTime * mSpeed;
 			if (mLerpTime >= 1.0f) mLerpTime = 1.0f;
 		}
 		else{
@@ -68,14 +71,12 @@ void SceneCursor::Update(){
 	// キー入力
 	if (Input::Trigger(PAD_DS4_KeyCoord::Button_UP) ||
 		Input::Trigger(KeyCoord::Key_A)) {
-		//if (mButtonCount > 0) mButtonCount--;
 		if (mButtonCount == 0) return;
 		mButtonCount--;
 		mIsCursorMove = true;
 	}
 	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_DOWN) ||
 		Input::Trigger(KeyCoord::Key_Z)) {
-		//if (mButtonCount < mButtonContainer.size() - 1) mButtonCount++;
 		if (mButtonCount == mButtonContainer.size() - 1) return;
 		mButtonCount++;
 		mIsCursorMove = true;
