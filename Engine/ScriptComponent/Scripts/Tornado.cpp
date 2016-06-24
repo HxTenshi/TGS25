@@ -9,8 +9,9 @@ void Tornado::Initialize(){
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
-void Tornado::Start(){
-
+void Tornado::Start()
+{
+	mScale = gameObject->mTransform->Scale();
 }
 
 //毎フレーム呼ばれます
@@ -25,7 +26,9 @@ void Tornado::Update()
 
 	if (mTimer > LimitTime)
 	{
-		game->DestroyObject(gameObject);
+		mScale -= XMVectorSet(0.01,0.01,0.01,0);
+		gameObject->mTransform->Scale(mScale);
+		if(mScale.x < 0) game->DestroyObject(gameObject);
 	}
 
 	mTimer += game->DeltaTime()->GetDeltaTime();

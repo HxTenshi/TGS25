@@ -23,5 +23,6 @@ private:
 		float LimitTime;
 
 	float mTimer;
+	XMVECTOR mScale;
 
 };
