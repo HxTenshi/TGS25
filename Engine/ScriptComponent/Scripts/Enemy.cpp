@@ -564,7 +564,6 @@ void Enemy::DeadBlowAwayMove() {
 	else {
 		// 回転しきって条件を満たしたら死亡
 		// プレイヤーの回復
-		Enemy::EnemyPlaySound("heal");
 		Enemy::Dead();
 	}
 	// 上昇
@@ -640,6 +639,7 @@ void Enemy::Dead() {
 		// 回復処理
 		Enemy::PlayerHeal();
 		mIsPlayerHeal = true;
+		if(!mIsBlowAway || !mIsTornadoCatch) Enemy::EnemyPlaySound("heal");
 	}
 	else {
 		// 雲に当たったら消滅 または リスポーン位置まで落ちたら消滅

@@ -45,4 +45,5 @@ private:
 	float mTitleChangeTime;
 
 	Actor* mFadeOutObj;
+	Actor* mSoundBox;
 };

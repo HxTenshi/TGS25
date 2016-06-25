@@ -32,6 +32,7 @@ void SoundBox::Update(){
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
 void SoundBox::Finish(){
+	game->DestroyObject(gameObject);
 }
 
 //コライダーとのヒット時に呼ばれます
@@ -52,4 +53,5 @@ void SoundBox::OnCollideExit(Actor* target){
 // サウンドの名前を設定します
 void SoundBox::SetSoundName(const std::string name) {
 	mName = "Assets/SceneTexture/" + name + ".wav";
+	mIsSoundPlay = false;
 }

@@ -153,6 +153,8 @@ void PlayerManager::GameClear()
 	{
 		cleartexture = game->CreateActor("Assets/UIPrefab/Clear.json");
 		game->AddObject(cleartexture);
+		// サウンドボックスの生成
+		CreateSoundBox("clear");
 	}
 	else
 	{
@@ -163,8 +165,6 @@ void PlayerManager::GameClear()
 			if (mFadeOutObj == nullptr) {
 				mFadeOutObj = game->CreateActor("Assets/Fade");
 				game->AddObject(mFadeOutObj);
-				// サウンドボックスの生成
-				CreateSoundBox("clear");
 			}
 			auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 			mFadeOutScript->FadeOut(mFadeOutSecond);
@@ -226,9 +226,11 @@ void PlayerManager::WingUI()
 
 // サウンドボックス生成関数です
 void PlayerManager::CreateSoundBox(const std::string name) {
-	auto soundBox = game->CreateActor("Assets/SoundBox.json");
-	game->AddObject(soundBox);
-	auto soundBoxScript = soundBox->GetScript<SoundBox>();
+	if (mSoundBox == nullptr) {
+		mSoundBox = game->CreateActor("Assets/SoundBox.json");
+		game->AddObject(mSoundBox);
+	}
+	auto soundBoxScript = mSoundBox->GetScript<SoundBox>();
 	soundBoxScript->SetSoundName(name);
 }
 
