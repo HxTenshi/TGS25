@@ -133,7 +133,13 @@ void SailBoard::Update(){
 		physx->SetForceVelocity(XMVectorSet(0, 0, 0, 1));
 		gameObject->mTransform->Quaternion(XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0));
 	}
-	
+
+	auto tornado = game->FindActor("Tornado");
+	if (tornado)
+	{
+		gameObject->mTransform->Position(tornado->mTransform->Position() + XMVectorSet(0, 5, 0, 0));
+	}
+
 	ArrowUpdate();
 	mPlyerHP = min(max(mPlyerHP, -100), 100);
 
@@ -186,7 +192,7 @@ void SailBoard::OnCollideEnter(Actor* target){
 
 	if (target->Name() == "Air" || target->Name() == "Floor")
 	{
-		if (IsTrick())
+		/*if (IsTrick())
 		{
 			auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
 			if (tornado)
@@ -197,7 +203,7 @@ void SailBoard::OnCollideEnter(Actor* target){
 				auto parent = game->FindActor("Tornados");
 				tornado->mTransform->SetParent(parent);
 			}
-		}
+		}*/
 		
 		mTrick = false;
 		mJumpYRotate = 0;
@@ -288,10 +294,10 @@ float SailBoard::GetHitPoint()
 void SailBoard::RotationBoard()
 {
 	if (Input::Down(KeyCoord::Key_A)) {
-		mRotateY -= 0.1f;
+		mYRot -= 0.5f;
 	}
 	if (Input::Down(KeyCoord::Key_D)) {
-		mRotateY += 0.1f;
+		mYRot += 0.5f;
 	}
 	mRotateY += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x;
 	mYRot += mRotateY;
@@ -333,7 +339,7 @@ void SailBoard::Trick()
 		mTrickRotate.y += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x * 0.1f;
 
 		mTrickPoint = abs(mTrickRotate.x) + abs(mTrickRotate.y);
-		if (mTrickPoint > 0.f)
+		if (mTrickPoint > 0.2f)
 		{
 			if (mAnimator->mCurrentSet != 1)
 			{
@@ -341,14 +347,15 @@ void SailBoard::Trick()
 				//トルネードの追加
 				if (IsUnrivaled())
 				{
-					/*auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
+					auto tornado = game->CreateActor("Assets/Effect/Tornado.json");
 					if (tornado)
 					{
 						game->AddObject(tornado);
+						PlaySE("Assets/PlayerSE/wind.wav");
 						tornado->mTransform->Position(gameObject->mTransform->Position());
 						auto parent = game->FindActor("Tornados");
 						tornado->mTransform->SetParent(parent);
-					}*/
+					}
 				}
 			}
 			mTrick = true;

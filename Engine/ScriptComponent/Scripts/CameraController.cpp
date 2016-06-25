@@ -23,8 +23,19 @@ void CameraController::Start(){
 //毎フレーム呼ばれます
 void CameraController::Update()
 {
-	if (mTarget)
+
+
+	auto temp = game->FindActor("Tornado");
+	if (temp)
 	{
+		mTarget = temp;
+		Look();
+		mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 4, -30, 1);
+	}
+	else
+	{
+		mTarget = game->FindActor("Board");
+
 		Look();
 
 		//プレイヤーがジャンプしたらカメラの位置変更の準備
@@ -47,8 +58,9 @@ void CameraController::Update()
 		{
 			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1));
 		}
-		gameObject->mTransform->Position(mPosition);
 	}
+
+	gameObject->mTransform->Position(mPosition);
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -78,14 +90,22 @@ void CameraController::Look()
 
 	auto Angel = atan2(-SubVector.x, -SubVector.z);
 	auto vec = XMVectorSet(0, 0, 0, 1);
-	if (!mTarget->GetScript<SailBoard>()->GetIsJump())
+	if (mTarget->Name() == "Tornado")
 	{
 		auto Angel2 = mTarget->mTransform->Rotate().x;
 		vec = XMVectorSet(Angel2, Angel, 0, 1);
 	}
 	else
 	{
-		vec = XMVectorSet(0, Angel, 0, 1);
+		if (!mTarget->GetScript<SailBoard>()->GetIsJump())
+		{
+			auto Angel2 = mTarget->mTransform->Rotate().x;
+			vec = XMVectorSet(Angel2, Angel, 0, 1);
+		}
+		else
+		{
+			vec = XMVectorSet(0, Angel, 0, 1);
+		}
 	}
 	gameObject->mTransform->Rotate(vec);
 
