@@ -31,7 +31,7 @@ void PlayerManager::Start()
 	{
 		auto haneTex = game->CreateActor("Assets/UIPrefab/haneUI.json");
 		game->AddObject(haneTex);
-		haneTex->mTransform->Position(XMVectorSet(230 + (70 * i), 630, 0, 0));
+		haneTex->mTransform->Position(XMVectorSet(300 + (70 * i), 630, 0, 0));
 		haneTex->mTransform->Scale(XMVectorSet(100, 100, 0, 0));
 		haneTex->mTransform->SetParent(gameObject);
 	}

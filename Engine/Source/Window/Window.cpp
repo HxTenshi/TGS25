@@ -80,7 +80,8 @@ int Window::Init(){
 	RECT rc = { 0, 0, WindowState::mWidth, WindowState::mHeight };
 	AdjustWindowRect(&rc, NULL, FALSE);
 
-	DWORD WindowModeFlag = WS_POPUP;//WS_OVERLAPPEDWINDOW
+	//DWORD WindowModeFlag = WS_POPUP;
+	DWORD WindowModeFlag = WS_OVERLAPPEDWINDOW;
 
 
 	mhWnd = CreateWindow("GameWindowClass", "GameWindow", 

@@ -1,10 +1,4 @@
 //--------------------------------------------------------------------------------------
-// File: Tutorial07.fx
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
 Texture2D txDiffuse : register( t0 );
@@ -14,6 +8,10 @@ cbuffer cbScreen : register(b13)
 {
 	float2 ScreenSize;
 	float2 NULLss;
+};
+cbuffer cbFreeParam : register(b10)
+{
+	float4 AddPow;
 };
 
 //--------------------------------------------------------------------------------------
@@ -43,7 +41,7 @@ PS_INPUT VS( VS_INPUT input )
 	output.Pos = mul(input.Pos, World);
 	output.Pos.z = 0;
 	float y = ScreenSize.y / ScreenSize.x;
-	output.Tex = input.Tex * float2(1, y);
+	output.Tex = input.Tex *float2(1, y);
 	
 	return output;
 }
@@ -54,6 +52,6 @@ PS_INPUT VS( VS_INPUT input )
 //--------------------------------------------------------------------------------------
 float4 PS(PS_INPUT input) : SV_Target
 {
-	float4 col = txDiffuse.Sample(samLinear, input.Tex);
+	float4 col = txDiffuse.Sample(samLinear, input.Tex) * AddPow;
 	return col;
 }

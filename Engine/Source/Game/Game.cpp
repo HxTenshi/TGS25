@@ -665,6 +665,9 @@ void Game::Draw(){
 			PlayDrawList(DrawStage::Diffuse);
 		});
 
+		mMainCamera->VSSetConstantBuffers(render->m_Context);
+		mMainCamera->PSSetConstantBuffers(render->m_Context);
+		mMainCamera->GSSetConstantBuffers(render->m_Context);
 
 		m_DeferredRendering.G_Buffer_Rendering(render, [&](){
 			mMainCamera->ScreenClear();
@@ -723,7 +726,7 @@ void Game::Draw(){
 
 	{
 		render->PushSet(DepthStencil::Preset::DS_Zero_Alawys);
-		render->PushSet(BlendState::Preset::BS_Alpha);
+		render->PushSet(BlendState::Preset::BS_Alpha, 0xFFFFFFFF);
 
 		PlayDrawList(DrawStage::UI);
 

@@ -207,6 +207,7 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 
 
 	float roughness = norCol.a - 1;
+	roughness = max(roughness, 0.1f);
 	float spec = LightingFuncGGX_REF(N, -normalize(vpos), -L, roughness, 0.1);
 
 	float r = 0.75f;
@@ -218,7 +219,6 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 	else{
 		Out.Diffuse = LightColor * float4(r, g, b, 1);
 	}
-	//Out.Diffuse = LightColor * DifGen;
 	Out.Diffuse.a = LightColor.a;
 
 	Out.Specular = LightColor * spec;
@@ -243,8 +243,8 @@ PS_OUTPUT_1 PS(PS_INPUT input)
 	if (rebirth > 0.1){
 		PS_OUTPUT_1 reb;
 		reb = main(input,-1);
-		Out.Diffuse.rgb += reb.Diffuse.rgb * rebirth;
-		Out.Specular.rgb += reb.Specular.rgb * rebirth;
+		Out.Diffuse.rgb = ((1 - rebirth) * Out.Diffuse.rgb) + reb.Diffuse.rgb * rebirth;
+		Out.Specular.rgb = ((1 - rebirth) * Out.Specular.rgb) + reb.Specular.rgb * rebirth;
 	}
 	else{
 

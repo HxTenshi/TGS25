@@ -42,7 +42,7 @@ void HPGauge::Update()
 	{
 		auto height = (playerScript->GetHitPoint() / 100.0f) * 910;
 		gameObject->mTransform->Scale(XMVectorSet(height, 300, 1, 1));
-		gameObject->mTransform->Position(XMVectorSet((playerScript->GetHitPoint() / 100.0f) * 376 + 129, 672, 1, 1));
+		gameObject->mTransform->Position(XMVectorSet(height / 4 + 273, 672, 1, 1));
 		//gameObject->mTransform->Position(XMVectorSet((gameObject->mTransform->Scale().x / 2) + 50, 672, 1, 1));
 
 		auto mat = gameObject->GetComponent<MaterialComponent>();

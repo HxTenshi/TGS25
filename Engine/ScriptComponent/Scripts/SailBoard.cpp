@@ -183,7 +183,7 @@ void SailBoard::OnCollideBegin(Actor* target){
 
 		auto effect = game->CreateActor("Assets/Effect/haneEffect.json");
 		game->AddObject(effect);
-		effect->GetScript<HaneEffect>()->SetPosition(XMVectorSet(230 + (70 * mPoint), 630, 0, 0));
+		effect->GetScript<HaneEffect>()->SetPosition(XMVectorSet(300 + (70 * mPoint), 630, 0, 0));
 		mPoint++;
 		PlaySE("Assets/PlayerSE/recovery.wav");
 		game->DestroyObject(target);

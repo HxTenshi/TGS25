@@ -140,7 +140,7 @@ PS_INPUT VS( VS_INPUT input )
 
 	output.Pos = mul(input.Pos, World);
 
-	output.Pos.y += sin((output.Pos.x / 10.0f + Time.x / 20.0f)) * 0.6;
+	output.Pos.y += sin((output.Pos.x / 10.0f + Time.y)) * 0.6;
 
 	output.LPos[0] = mul(output.Pos, LViewProjection[0]);
 	output.LPos[1] = mul(output.Pos, LViewProjection[1]);
@@ -169,6 +169,26 @@ PS_INPUT VS( VS_INPUT input )
 	return output;
 }
 
+struct PS_INPUT_D
+{
+	float4 Pos		: SV_POSITION;
+	float2 Tex		: TEXCOORD0;
+};
+
+//--------------------------------------------------------------------------------------
+// Vertex Shader
+//--------------------------------------------------------------------------------------
+PS_INPUT_D VS_Depth(float4 pos : POSITION, float2 tex : TEXCOORD0)
+{
+
+	PS_INPUT_D Out;
+
+	pos = mul(pos, World);
+	pos.y += sin((pos.x / 10.0f + Time.x / 20.0f)) * 0.6;
+	Out.Pos = mul(pos, LViewProjection[0]);
+	Out.Tex = tex;
+	return Out;
+}
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader

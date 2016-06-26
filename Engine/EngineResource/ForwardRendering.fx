@@ -359,7 +359,14 @@ PS_OUTPUT_1 PS(PS_INPUT input)
 	float spec = LightingFuncGGX_REF(N, -normalize(ray), -L, roughness, 0.1);
 
 
-	Out.Diffuse = DifColor * MDiffuse * LightColor * DifGen;
+	float r = 0.75f;
+	float g = 0.83f;
+	float b = 0.95f;
+	{
+		Out.Diffuse = LightColor * (DifGen* float4(1 - r, 1 - g, 1 - b, 1) + float4(r, g, b, 1));
+	}
+
+	Out.Diffuse = DifColor * MDiffuse * Out.Diffuse;
 	Out.Diffuse.a = DifColor.a;
 
 	Out.Diffuse.rgb += env + LightColor.rgb * spec;
