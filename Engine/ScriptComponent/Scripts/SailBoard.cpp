@@ -153,6 +153,10 @@ void SailBoard::Finish(){
 //コライダーとのヒット時に呼ばれます
 void SailBoard::OnCollideBegin(Actor* target){
 	(void)target;
+	if (target->Name() == "Tree" || target->Name() == "Tower") 
+	{
+		PlaySE("Assets/PlayerSE/hit.wav");
+	}
 
 	if (target->Name() == "Air" || target->Name() == "Floor"){
 		isJump = false;
