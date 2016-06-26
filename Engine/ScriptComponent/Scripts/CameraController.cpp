@@ -30,7 +30,7 @@ void CameraController::Update()
 	{
 		mTarget = temp;
 		Look();
-		mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 4, -30, 1);
+		mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 10, -50, 1);
 	}
 	else
 	{
