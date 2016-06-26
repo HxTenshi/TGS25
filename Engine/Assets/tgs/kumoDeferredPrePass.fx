@@ -137,9 +137,10 @@ PS_INPUT VS( VS_INPUT input )
 {
 	PS_INPUT output = (PS_INPUT)0;
 
-	input.Pos.y += sin((input.Pos.x/20.0f + Time.x/20.0f)) * 0.4;
 
 	output.Pos = mul(input.Pos, World);
+
+	output.Pos.y += sin((output.Pos.x / 10.0f + Time.x / 20.0f)) * 0.6;
 
 	output.LPos[0] = mul(output.Pos, LViewProjection[0]);
 	output.LPos[1] = mul(output.Pos, LViewProjection[1]);
