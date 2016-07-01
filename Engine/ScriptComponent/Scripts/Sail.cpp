@@ -46,8 +46,6 @@ void Sail::Update(){
 	move -= move * 0.9f * game->DeltaTime()->GetDeltaTime();
 	mVelocity.y = -5 * (60 * game->DeltaTime()->GetDeltaTime());
 	move = min(max(move, 0), 100);
-
-	if (parent->GetScript<SailBoard>()->GetHitPoint() <= 0) return;
 	
 	if (!parent->GetScript<SailBoard>()->GetIsJump() && parent->GetScript<SailBoard>()->GetIsGround())
 	{
