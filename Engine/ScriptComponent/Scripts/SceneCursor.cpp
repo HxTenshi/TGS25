@@ -131,6 +131,11 @@ int SceneCursor::GetButtonCount() {
 	return mButtonCount;
 }
 
+// カーソルが動いているかを返します
+bool SceneCursor::IsCursorMove() {
+	return mIsCursorMove;
+}
+
 // シーンが変わったかを返します
 bool SceneCursor::IsChangeScene() {
 	return mIsChangeScene;

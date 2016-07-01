@@ -22,8 +22,11 @@ private:
 	float mCameraRotateSpeed;
 	SERIALIZE
 	float mFadeOutSecond;
+	float mSceneChangeTimer;
+	bool mIsPVSceneChange;
 	Actor* mCursorObj;
 	Actor* mFadeOutObj;
 	SceneCursor* mCursorScript;
 	Fade*  mFadeOutScript;
+	const int mChangeTime = 30;
 };

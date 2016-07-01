@@ -13,7 +13,8 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void TitleMnager::Initialize(){
-
+	mSceneChangeTimer = 0.0f;
+	mIsPVSceneChange = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -44,8 +45,27 @@ void TitleMnager::Update()
 	auto cameraRotate = camera->mTransform->Rotate();
 	// デルタタイムの取得
 	auto deltaTime = game->DeltaTime()->GetDeltaTime();
+	// 何も入力がなければタイム加算
+	if (!mCursorScript->IsChangeScene()) {
+		if (mCursorScript->IsCursorMove()) mSceneChangeTimer = 0.0f;
+		else mSceneChangeTimer += deltaTime;
+		// タイムが一定以上になったらフェイドアウトしてPVシーンに移行
+		if (mChangeTime <= mSceneChangeTimer) {
+			mIsPVSceneChange = true;
+			if (mFadeOutObj == nullptr) {
+				mFadeOutObj = game->CreateActor("Assets/Fade");
+				game->AddObject(mFadeOutObj);
+			}
+			mFadeOutScript = mFadeOutObj->GetScript<Fade>();
+			mFadeOutScript->FadeOut(mFadeOutSecond);
+			// フェードアウト後シーン移動
+			if (mFadeOutScript->IsFadeOut()) 
+				game->LoadScene("./Assets/Scenes/How_To.scene");
+		}
+	}
+
 	// フェードアウトしてシーン移動
-	if (mCursorScript->IsChangeScene()) {
+	if (mCursorScript->IsChangeScene() && mIsPVSceneChange) {
 		// 一度だけ生成
 		if (mFadeOutObj == nullptr) {
 			mFadeOutObj = game->CreateActor("Assets/Fade");

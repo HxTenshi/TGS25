@@ -22,6 +22,8 @@ public:
 	void OnChangeScene();
 	// ボタンの値を取得します
 	int GetButtonCount();
+	// カーソルが動いているかを返します
+	bool IsCursorMove();
 	// シーンが変わったかを返します
 	bool IsChangeScene();
 
