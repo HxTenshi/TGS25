@@ -86,7 +86,7 @@ void SceneCursor::Update(){
 		mIsChangeScene = true;
 		auto sound = gameObject->GetComponent<SoundComponent>();
 		if (!sound) return;
-		sound->LoadFile("Assets/SceneTexture/Decision.wav");
+		sound->LoadFile("Assets/SceneAssets/SceneSound/Decision.wav");
 		sound->Play();
 	}
 }

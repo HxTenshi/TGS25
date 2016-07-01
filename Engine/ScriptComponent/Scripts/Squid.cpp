@@ -59,7 +59,7 @@ void Squid::OnCollideExit(Actor* target){
 	Enemy::OnCollideExit(target);
 }
 
-void Squid::SearchMove() {
+void Squid::PlayerSearchMove() {
 
 	// 親を動かす
 	auto parentPosition = mParentObj->mTransform->Position();
@@ -80,7 +80,7 @@ void Squid::SearchMove() {
 	}
 }
 
-void Squid::PlayerChase() {	
+void Squid::PlayerChaseMove() {	
 
 	// プレイヤーの方向を向く（まだ）
 	auto playerObj = game->FindActor("Board");
