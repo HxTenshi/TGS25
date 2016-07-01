@@ -27,24 +27,31 @@ void Sail::Start(){
 
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
 void Sail::Update(){
-	 
+	
+
 	SailRotate();
 	auto parent = gameObject->mTransform->GetParent()->mTransform->GetParent();
 	auto forward = parent->mTransform->Forward();
 	forward.y = 0;
 	forward = XMVector3Normalize(forward);
 
-	if (!parent->GetScript<SailBoard>()->GetIsJump())
+	auto velocity = parent->GetComponent<PhysXComponent>()->GetForceVelocity();
+	velocity.x = 0;
+	velocity.z = 0;
+
+	if (!parent->GetScript<SailBoard>()->GetIsJump() && parent->GetScript<SailBoard>()->GetIsGround())
 	{
 		move += MovePower() * Speed * game->DeltaTime()->GetDeltaTime();
 	}
 	move -= move * 0.9f * game->DeltaTime()->GetDeltaTime();
 	mVelocity.y = -5 * (60 * game->DeltaTime()->GetDeltaTime());
 	move = min(max(move, 0), 100);
+
+	if (parent->GetScript<SailBoard>()->GetHitPoint() <= 0) return;
 	
-	if (!parent->GetScript<SailBoard>()->GetIsJump())
+	if (!parent->GetScript<SailBoard>()->GetIsJump() && parent->GetScript<SailBoard>()->GetIsGround())
 	{
-		parent->GetComponent<PhysXComponent>()->SetForceVelocity(mVelocity + (forward * move));
+		parent->GetComponent<PhysXComponent>()->SetForceVelocity(velocity + (forward * move));
 	}
 
 

@@ -18,6 +18,8 @@ public:
 	void OnCollideExit(Actor* target)override;
 	XMVECTOR GetWind();
 	bool GetIsJump();
+	bool GetIsGround();
+	bool IsDead();
 	//プレイヤーは無敵か?
 	bool IsUnrivaled();
 	//ダメージの処理

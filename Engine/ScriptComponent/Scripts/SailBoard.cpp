@@ -158,9 +158,9 @@ void SailBoard::OnCollideBegin(Actor* target){
 		PlaySE("Assets/PlayerSE/hit.wav");
 	}
 
-	if (target->Name() == "Air" || target->Name() == "Floor"){
+	if (target->Name() == "Air" || target->Name() == "Floor") {
 		isJump = false;
-		AnimationChange(0, false,0);
+		AnimationChange(0, false, 0);
 		if (!isGround)
 		{
 			auto bomb = game->CreateActor("Assets/tgs/SmokeBomb.json");
@@ -169,13 +169,12 @@ void SailBoard::OnCollideBegin(Actor* target){
 				game->AddObject(bomb);
 				bomb->mTransform->Position(gameObject->mTransform->Position());
 			}
-			isGround = true;
 		}
-
+		isGround = true;
 		/*float power = 2.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
 		gameObject->mTransform->AddForce(v*power);*/
-		XMVECTOR rotate = XMVectorSet(0, gameObject->mTransform->Rotate().y,0, 1);
+		XMVECTOR rotate = XMVectorSet(0, gameObject->mTransform->Rotate().y, 0, 1);
 		gameObject->mTransform->Rotate(rotate);
 	}
 
@@ -211,7 +210,7 @@ void SailBoard::OnCollideEnter(Actor* target){
 		
 		mTrick = false;
 		mJumpYRotate = 0;
-
+		isGround = true;
 		//”g‚Ì•\Œ»‚ÌƒvƒƒOƒ‰ƒ€
 		/*float power = 1.0f;
 		auto v = XMVectorSet(0, 1, 0, 1);
@@ -247,6 +246,16 @@ XMVECTOR SailBoard::GetWind()
 bool SailBoard::GetIsJump()
 {
 	return this->isJump;
+}
+
+bool SailBoard::GetIsGround()
+{
+	return isGround;
+}
+
+bool SailBoard::IsDead()
+{
+	return Dead();
 }
 
 bool SailBoard::IsUnrivaled()
@@ -397,6 +406,7 @@ bool SailBoard::Dead()
 		if (!physx) return false;
 		physx->SetForceVelocity({ 0, -9.8, 0, 0 });
 		gameObject->GetComponent<PhysXColliderComponent>()->SetIsTrigger(true);
+		game->FindActor("BoardFrontCollision")->GetComponent<PhysXColliderComponent>()->SetIsTrigger(true);
 	}
 	return false;
 }
