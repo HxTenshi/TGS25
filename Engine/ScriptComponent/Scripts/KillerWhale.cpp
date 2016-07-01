@@ -1,5 +1,6 @@
 #include "KillerWhale.h"
 #include "Enemy.h"
+#include  "EnemyManager.h"
 
 //アクターなど基本のインクルード
 #include "h_standard.h"
@@ -14,7 +15,7 @@ void KillerWhale::Initialize(){
 	mSpeed = mSetSpeed;
 	mIsShot = false;
 	mIsDistanceAct = true;
-	mIsBlowAway = false;
+	//mIsBlowAway = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -28,6 +29,7 @@ void KillerWhale::Start(){
 		mSetTornadoPower, mSetTornadoRotateScale, mSetAddTornadoRotateScale,
 		mSetTornadoRotatePower, mSetTornadoUpPower, mSetTornadoInterval,
 		mSetTornadoDistance);
+	Enemy::ChangeEnemyDeadState(EnemyDeadState::KnockBackDead);
 
 	mInitBulletShotTime = mBulletShotTime;
 	mInitRecastTime = mRecastTime;
@@ -59,7 +61,7 @@ void KillerWhale::OnCollideExit(Actor* target){
 	Enemy::OnCollideExit(target);
 }
 
-void KillerWhale::SearchMove() {
+void KillerWhale::PlayerSearchMove() {
 	// 何もしない
 	mIsMove = false;
 	if (!mIsFloorHit && mInitSetCount == 1) {
@@ -83,7 +85,7 @@ void KillerWhale::ShortDistanceAttack() {
 			auto gunBullet = game->CreateActor("Assets/Enemy/WaterGunBullet");
 			game->AddObject(gunBullet);
 			// 位置の変更
-			Enemy::SetParentForwardObj(gunBullet);
+			mEnemyManagerScript->SetParentForwardObj(gunBullet);
 			mIsShot = true;
 			Enemy::SetAnimationTimeScale(1.0f);
 			//// サウンドの再生

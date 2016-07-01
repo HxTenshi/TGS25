@@ -6,13 +6,22 @@
 class PlayerSearch;
 class EnemyCG;
 class MoveSmoke;
+class EnemyManager;
 
 enum class EnemyState {
 	PlayerSearch,
 	PlayerChase,
 	PlayerShortDistance,
 	PlayerCenterDistance,
-	PlayerLongDistance
+	PlayerLongDistance,
+	TornadoEscape,
+	DeadMove
+};
+
+enum class EnemyDeadState {
+	KnockBackDead,
+	BlowAwayDead,
+	TornadoDead
 };
 
 class Enemy :public IDllScriptComponent{
@@ -26,13 +35,13 @@ public:
 	virtual void OnCollideEnter(Actor* target)override;
 	virtual void OnCollideExit(Actor* target)override;
 	// 索敵移動します
-	virtual void SearchMove();
+	virtual void PlayerSearchMove();
 	// 索敵関数です
 	virtual void PlayerSearchMode(const XMVECTOR objScale);
 	// プレイヤーの方向に回転します
 	virtual void PlayerChaseMode(const float startPoint, const float endPoint);
 	// プレイヤーを追跡します
-	virtual void PlayerChase();
+	virtual void PlayerChaseMove();
 	// プレイヤーとの距離が短いときの行動です
 	virtual void ShortDistanceAttack();
 	// プレイヤーとの距離が中間の行動です
@@ -43,8 +52,6 @@ public:
 	virtual void TornadoEscapeMove(Actor* tornadoObj);
 	// プレイヤーに当たったらノックバックします
 	virtual void KnockBack();
-	// 敵の目の前にオブジェを生成します(親がいる場合)
-	void SetParentForwardObj(Actor* setObj);
 	// ダメージの設定です
 	void SetDamage(int damage);
 	// リスポーンタイムです
@@ -63,27 +70,25 @@ public:
 	void DeadBlowAwayMove();
 	// 竜巻に巻き込まれた時の死亡行動です
 	void DeadTornadoMove();
+	// 竜巻に吹き飛ばされる時の死亡行動です
+	void DeadTornadoBlowAwayMove();
 	// プレイヤーボートの耐久力回復処理を行います
 	void PlayerHeal();
 	// 死亡処理を行います
 	void Dead();
 	// 敵の行動関数
 	void Move();
-	// 親のステータスを初期化します
-	void InitStatus();
-	// 敵のステータスをリセットします
-	void ResetStatus();
+	// 敵の状態の変更を行います
+	void ChangeEnemyState(EnemyState state);
+	// 敵の死亡状態の変更を行います
+	void ChangeEnemyDeadState(EnemyDeadState state);
 	// プレイヤーの追跡を中止する距離の加算です
 	void AddPlayerChaseStopDistance(float distance);
-	// サウンドを再生します
-	void EnemyPlaySound(const std::string soundName);
 	// 竜巻のステータスを入れます
 	void SetTornadoStatus(
 		const float power, const float rotate, const float addRotate,
 		const float rotatePower, const float upPower, const float interval,
 		const float distance);
-	// プレイヤーと指定されたオブジェの位置との距離を計算して返します
-	float GetPlayerDistance(Actor* playerObj, Actor* otherObj);
 	// 子供側からアニメーションのIDを変えます
 	void SetAnimationID(int id);
 	// 子供側からアニメーションのタイムを変更します(未使用)
@@ -106,14 +111,15 @@ protected:
 	Actor* mBlowAwayTornadoObj;				// 吹き飛び死亡時の竜巻のオブジェクト
 	Actor* mRightSmokeObj;					// 右のスモックオブジェクト
 	Actor* mLeftSmokeObj;					// 左のスモックオブジェクト
+	Actor* mEnemyManagerObj;
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
 	EnemyCG* mEnemyCGScript;				// 敵のCGオブジェクトのスクリプト
 	MoveSmoke* mRightSmokeScript;			// 右のスモックオブジェクトのスクリプト
 	MoveSmoke* mLeftSmokeScript;			// 左のスモックオブジェクトのスクリプト
+	EnemyManager* mEnemyManagerScript;		// エネミーマネージャーのスクリプト
 	EnemyState mEnemyState;					// enumクラスのEnemyState(敵の行動選択時に使用)
+	EnemyDeadState mEnemyDeadState;			// enumクラスの
 	XMVECTOR mSize;							// 敵の大きさ
-	XMVECTOR mInitPosition;					// 初期位置
-	XMVECTOR mInitRotate;;					// 初期の回転
 	XMVECTOR mSearchObjPosition;			// 索敵範囲の位置
 	XMVECTOR mKnockBackDIrection;			// ノックバックの方向
 	int mAddSearchObjCount;					// 索敵範囲オブジェの作成カウント
@@ -148,16 +154,12 @@ protected:
 	bool mIsCloudHit;						// 雲と当たったか
 	bool mIsImmortalBody;					// 不死身の敵か(未実装)
 	bool mIsDistanceAct;					// 距離判定の行動をするか
-	bool mIsBlowAway;						// 死亡時に吹き飛ぶかどうか
-	bool mIsTornadoCatch;					// 竜巻に捕まったか
 	bool mIsKnockBackDirection;				// ノックバックの方向を決めたか
 	bool mIsChaseRotate;					// プレイヤーの方向を向くかどうか
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)
-	bool mIsTornadoRange;					// 竜巻の範囲内か
 	bool mIsTornadoBlowAway;				// 竜巻で吹き飛ばすか
 	bool mIsPlayerHeal;						// プレイヤーが回復したか
-	bool mIsDead;							// プレイヤーと当たったか
-	// 行動コンテナ
+	// 距離行動コンテナ
 	typedef std::vector<EnemyState> DistanceVector;
 	DistanceVector mDistanceVector;
 

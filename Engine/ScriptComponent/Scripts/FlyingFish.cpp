@@ -127,15 +127,13 @@ void FlyingFish::OnCollideExit(Actor* target){
 	if (target->Name() == "Floor") mIsFloorHit = false;
 }
 
-void FlyingFish::SearchMove() {
+void FlyingFish::PlayerSearchMove() {
 	auto parentRotate = mParentObj->mTransform->Rotate();
 	// “G‚Ì‰ñ“]
 	if (mWallHitCount % 2 == 0) {
-		//parentRotate.y += 3.14f / 180.0f / mRotateInterval;
 		parentRotate.y += (3.14f / 180.0f / mRotateInterval) * Enemy::GetEnemyDeltaTime(60.0f);
 	}
 	else {
-		//parentRotate.y -= 3.14f / 180.0f / mRotateInterval;
 		parentRotate.y -= (3.14f / 180.0f / mRotateInterval) * Enemy::GetEnemyDeltaTime(60.0f);
 	}
 
@@ -151,7 +149,7 @@ void FlyingFish::SearchMove() {
 	JampMove();
 }
 
-void FlyingFish::PlayerChase() {
+void FlyingFish::PlayerChaseMove() {
 	Enemy::PlayerChaseMode(5.0f, 2.0f);
 	JampMove();
 }

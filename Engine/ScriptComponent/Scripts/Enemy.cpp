@@ -1,10 +1,10 @@
 #include "Enemy.h"
+#include "EnemyManager.h"
 #include "PlayerSearch.h"
 #include "SailBoard.h"
 #include "ParentObj.h"
 #include "EnemyCG.h"
 #include "MoveSmoke.h"
-
 //アクターなど基本のインクルード
 #include "h_standard.h"
 //コンポーネント全てのインクルード
@@ -20,6 +20,7 @@ Enemy::~Enemy() {
 void Enemy::Initialize(){
 
 	mEnemyState = EnemyState::PlayerSearch;
+	mEnemyDeadState = EnemyDeadState::BlowAwayDead;
 	mAddSearchObjCount = 0;
 	mDamage = 0;
 	mResPawnTime = 0;
@@ -45,15 +46,11 @@ void Enemy::Initialize(){
 	mIsCloudHit = false;
 	mIsImmortalBody = false;
 	mIsDistanceAct = false;
-	mIsBlowAway = true;
-	mIsTornadoCatch = false;
 	mIsKnockBackDirection = false;
 	mIsAttckMode = false;
 	mIsChaseRotate = true;
-	mIsTornadoRange = false;
 	mIsTornadoBlowAway = false;
 	mIsPlayerHeal = false;
-	mIsDead = false;
 	// 配列に追跡行動のenumクラスを入れる
 	mDistanceVector.push_back(EnemyState::PlayerShortDistance);
 	mDistanceVector.push_back(EnemyState::PlayerCenterDistance);
@@ -64,13 +61,19 @@ void Enemy::Initialize(){
 void Enemy::Start(){
 	// 親の取得	
 	mParentObj = gameObject->mTransform->GetParent();
-	// 初期ステータスを入れる
-	mInitPosition = mParentObj->mTransform->Position();
-	mInitRotate = mParentObj->mTransform->Rotate();
+	//// 初期ステータスを入れる
+	//mInitPosition = mParentObj->mTransform->Position();
+	//mInitRotate = mParentObj->mTransform->Rotate();
+	// エネミーマネージャーの作成
+	mEnemyManagerObj = game->CreateActor("Assets/Enemy/EnemyManager");
+	game->AddObject(mEnemyManagerObj);
+	mEnemyManagerObj->mTransform->SetParent(gameObject);
+	mEnemyManagerScript = mEnemyManagerObj->GetScript<EnemyManager>();
 }
 
 //毎フレーム呼ばれます
 void Enemy::Update(){
+	
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -79,7 +82,7 @@ void Enemy::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void Enemy::OnCollideBegin(Actor* target){
-	if (!mIsDead) {
+	if (mEnemyState != EnemyState::DeadMove) {
 		if (target->Name() == "Board") {
 			auto playerScript = target->GetScript<SailBoard>();
 			// プレイヤーが無敵状態なら死亡
@@ -95,20 +98,19 @@ void Enemy::OnCollideBegin(Actor* target){
 				auto v = parentPosition - playerPosition;
 				auto angle = atan2(v.x, v.z);
 				auto quaternion = XMQuaternionRotationAxis(mParentObj->mTransform->Up(), angle);
-				mIsDead = true;
+				mEnemyState = EnemyState::DeadMove;
 				// 死亡アニメーションの呼び出し
 				Enemy::SetAnimationID(2);
 				Enemy::SetAnimationLoop(false);
 			}
 			else playerScript->Damage(mDamage);
 			// サウンドの再生
-			Enemy::EnemyPlaySound("hit");
+			mEnemyManagerScript->EnemyPlaySound("hit");
 		}
 		// 竜巻に当たったら死亡する
 		if (target->Name() == "Tornado") {
-			mIsDead = true;
-			mIsBlowAway = true;
-			mIsTornadoCatch = true;
+			mEnemyState = EnemyState::DeadMove;
+			mEnemyDeadState = EnemyDeadState::TornadoDead;
 			mBlowAwayPower = 100.0f;
 			mBlowAwayTornadoObj = mTornadoObj;
 			mTornadoObj = nullptr;
@@ -134,10 +136,9 @@ void Enemy::OnCollideEnter(Actor* target){
 	if (target->Name() == "Floor") mIsFloorHit = true;
 
 	// 竜巻に当たったら死亡する
-	if (target->Name() == "Tornado" && mIsDead == false) {
-		mIsDead = true;
-		mIsBlowAway = true;
-		mIsTornadoCatch = true;
+	if (target->Name() == "Tornado" && mEnemyState != EnemyState::DeadMove) {
+		mEnemyState = EnemyState::DeadMove;
+		mEnemyDeadState = EnemyDeadState::TornadoDead;
 		mBlowAwayPower = 100.0f;
 		mBlowAwayTornadoObj = mTornadoObj;
 		// コライダーのトリガーをオンにする
@@ -152,7 +153,7 @@ void Enemy::OnCollideExit(Actor* target){
 }
 
 // 索敵移動をします（デフォルト設定）
-void Enemy::SearchMove() {
+void Enemy::PlayerSearchMove() {
 	// デフォルトの移動
 	auto position = gameObject->mTransform->Position();
 	auto forward = gameObject->mTransform->Forward();
@@ -160,6 +161,8 @@ void Enemy::SearchMove() {
 }
 // 索敵関数です
 void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
+	// 死亡していたらすぐに返す
+	if (mEnemyState == EnemyState::DeadMove) return;
 	// 索敵範囲オブジェの生成後に追跡中止距離の設定を行う
 	if (mAddSearchObjCount == 1) {
 		// 追跡中止の距離の設定
@@ -253,7 +256,7 @@ void  Enemy::PlayerChaseMode(const float startPoint, const float endPoint) {
 	if (mIsChaseRotate)mParentObj->mTransform->Quaternion(quaternion);
 }
 // プレイヤーを追跡します（デフォルト設定）
-void Enemy::PlayerChase() {
+void Enemy::PlayerChaseMove() {
 	// 移動
 	auto position = gameObject->mTransform->Position();
 	auto forward = gameObject->mTransform->Forward();
@@ -286,23 +289,15 @@ void Enemy::LongDistanceAttack() {
 
 // 竜巻から逃げるときの行動です
 void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
-	/*auto tornadoParent = game->FindActor("Tornados");
-	auto size = tornadoParent->mTransform->Children().size();
-	if (mTornadosCount != size) {
-		mTornadoObj = nullptr;
-		tornadoObj = nullptr;
-	}*/
-	//if(tornadoObj != nullptr)game->Debug()->Log(tornadoObj->Name());
 	if (tornadoObj == nullptr) return;
 	if (tornadoObj->Name() != "Tornado") {
-		mIsTornadoRange = false;
 		mTornadoObj = nullptr;
 		mTornadoMinDistance = mTornadoDistance;
 		return;
 	}
 	// スモックを動かす
 	mIsMove = true;
-
+	// 竜巻の位置の取得
 	auto tornadoPosition = tornadoObj->mTransform->Position();
 	// 親のステータスの取得
 	auto parentPosition = mParentObj->mTransform->Position();
@@ -314,7 +309,6 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 	// escapeAngle が 0.000000f になっている状態でを足すとエラーな軸となる
 	// ログ表示では escapeAngle が 0.000000f となっているが、0.000000fと認識してくれない
 	// string型だと認識してくれる
-	// if (std::to_string(escapeAngle) == "0.000000") game->Debug()->Log("回転軸エラー");
 	if (std::to_string(escapeAngle) == "0.000000") escapeAngle = 0.0f;
 	if (escapeAngle < 0) escapeAngle += 3.141593f * 2.0f;
 	// 竜巻から逃げるように移動する
@@ -328,9 +322,8 @@ void Enemy::TornadoEscapeMove(Actor* tornadoObj) {
 	if (distance.x <= 10.0f) mTornadoInterval = 1.0f;
 	auto tornadoCollider = mTornadoObj->GetComponent<PhysXColliderComponent>();
 	if (distance.x <= tornadoCollider->GetScale().x) {
-		mIsDead = true;
-		mIsBlowAway = true;
-		mIsTornadoCatch = true;
+		mEnemyState = EnemyState::DeadMove;
+		mEnemyDeadState = EnemyDeadState::TornadoDead;
 		mBlowAwayPower = 100.0f;
 		mBlowAwayTornadoObj = mTornadoObj;
 		mTornadoObj = nullptr;
@@ -361,24 +354,6 @@ void Enemy::KnockBack() {
 		parentPosition + ((mKnockBackDIrection * 20.0f * 0.01f) -
 		mParentObj->mTransform->Up() * 5.0f * 0.01f) * Enemy::GetEnemyDeltaTime(60.0f));
 	Enemy::Dead();
-}
-
-// 敵の目の前にオブジェを生成します(親がいる場合)
-void Enemy::SetParentForwardObj(Actor* setObj) {
-	auto parentPosition = mParentObj->mTransform->Position();
-	auto parentRotate = mParentObj->mTransform->Rotate();
-	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
-	auto colliderScale = collider->GetScale();
-	auto setObjScale = setObj->mTransform->Scale();
-	// 位置の指定
-	auto setPosition = XMVectorSet(
-		((colliderScale.z / 2.0f) + (setObjScale.z / 2.0f)) * sinf(parentRotate.y),
-		0.0f,
-		((colliderScale.z / 2.0f) + (setObjScale.z / 2.0f)) * cosf(parentRotate.y), 0.0f);
-	// 位置の変更
-	setObj->mTransform->Position(parentPosition + -setPosition);
-	// 生成元のオブジェの回転角に変更
-	setObj->mTransform->Rotate(parentRotate);
 }
 
 // ダメージの設定です
@@ -456,16 +431,17 @@ void Enemy::ResPawnLine() {
 	if (mParentObj->mTransform->Position().y <= mResPawnHeigth) {
 		// リスポーンタイムが０ならリスポーンする
 		if (mResPawnTime < 0) {
-			Enemy::InitStatus();
+			mEnemyManagerScript->InitStatus();
 			mResPawnTime = mInitResPawnTime;
 			mInitSetCount = 0;
 		}
-		mResPawnTime--;
+		mResPawnTime -= Enemy::GetEnemyDeltaTime(60.0f);
 	}
 }
 
 // 竜巻を探します
 void Enemy::SearchTornado() {
+	if (mEnemyState == EnemyState::DeadMove) return;
 	// 竜巻の親検索
 	auto tornadoParent = game->FindActor("Tornados");
 	if (tornadoParent != nullptr) {
@@ -475,7 +451,7 @@ void Enemy::SearchTornado() {
 		// 竜巻が消えたなら、一回エラー防止にnullptrを入れる
 		if (mTornadosCount != size) {
 			mTornadosCount = size;
-			mIsTornadoRange = false;
+			mEnemyState = EnemyState::PlayerSearch;
 			mTornadoObj = nullptr;
 			mTornadoMinDistance = mTornadoDistance;
 			return;
@@ -500,13 +476,13 @@ void Enemy::SearchTornado() {
 				}
 			}
 			// 範囲内なら竜巻に巻き込まれる行動を行う
-			if (mTornadoMinDistance <= mTornadoDistance) mIsTornadoRange = true;
-			else mIsTornadoRange = false;
+			if (mTornadoMinDistance <= mTornadoDistance)
+				mEnemyState = EnemyState::TornadoEscape;
+			else mEnemyState = EnemyState::PlayerSearch;
 		}
 		else {
 			// 竜巻がないなら通常行動をする
-			if (!mIsDead) {
-				mIsTornadoRange = false;
+			if (mEnemyState != EnemyState::DeadMove) {
 				mTornadoObj = nullptr;
 				mTornadoMinDistance = mTornadoDistance;
 			}
@@ -516,37 +492,12 @@ void Enemy::SearchTornado() {
 
 // 敵の死亡行動です
 void Enemy::DeadMove() {
-	// 吹き飛ぶ場合
-	if (mIsBlowAway) {
-		// 竜巻の吹き飛び
-		if (mIsTornadoCatch) {
-			if (!mIsTornadoBlowAway) {
-				// 竜巻に吹き飛ばされた時のモーション
-				Enemy::DeadTornadoMove();
-			}
-			else {
-				auto parentPosition = mParentObj->mTransform->Position();
-				mParentObj->mTransform->Position(
-					parentPosition +
-					(mParentObj->mTransform->Forward() +
-						(mParentObj->mTransform->Up() * cos(mBlowAwayY)))
-					* Enemy::GetEnemyDeltaTime(60.0f));
-				if (mBlowAwayY < 3.141593f) {
-					mBlowAwayY += (3.141593f / 180.0f) * Enemy::GetEnemyDeltaTime(60.0f);
-					if (mBlowAwayY > 3.141593f) mBlowAwayY = 3.141593f;
-				}
-				// 死亡判定
-				Enemy::Dead();
-			}
-		}
-		else {
-			// 吹き飛びモーション
-			Enemy::DeadBlowAwayMove();
-		}
-	}
-	else {
-		// ノックバックモーション
-		Enemy::KnockBack();
+	// 死亡行動の状態
+	switch (mEnemyDeadState)
+	{
+	case EnemyDeadState::KnockBackDead: Enemy::KnockBack(); break;
+	case EnemyDeadState::BlowAwayDead: Enemy::DeadBlowAwayMove(); break;
+	case EnemyDeadState::TornadoDead: Enemy::DeadTornadoBlowAwayMove(); break;
 	}
 }
 
@@ -563,7 +514,6 @@ void Enemy::DeadBlowAwayMove() {
 	}
 	else {
 		// 回転しきって条件を満たしたら死亡
-		// プレイヤーの回復
 		Enemy::Dead();
 	}
 	// 上昇
@@ -622,6 +572,28 @@ void Enemy::DeadTornadoMove() {
 	}
 }
 
+// 竜巻に吹き飛ばされる時の死亡行動です
+void Enemy::DeadTornadoBlowAwayMove() {
+	if (!mIsTornadoBlowAway) {
+		// 竜巻に吹き飛ばされた時のモーション
+		Enemy::DeadTornadoMove();
+	}
+	else {
+		auto parentPosition = mParentObj->mTransform->Position();
+		mParentObj->mTransform->Position(
+			parentPosition +
+			(mParentObj->mTransform->Forward() +
+				(mParentObj->mTransform->Up() * cos(mBlowAwayY)))
+			* Enemy::GetEnemyDeltaTime(60.0f));
+		if (mBlowAwayY < 3.141593f) {
+			mBlowAwayY += (3.141593f / 180.0f) * Enemy::GetEnemyDeltaTime(60.0f);
+			if (mBlowAwayY > 3.141593f) mBlowAwayY = 3.141593f;
+		}
+		// 死亡判定
+		Enemy::Dead();
+	}
+}
+
 // プレイヤーボートの耐久力回復処理を行います
 void Enemy::PlayerHeal() {
 	// プレイヤーの捜索
@@ -639,7 +611,8 @@ void Enemy::Dead() {
 		// 回復処理
 		Enemy::PlayerHeal();
 		mIsPlayerHeal = true;
-		if(!mIsBlowAway || !mIsTornadoCatch) Enemy::EnemyPlaySound("heal");
+		if(mEnemyDeadState != EnemyDeadState::TornadoDead)
+			mEnemyManagerScript->EnemyPlaySound("heal");
 	}
 	else {
 		// 雲に当たったら消滅 または リスポーン位置まで落ちたら消滅
@@ -654,85 +627,46 @@ void Enemy::Dead() {
 
 // 敵の行動関数
 void Enemy::Move() {
+	// 索敵範囲の設定
+	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+	auto colliderScale = collider->GetScale();
+	PlayerSearchMode(colliderScale);
+	mPlayerSearchObj->mTransform->SetParent(mParentObj);
 	// 竜巻を探す
 	Enemy::SearchTornado();
-	// 死んでいなかったら各敵の行動を行う
-	if (!mIsDead) {
-		auto collider = gameObject->GetComponent<PhysXColliderComponent>();
-		auto colliderScale = collider->GetScale();
-		PlayerSearchMode(colliderScale);
-		mPlayerSearchObj->mTransform->SetParent(mParentObj);
-		// 竜巻の範囲内に入っていなかったら通常行動を行う
-		if (!mIsTornadoRange) {
-			if (mEnemyState == EnemyState::PlayerSearch) {
-				// プレイヤーを捜索する行動
-				SearchMove();
-			}
-			else {
-				if (!mIsDistanceAct) {
-					// プレイヤーを見つけたときの行動
-					if (mEnemyState == EnemyState::PlayerChase) {
-						PlayerChase();
-					}
-				}
-				else {
-					// 距離での行動
-					if (mEnemyState == EnemyState::PlayerShortDistance) {
-						ShortDistanceAttack();
-					}
-					else if (mEnemyState == EnemyState::PlayerCenterDistance) {
-						CenterDistanceAttack();
-					}
-					else if (mEnemyState == EnemyState::PlayerLongDistance) {
-						LongDistanceAttack();
-					}
-				}
-			}
-		}
-		else {
-			// 竜巻に巻き込まれたときの行動
-			Enemy::TornadoEscapeMove(mTornadoObj);
-		}
-		// リスポーンするかの判定
-		Enemy::ResPawnLine();
+	//// 竜巻の範囲内に入っていなかったら通常行動を行う
+	// スイッチを使った行動
+	switch (mEnemyState)
+	{
+	case EnemyState::TornadoEscape: Enemy::TornadoEscapeMove(mTornadoObj); break;
+	case EnemyState::PlayerSearch: PlayerSearchMove(); break;
+	case EnemyState::PlayerChase: PlayerChaseMove(); break;
+	case EnemyState::PlayerShortDistance: ShortDistanceAttack(); break;
+	case EnemyState::PlayerCenterDistance: CenterDistanceAttack(); break;
+	case EnemyState::PlayerLongDistance: LongDistanceAttack(); break;
+	case EnemyState::DeadMove: Enemy::DeadMove(); break;
 	}
-	else {
-		// 死亡行動の呼び出し
-		Enemy::DeadMove();
-	}
+	// リスポーンするかの判定
+	Enemy::ResPawnLine();
 	// ステータスのリセット
-	Enemy::ResetStatus();
+	mEnemyManagerScript->ResetStatus();
 	// スモークの呼び出し
 	Enemy::EnemyMoveSmoke();
 }
 
-// 親のステータスの初期化
-void Enemy::InitStatus() {
-	mParentObj->mTransform->Position(mInitPosition);
-	mParentObj->mTransform->Rotate(mInitRotate);
+// 敵の状態の変更を行います
+void Enemy::ChangeEnemyState(EnemyState state) {
+	mEnemyState = state;
 }
 
-// 敵のステータスのリセット
-void Enemy::ResetStatus() {
-	auto ZeroStatus = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	// ０の値に変える
-	gameObject->mTransform->Position(ZeroStatus);
-	gameObject->mTransform->Rotate(ZeroStatus);
+// 敵の死亡状態の変更を行います
+void Enemy::ChangeEnemyDeadState(EnemyDeadState state) {
+	mEnemyDeadState = state;
 }
 
 // プレイヤーの追跡を中止する距離の加算です
 void Enemy::AddPlayerChaseStopDistance(float distance) {
 	mAddPlayerChaseStopDistance = distance;
-}
-
-// サウンドを再生します
-void Enemy::EnemyPlaySound(const std::string soundName) {
-	std::string playSoundName = "Assets/Enemy/" + soundName + ".wav";
-	//// サウンドを鳴らす
-	auto sound = gameObject->GetComponent<SoundComponent>();
-	if (!sound) return;
-	sound->LoadFile(playSoundName);
-	sound->Play();
 }
 
 // 竜巻のステータスを入れます
@@ -747,15 +681,6 @@ void Enemy::SetTornadoStatus(
 	mTornadoUpPower = upPower;
 	mTornadoInterval = interval;
 	mTornadoDistance = distance;
-}
-
-// プレイヤーと指定されたオブジェの位置との距離を計算して返します
-float Enemy::GetPlayerDistance(Actor* playerObj, Actor* otherObj) {
-	auto playerPosition = playerObj->mTransform->Position();
-	auto otherPosition = otherObj->mTransform->Position();
-	// プレイヤーとの距離を計算
-	auto distance = XMVector3Length(playerPosition - otherPosition);
-	return distance.z;
 }
 
 // 子供側からアニメーションのIDを変えます

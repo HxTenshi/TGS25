@@ -52,6 +52,6 @@ void SoundBox::OnCollideExit(Actor* target){
 
 // サウンドの名前を設定します
 void SoundBox::SetSoundName(const std::string name) {
-	mName = "Assets/SceneTexture/" + name + ".wav";
+	mName = "Assets/SceneAssets/SceneSound/" + name + ".wav";
 	mIsSoundPlay = false;
 }

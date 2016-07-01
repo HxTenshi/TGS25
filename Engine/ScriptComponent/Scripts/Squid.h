@@ -13,8 +13,8 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
-	void SearchMove()override;
-	void PlayerChase()override;
+	void PlayerSearchMove()override;
+	void PlayerChaseMove()override;
 
 private:
 	//ƒƒ“ƒo•Ï”

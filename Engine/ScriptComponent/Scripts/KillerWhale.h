@@ -12,7 +12,7 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
-	void SearchMove()override;
+	void PlayerSearchMove()override;
 	void ShortDistanceAttack()override;
 	void CenterDistanceAttack()override;
 	void LongDistanceAttack()override;
