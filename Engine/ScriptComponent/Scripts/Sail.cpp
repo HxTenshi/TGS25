@@ -17,6 +17,9 @@ void Sail::Initialize(){
 	mSailRotate = 0.00f;
 	mVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	move = 0;
+	mRotate = 0;
+	isAnimation = false;
+	mBirdPos = BirdPosition::RIGHT;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -28,8 +31,14 @@ void Sail::Start(){
 //毎フレーム呼ばれます
 void Sail::Update(){
 	
-
-	SailRotate();
+	if (isAnimation)
+	{
+		SailAnimation();
+	}
+	else
+	{
+		SailRotate();
+	}
 	auto parent = gameObject->mTransform->GetParent()->mTransform->GetParent();
 	auto forward = parent->mTransform->Forward();
 	forward.y = 0;
@@ -92,9 +101,6 @@ float Sail::MovePower()
 	auto windvec = wind->GetWind();
 	windvec.y = 0;
 
-	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mSailRotate);
-	gameObject->mTransform->Quaternion(rotatey);
-
 	auto saildir = gameObject->mTransform->Left();
 
 	saildir = XMVector3Normalize(saildir);
@@ -122,9 +128,43 @@ void Sail::SailRotate()
 		mSailRotate += 0.05f;
 	}
 
+	if ((mSailRotate > 0 && mBirdPos == BirdPosition::RIGHT)
+		|| (mSailRotate < 0 && mBirdPos == BirdPosition::LEFT))
+	{
+		isAnimation = true;
+	}
+
 	mSailRotate += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).z;
 
 	mSailRotate = min(max(mSailRotate, -XM_PI / 2), XM_PI / 2);
 
 	if (Input::Down(PAD_DS4_KeyCoord::Button_CROSS)) mSailRotate = 0;
+
+	auto rotatey = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 1), mSailRotate);
+	gameObject->mTransform->Quaternion(rotatey);
+}
+
+void Sail::SailAnimation()
+{
+	if (mBirdPos == BirdPosition::LEFT)
+	{
+		mRotate += RotatePower;
+		if (abs(mRotate) >= 5)
+		{
+			mBirdPos = BirdPosition::RIGHT;
+			isAnimation = false;
+			mRotate = 0;
+		}
+	}
+	else if (mBirdPos == BirdPosition::RIGHT)
+	{
+		mRotate -= RotatePower;
+		if (abs(mRotate) >= 5)
+		{
+			mBirdPos = BirdPosition::LEFT;
+			isAnimation = false;
+			mRotate = 0;
+		}
+	}
+	gameObject->mTransform->Rotate(XMVectorSet(0, mRotate, 0, 0));
 }
