@@ -126,6 +126,11 @@ void SceneCursor::OnChangeScene() {
 	game->LoadScene(mSceneContainer[mButtonCount]);
 }
 
+// カーソルの移動制限の設定します
+void SceneCursor::SetIsCursorMove(bool isMove) {
+	mIsCursorMove = isMove;
+}
+
 // ボタンの値を取得します
 int SceneCursor::GetButtonCount() {
 	return mButtonCount;

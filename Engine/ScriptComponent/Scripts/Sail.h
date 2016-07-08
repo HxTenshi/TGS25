@@ -2,6 +2,11 @@
 #pragma once
 #include "main.h"
 
+enum BirdPosition
+{
+	LEFT,
+	RIGHT
+};
 
 class Sail :public IDllScriptComponent{
 public:
@@ -24,8 +29,15 @@ private:
 	XMVECTOR mWindvec;
 	SERIALIZE
 	float Speed;
+	float mRotate;
+	BirdPosition mBirdPos;
+	bool isAnimation;
+
+	SERIALIZE
+	float RotatePower;
 
 private:
 	void SailRotate();
+	void SailAnimation();
 
 };

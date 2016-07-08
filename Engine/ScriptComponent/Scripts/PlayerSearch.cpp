@@ -10,6 +10,7 @@ void PlayerSearch::Initialize(){
 	mPlayerDistance = 0.0f;
 	mIsPlayerHit = false;
 	mIsWallHit = false;
+	mIsLost = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -35,6 +36,7 @@ void PlayerSearch::Update(){
 			/*game->Debug()->Log("敵の索敵範囲外距離:" + std::to_string(mChaseStopDistance));
 			game->Debug()->Log("プレイヤーとの距離:" + std::to_string(mPlayerDistance));*/
 			mIsPlayerHit = false;
+			mIsLost = true;
 		}
 	}
 }
@@ -71,6 +73,7 @@ void PlayerSearch::OnCollideBegin(Actor* target){
 	if (target->Name() == "Board") {
 		PlayerDistance(target);
 		mIsPlayerHit = true;
+		mIsLost = false;
 	}
 }
 
@@ -99,6 +102,7 @@ void PlayerSearch::OnCollideEnter(Actor* target){
 
 	if (target->Name() == "Board") {
 		mIsPlayerHit = true;
+		mIsLost = false;
 	}
 }
 
@@ -128,8 +132,14 @@ void PlayerSearch::PlayerDistance(Actor* playerObj) {
 		parentPosition.z - ((mSizeZ / mScalarZ) / 2.0f * cosf(parentRotate.y)),
 		0.0f);
 	// プレイヤーと親の頭部の距離の計算
-	auto targetRange = XMVector3Length(playerObj->mTransform->Position() - parentHeadPoint);
+	auto targetRange = XMVector3Length(
+		playerObj->mTransform->Position() - parentHeadPoint);
 	mPlayerDistance = targetRange.z;
+}
+
+// 外部でIsLostの変更を行います
+void PlayerSearch::SetIsLost(bool isLost) {
+	mIsLost = isLost;
 }
 
 // プレイヤーと索敵範囲の始点との距離を返します
@@ -141,6 +151,12 @@ float PlayerSearch::GetPlayerDistance() {
 bool PlayerSearch::IsPlayerSearch() {
 	return mIsPlayerHit;
 }
+
+// 追跡中にプレイヤーを見失ったかを返します
+bool PlayerSearch::IsLost() {
+	return mIsLost;
+}
+
 // プレイヤーを追跡中止する距離に加算します
 void PlayerSearch::AddChaseStopDistance(float distance) {
 	mChaseStopDistance += distance;

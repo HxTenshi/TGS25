@@ -82,7 +82,8 @@ void FlyingFish::OnCollideBegin(Actor* target){
 	Enemy::OnCollideBegin(target);
 	if (target->Name() == "Floor") {
 		// 接触した床の位置を入れる
-		mFloorPosition = target->mTransform->Position().y + 0.9f;
+		//mFloorPosition = target->mTransform->Position().y + 0.9f;
+		mFloorPosition = mParentObj->mTransform->Position().y ;
 		// 床に接触したらtrue
 		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mFloorPosition) {
 			mIsInitSet = true;
@@ -161,14 +162,17 @@ void FlyingFish::JampMove() {
 	if (mJampRestTime <= 0) {
 		//mUpCosine += 3.141593f / mInitUpCount;
 		mUpCosine += (3.141593f / mInitUpCount) * Enemy::GetEnemyDeltaTime(60.0f);
+		if (mUpCosine > 3.141593f) mUpCosine = 3.141593f;
 		if (mUpCount > 0) {
 			// 上げる処理
 			// コサインによるジャンプ
-			mJampVelocity = (mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f);
+			//mJampVelocity = (mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f);
+			auto velocityY = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+			mJampVelocity = (velocityY * mUpPowar * cosf(mUpCosine) * 0.01f);
 			mIsJamp = true;
 		}
 		else {
-			if (parentPosition.y > mFloorPosition) {
+			//if (parentPosition.y > mFloorPosition) {
 				// 落ちる処理
 				auto downVelocity = XMVectorSet(0.0f, 0.1f, 0.0f, 0.0f);
 				mJampVelocity = (mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f);
@@ -184,10 +188,12 @@ void FlyingFish::JampMove() {
 						mJampVelocity = revasionVelocity;
 					}
 					else {
-						mJampVelocity = (-mParentObj->mTransform->Up() * mUpPowar * 0.01f);
+						//mJampVelocity = (-mParentObj->mTransform->Up() * mUpPowar * 0.01f);
+						auto velocityY = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+						mJampVelocity = (velocityY * mUpPowar  * cosf(mUpCosine) * 0.01f);
 					}
 				}
-			}
+			//}
 		}
 	}
 	// 初期段階で床と接触していなかったら

@@ -20,6 +20,8 @@ public:
 	void AddSceneContainer(const std::string sceneName);
 	// 押されたボタンによってシーンを移動します
 	void OnChangeScene();
+	// カーソルの移動制限の設定します
+	void SetIsCursorMove(bool isMove);
 	// ボタンの値を取得します
 	int GetButtonCount();
 	// カーソルが動いているかを返します

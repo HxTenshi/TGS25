@@ -10,11 +10,11 @@
 // カーソルとフェード追加
 #include "SceneCursor.h"
 #include "Fade.h"
+#include "HowToManager.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void TitleMnager::Initialize(){
 	mSceneChangeTimer = 0.0f;
-	mIsPVSceneChange = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -46,26 +46,14 @@ void TitleMnager::Update()
 	// デルタタイムの取得
 	auto deltaTime = game->DeltaTime()->GetDeltaTime();
 	// 何も入力がなければタイム加算
-	if (!mCursorScript->IsChangeScene()) {
+	// タイムが一定以上になったらフェイドアウトしてPVシーンに移行
+	if (mChangeTime > mSceneChangeTimer) {
 		if (mCursorScript->IsCursorMove()) mSceneChangeTimer = 0.0f;
-		else mSceneChangeTimer += deltaTime;
-		// タイムが一定以上になったらフェイドアウトしてPVシーンに移行
-		if (mChangeTime <= mSceneChangeTimer) {
-			mIsPVSceneChange = true;
-			if (mFadeOutObj == nullptr) {
-				mFadeOutObj = game->CreateActor("Assets/Fade");
-				game->AddObject(mFadeOutObj);
-			}
-			mFadeOutScript = mFadeOutObj->GetScript<Fade>();
-			mFadeOutScript->FadeOut(mFadeOutSecond);
-			// フェードアウト後シーン移動
-			if (mFadeOutScript->IsFadeOut()) 
-				game->LoadScene("./Assets/Scenes/How_To.scene");
-		}
+		if (!mCursorScript->IsChangeScene())mSceneChangeTimer += deltaTime;
 	}
-
 	// フェードアウトしてシーン移動
-	if (mCursorScript->IsChangeScene() && mIsPVSceneChange) {
+	if (mCursorScript->IsChangeScene() || mChangeTime <= mSceneChangeTimer) {
+		mCursorScript->SetIsCursorMove(true);
 		// 一度だけ生成
 		if (mFadeOutObj == nullptr) {
 			mFadeOutObj = game->CreateActor("Assets/Fade");
@@ -74,7 +62,10 @@ void TitleMnager::Update()
 		mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 		mFadeOutScript->FadeOut(mFadeOutSecond);
 		// フェードアウト後シーン移動
-		if (mFadeOutScript->IsFadeOut()) mCursorScript->OnChangeScene();
+		if (mFadeOutScript->IsFadeOut()) {
+			if (mChangeTime <= mSceneChangeTimer) game->LoadScene("./Assets/Scenes/How_To.scene");
+			else  mCursorScript->OnChangeScene();
+		}
 	}
 	// カメラの親の移動
 	camera->mTransform->Position(

@@ -23,7 +23,6 @@ private:
 	SERIALIZE
 	float mFadeOutSecond;
 	float mSceneChangeTimer;
-	bool mIsPVSceneChange;
 	Actor* mCursorObj;
 	Actor* mFadeOutObj;
 	SceneCursor* mCursorScript;

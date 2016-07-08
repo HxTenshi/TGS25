@@ -15,7 +15,8 @@ enum class EnemyState {
 	PlayerCenterDistance,
 	PlayerLongDistance,
 	TornadoEscape,
-	DeadMove
+	DeadMove,
+	ReturnMove
 };
 
 enum class EnemyDeadState {
@@ -72,6 +73,8 @@ public:
 	void DeadTornadoMove();
 	// 竜巻に吹き飛ばされる時の死亡行動です
 	void DeadTornadoBlowAwayMove();
+	// 敵が生成オブジェクトに戻る行動です
+	void ReturnMove();
 	// プレイヤーボートの耐久力回復処理を行います
 	void PlayerHeal();
 	// 死亡処理を行います
@@ -111,7 +114,8 @@ protected:
 	Actor* mBlowAwayTornadoObj;				// 吹き飛び死亡時の竜巻のオブジェクト
 	Actor* mRightSmokeObj;					// 右のスモックオブジェクト
 	Actor* mLeftSmokeObj;					// 左のスモックオブジェクト
-	Actor* mEnemyManagerObj;
+	Actor* mEnemyManagerObj;				// エネミーマネージャーオブジェクト
+	Actor* mCreateEnemyObj;
 	PlayerSearch* mSearchScript;			// 索敵範囲オブジェクトのスクリプト
 	EnemyCG* mEnemyCGScript;				// 敵のCGオブジェクトのスクリプト
 	MoveSmoke* mRightSmokeScript;			// 右のスモックオブジェクトのスクリプト
@@ -164,5 +168,5 @@ protected:
 	DistanceVector mDistanceVector;
 
 private:
-	const float mResPawnHeigth = -10.0f;	// リスポーンする高さ
+	const float mResPawnHeigth = -100.0f;	// リスポーンする高さ
 };

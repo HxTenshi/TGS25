@@ -8,7 +8,10 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void ParentObj::Initialize(){
-	//mCreateCount = 0;
+}
+
+//initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
+void ParentObj::Start(){
 	// 子の生成 自分の名前から子を選択し生成します
 	std::string baseName = "Assets/Enemy/EnemyObj/" + gameObject->Name();
 	baseName.erase(baseName.end() - 9, baseName.end());
@@ -19,18 +22,8 @@ void ParentObj::Initialize(){
 	enemyObj->mTransform->SetParent(gameObject);
 }
 
-//initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
-void ParentObj::Start(){
-}
-
 //毎フレーム呼ばれます
 void ParentObj::Update(){
-	/*if (mCreateCount == 0) {
-		
-
-		mCreateCount = 1;
-	}*/
-
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
