@@ -288,7 +288,7 @@ bool SailBoard::IsUnrivaled()
 
 void SailBoard::Damage(int damage)
 {
-	if(damage < 0) AnimationChange(2, false, 0);
+	if(damage > 0) AnimationChange(2, false, 0);
 	mPlyerHP -= damage;
 	mPlyerHP = min(max(mPlyerHP, -100), 100);
 }
