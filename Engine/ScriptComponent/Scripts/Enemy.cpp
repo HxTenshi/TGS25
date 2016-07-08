@@ -4,6 +4,7 @@
 #include "SailBoard.h"
 #include "ParentObj.h"
 #include "EnemyCG.h"
+#include "CreateEnemyObj.h"
 #include "MoveSmoke.h"
 //アクターなど基本のインクルード
 #include "h_standard.h"
@@ -69,11 +70,12 @@ void Enemy::Start(){
 	game->AddObject(mEnemyManagerObj);
 	mEnemyManagerObj->mTransform->SetParent(gameObject);
 	mEnemyManagerScript = mEnemyManagerObj->GetScript<EnemyManager>();
+	// 親である生成オブジェクトの捜索
+	mCreateEnemyObj = game->FindActor("CreateEnemyObj");
 }
 
 //毎フレーム呼ばれます
 void Enemy::Update(){
-	
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -133,7 +135,33 @@ void Enemy::OnCollideBegin(Actor* target){
 
 //コライダーとのヒット中に呼ばれます
 void Enemy::OnCollideEnter(Actor* target){
-	if (target->Name() == "Floor") mIsFloorHit = true;
+	if (target->Name() == "Floor") {
+	
+		// 床の角度と同じにする
+		auto targetPosition = target->mTransform->Position();
+		auto floorRotate = target->mTransform->Rotate();
+		auto parentPosition = mParentObj->mTransform->Position();
+		auto parentRotate = mParentObj->mTransform->Rotate();
+		// 角度が０なら代入する
+		if (abs(floorRotate.x) > abs(floorRotate.z)) {
+			if (floorRotate.z == 0) floorRotate.z = floorRotate.x;
+			// 角度の変更
+			auto enemyRotate = XMVectorSet(
+				floorRotate.x * cosf(parentRotate.y), parentRotate.y,
+				floorRotate.z * -sinf(parentRotate.y), 0.0f);
+			mParentObj->mTransform->Rotate(enemyRotate);
+		}
+		else if (abs(floorRotate.x) < abs(floorRotate.z)) {
+			if (floorRotate.x == 0) floorRotate.x = floorRotate.z;
+			// 角度の変更
+			auto enemyRotate = XMVectorSet(
+				floorRotate.x * -sinf(parentRotate.y), parentRotate.y,
+				floorRotate.z * cosf(parentRotate.y), 0.0f);
+			mParentObj->mTransform->Rotate(enemyRotate);
+		}
+
+		mIsFloorHit = true;
+	}
 
 	// 竜巻に当たったら死亡する
 	if (target->Name() == "Tornado" && mEnemyState != EnemyState::DeadMove) {
@@ -207,6 +235,7 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 	if (mSearchScript->IsPlayerSearch()){
 		if (!mIsDistanceAct) {
 			mEnemyState = EnemyState::PlayerChase;
+			return;
 		}
 		else {
 			if (!mIsAttckMode) {
@@ -218,12 +247,22 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 				}
 				// 敵の追跡行動の決定
 				mEnemyState = mDistanceVector[playerDistanceNumber];
+				return;
 			}
 		}
 	}
 	else {
 		if (!mIsAttckMode) {
-			mEnemyState = EnemyState::PlayerSearch;
+			if (mSearchScript->IsLost()) {
+				// 戻る行動
+				mEnemyState = EnemyState::ReturnMove;
+				return;
+			}
+			else {
+				// 通常行動
+				mEnemyState = EnemyState::PlayerSearch;
+				return;
+			}
 		}
 	}
 }
@@ -594,6 +633,39 @@ void Enemy::DeadTornadoBlowAwayMove() {
 	}
 }
 
+// 敵が生成オブジェクトに戻る行動です
+void Enemy::ReturnMove() {
+	// 生成オブジェクトがなかったらすぐに通常行動に戻す
+	if (mCreateEnemyObj == nullptr) {
+		mEnemyState = EnemyState::PlayerSearch;
+		return;
+	}
+	mIsMove = true;
+
+	auto createEnemyPosition = mCreateEnemyObj->mTransform->Position();
+	// 親のステータスの取得
+	auto parentPosition = mParentObj->mTransform->Position();
+	// 生成オブジェクトとの距離の計算
+	auto distance = XMVector3Length(parentPosition - createEnemyPosition);
+	auto createEnemyScript = mCreateEnemyObj->GetScript<CreateEnemyObj>();
+	// 一定距離まで近づいたら通常行動に戻す
+	if (createEnemyScript->GetReturnDistance() <= distance.x) {
+		// 生成オブジェクトとのベクトルの向きを計算
+		auto v = parentPosition - createEnemyPosition;
+		auto angle = atan2(v.x, v.z);
+		auto quaternion = XMQuaternionRotationAxis(
+			mParentObj->mTransform->Up(), angle);
+		// 生成オブジェクトの方向を向く
+		mParentObj->mTransform->Quaternion(quaternion);
+		// 前方に移動
+		auto forward = mParentObj->mTransform->Forward() * mSpeed;
+		mParentObj->mTransform->Position(parentPosition + forward);
+	}
+	else {
+		mEnemyState = EnemyState::PlayerSearch;
+	}
+}
+
 // プレイヤーボートの耐久力回復処理を行います
 void Enemy::PlayerHeal() {
 	// プレイヤーの捜索
@@ -627,6 +699,12 @@ void Enemy::Dead() {
 
 // 敵の行動関数
 void Enemy::Move() {
+	/*auto collider2 = gameObject->GetComponent<PhysXColliderComponent>();
+	auto collider2Scale = collider2->GetScale();
+	auto rayHitObj = game->PhysX()->Raycast(
+		gameObject->mTransform->Up() * collider2Scale.y / 1.5f,
+		gameObject->mTransform->Up() * -10.0f, 10.0f);
+	if (rayHitObj) game->Debug()->Log(std::to_string(rayHitObj->mTransform->Position().y));*/
 	// 索敵範囲の設定
 	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 	auto colliderScale = collider->GetScale();
@@ -645,6 +723,7 @@ void Enemy::Move() {
 	case EnemyState::PlayerCenterDistance: CenterDistanceAttack(); break;
 	case EnemyState::PlayerLongDistance: LongDistanceAttack(); break;
 	case EnemyState::DeadMove: Enemy::DeadMove(); break;
+	case EnemyState::ReturnMove: Enemy::ReturnMove(); break;
 	}
 	// リスポーンするかの判定
 	Enemy::ResPawnLine();

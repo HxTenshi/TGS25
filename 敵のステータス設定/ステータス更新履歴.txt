@@ -25,3 +25,9 @@
 
 2016/06/17
 水鉄砲の弾の消去タイム mDestroyTime を整数から小数に変更しました。
+
+2016/07/05
+敵生成オブジェクトの変更を行いました
+敵生成オブジェクトに mOnceCreateCount を追加しました
+mOnceCreateCount 一回に生成する敵の数
+mCreateCount 敵を生成する回数
