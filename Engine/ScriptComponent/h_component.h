@@ -18,3 +18,5 @@
 //#include "Game/Component/PostEffectComponent.h"
 #include "Game/Component/ParticleComponent.h"
 #include "Game/Component/SoundComponent.h"
+//#include "Game/Component/navi.h"
+#include "Game/Component/CharacterControllerComponent.h"

@@ -167,6 +167,7 @@
     <ClCompile Include="Scripts\Enemy.cpp" />
     <ClCompile Include="Scripts\EnemyCG.cpp" />
     <ClCompile Include="Scripts\EnemyManager.cpp" />
+    <ClCompile Include="Scripts\ExPlayer.cpp" />
     <ClCompile Include="Scripts\Fade.cpp" />
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\GameEnd.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="Scripts\Enemy.h" />
     <ClInclude Include="Scripts\EnemyCG.h" />
     <ClInclude Include="Scripts\EnemyManager.h" />
+    <ClInclude Include="Scripts\ExPlayer.h" />
     <ClInclude Include="Scripts\Fade.h" />
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\GameEnd.h" />
