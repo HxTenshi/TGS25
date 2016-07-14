@@ -112,25 +112,7 @@ void CharacterControllerComponent::Update(){
 	//PxControllerCollisionFlags collisionFlags =
 	//	mController->move(disp, minDist, elapsedTime, filters, NULL);
 	//
-	////{
-	////	PxScene* scene = mController->getScene();
-	////	PxSceneReadLock scopedLock(*scene);
-	////
-	////	PxCapsuleController* capsuleCtrl = static_cast<PxCapsuleController*>(mController);
-	////
-	////	PxReal r = capsuleCtrl->getRadius();
-	////	PxReal dh = 1.0f;
-	////	PxCapsuleGeometry geom(r, dh*.5f);
-	////
-	////	PxExtendedVec3 position = mController->getPosition();
-	////	PxVec3 pos((float)position.x, (float)position.y + 1.0f*.5f + r, (float)position.z);
-	////	PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
-	////
-	////	PxOverlapBuffer hit;
-	////	if (scene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC))){
-	////
-	////	}
-	////}
+
 	//
 	//auto pos = mController->getFootPosition();
 	//auto p = XMVectorSet(pos.x, pos.y, pos.z,1.0f);
@@ -183,6 +165,26 @@ void CharacterControllerComponent::Move(const XMVECTOR& velocity){
 
 	PxControllerCollisionFlags collisionFlags =
 		mController->move(v, minDist, elapsedTime, filters, NULL);
+
+	//{
+	//	PxScene* scene = mController->getScene();
+	//	PxSceneReadLock scopedLock(*scene);
+	//
+	//	PxCapsuleController* capsuleCtrl = static_cast<PxCapsuleController*>(mController);
+	//
+	//	PxReal r = capsuleCtrl->getRadius();
+	//	PxReal dh = 1.0f;
+	//	PxCapsuleGeometry geom(r, dh*.5f);
+	//
+	//	PxExtendedVec3 position = mController->getPosition();
+	//	PxVec3 pos((float)position.x, (float)position.y + 1.0f*.5f + r, (float)position.z);
+	//	PxQuat orientation(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
+	//
+	//	PxOverlapBuffer hit;
+	//	if (scene->overlap(geom, PxTransform(pos, orientation), hit, PxQueryFilterData(PxQueryFlag::eANY_HIT | PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC))){
+	//	}
+	//}
+
 
 
 	auto pos = mController->getFootPosition();
