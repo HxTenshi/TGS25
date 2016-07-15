@@ -9,16 +9,19 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void HowToManager::Initialize(){
-	mMovieTimer = 0.0f;
-	mMovieEndTime = 0.0f;
-	mMovieEndTime = 47.5f * 29.0f;
+	//mMovieTimer = 0.0f;
+	//mMovieEndTime = 0.0f;
+	//mMovieEndTime = 47.5f * 29.0f;
 	mIsChangeScene = false;
 	mIsFadeIn = false;
+	mIsPlay = false;
 	mName = "";
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void HowToManager::Start(){
+
+
 }
 
 //毎フレーム呼ばれます
@@ -37,15 +40,15 @@ void HowToManager::Update(){
 	else {
 		// ムービー再生
 		auto movie = gameObject->GetComponent<MovieComponent>();
-		if (mMovieTimer >= mMovieEndTime) {
+		if (!mIsPlay){
+			movie->LoadFile(mName);
+			movie->SetLoop(false);
+			movie->Play();
+			mIsPlay = true;
+		}
+		else if (!movie->IsPlay()) {
 			movie->Stop();
 			mIsChangeScene = true;
-		}
-		else {
-			movie->LoadFile(mName);
-			movie->Play();
-			movie->SetLoop(false);
-			mMovieTimer += game->DeltaTime()->GetDeltaTime() * 29.0f;
 		}
 		//if (!movie->IsPlay()) mIsChangeScene = true;
 		// 再生完了がしたらタイトルシーンに遷移
@@ -99,6 +102,6 @@ void HowToManager::OnCollideExit(Actor* target){
 // 再生するムービーを変更します
 void HowToManager::SetMovie(std::string name, float time) {
 	mName = "Assets/SceneAssets/SceneMovie/" + name + ".wmv";
-	mMovieEndTime = time;
+	//mMovieEndTime = time;
 	// mMovieEndTime = 47.5f * 29.0f;
 }

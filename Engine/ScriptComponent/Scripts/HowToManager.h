@@ -20,8 +20,9 @@ private:
 	//ƒƒ“ƒo•Ï”
 	SERIALIZE
 	float mFadeOutSecond;
-	float mMovieTimer;
-	float mMovieEndTime;
+	//float mMovieTimer;
+	//float mMovieEndTime;
+	bool mIsPlay;
 	bool mIsChangeScene;
 	bool mIsFadeIn;
 	std::string mName;

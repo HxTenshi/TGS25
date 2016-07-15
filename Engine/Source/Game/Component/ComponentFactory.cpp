@@ -2,6 +2,7 @@
 #include "ComponentFactory.h"
 
 #include "TransformComponent.h"
+#include "CharacterControllerComponent.h"
 #include "PhysXComponent.h"
 #include "PhysXColliderComponent.h"
 #include "TextComponent.h"
@@ -19,6 +20,7 @@
 #include "SoundComponent.h"
 #include "MovieComponent.h"
 #include "Component.h"
+#include "DebugEngineScriptComponent.h"
 
 
 
@@ -41,11 +43,13 @@ ComponentFactory::ComponentFactory(){
 	_NewFunc<PointLightComponent>();
 	_NewFunc<ParticleComponent>();
 	_NewFunc<ScriptComponent>();
+	_NewFunc<CharacterControllerComponent>();
 	_NewFunc<PhysXComponent>();
 	_NewFunc<PhysXColliderComponent>();
 	_NewFunc<SoundComponent>();
 	_NewFunc<MovieComponent>();
 	_NewFunc<PostEffectComponent>();
+	_NewFunc<DebugEngineScriptComponent>();
 }
 
 shared_ptr<Component> ComponentFactory::Create(const std::string& ClassName){

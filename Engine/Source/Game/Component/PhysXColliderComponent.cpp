@@ -65,8 +65,6 @@ void PhysXColliderComponent::Update(){
 
 	UpdatePose();
 
-
-
 	//Game::AddDrawList(DrawStage::Engine, std::function<void()>([&](){
 	//	
 	//	auto mModel = gameObject->GetComponent<ModelComponent>();
@@ -118,7 +116,9 @@ void PhysXColliderComponent::ShapeAttach(PxShape* shape){
 	}
 	//アタッチしていれば
 	if (mIsShapeAttach){
-		mAttachPhysXComponent->RemoveShape(*mShape);
+		if (mAttachPhysXComponent){
+			mAttachPhysXComponent->RemoveShape(*mShape);
+		}
 		mShape->release();
 	}
 	else{
@@ -129,7 +129,9 @@ void PhysXColliderComponent::ShapeAttach(PxShape* shape){
 
 	mShape = shape;
 	if (mShape){
-		mAttachPhysXComponent->AddShape(*mShape);
+		if (mAttachPhysXComponent){
+			mAttachPhysXComponent->AddShape(*mShape);
+		}
 		mIsShapeAttach = true;
 	}
 	else{
@@ -378,14 +380,34 @@ void PhysXColliderComponent::DrawMesh(ID3D11DeviceContext* context, const Materi
 
 	auto transform = mShape->getLocalPose();
 	
+	Actor* par = gameObject;
+	if (mAttachPhysXComponent){
+		par = mAttachPhysXComponent->gameObject;
+	}
+
+	auto rot = par->mTransform->GetMatrix();
+	rot.r[0] = XMVector3Normalize(rot.r[0]);
+	rot.r[1] = XMVector3Normalize(rot.r[1]);
+	rot.r[2] = XMVector3Normalize(rot.r[2]);
+	auto quat = XMQuaternionRotationMatrix(rot);
+
+	
+	auto shmat = XMMatrixMultiply(
+		XMMatrixRotationQuaternion(XMVectorSet(transform.q.x, transform.q.y, transform.q.z, transform.q.w)),
+		XMMatrixTranslationFromVector(XMVectorSet(transform.p.x, transform.p.y, transform.p.z, 1.0f)));
+
+	auto wpos = par->mTransform->WorldPosition();
+
 	auto Matrix = XMMatrixMultiply(
 		XMMatrixMultiply(
+		XMMatrixMultiply(
 		XMMatrixScalingFromVector(mScale),
-		XMMatrixRotationQuaternion(XMVectorSet(transform.q.x, transform.q.y, transform.q.z, transform.q.w))),
-		XMMatrixTranslationFromVector(XMVectorSet(transform.p.x, transform.p.y, transform.p.z, 1)));
+		shmat),
+		XMMatrixRotationQuaternion(quat)),
+		XMMatrixTranslationFromVector(wpos));
 
 	//auto p = gameObject->mTransform->GetMatrix().r[3];
-	mDebugDraw.mWorld = XMMatrixMultiply(Matrix, XMMatrixMultiply(XMMatrixScalingFromVector(gameObject->mTransform->LossyScale()), gameObject->mTransform->GetMatrix()));
+	mDebugDraw.mWorld = Matrix;
 	mDebugDraw.Update();
 	mDebugDraw.Draw(context, material);
 }
@@ -405,7 +427,15 @@ void PhysXColliderComponent::SetTransform(const XMVECTOR& pos){
 		transform.p = PxVec3(mPosition.x, mPosition.y, mPosition.z);
 	}
 	else{
+		scale = gameObject->mTransform->GetParent()->mTransform->LossyScale();
 		transform.p = PxVec3(pos_.x*scale.x, pos_.y*scale.y, pos_.z*scale.z) + PxVec3(mPosition.x, mPosition.y, mPosition.z);
+	}
+
+
+	if (mIsParentPhysX){
+
+		auto quat = gameObject->mTransform->Quaternion();
+		transform.q = PxQuat(quat.x, quat.y, quat.z, quat.w);
 	}
 	mShape->setLocalPose(transform);
 

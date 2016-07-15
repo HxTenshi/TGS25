@@ -1,137 +1,200 @@
-
 /*
-	! @file movietex.h
-	! @bref	ムービーテクスチャクラス
-	! @author	Masafumi TAKAHASHI
+! @file movietex.h
+! @bref	ムービーテクスチャクラス
+! @author	Masafumi TAKAHASHI
 */
 
 #ifndef MOVIETEX_H
 #define MOVIETEX_H
 
-#include <tchar.h>
-typedef TCHAR* PTCHAR;
+#include <d3d11.h>
 
-// DirectX
-#include <d3d9.h>
-#include <d3dx9.h>
-
-// DirectShow
+#pragma push_macro("new")
+#undef new
+#include <atlbase.h>
 #include <stdio.h>
-#include "DirectShow/baseclasses/streams.h"
-#include "DirectShow/common/smartptr.h"
-#include <d3d9types.h>
+#include <Streams.h>
 #include <dshow.h>
+#pragma pop_macro("new")
+#include <vector>
 
-// DirectShow Library
-#ifdef _DEBUG
-#pragma comment( lib, "DirectShow/strmbasd.lib" )
-#else
-#pragma comment( lib, "DirectShow/strmbase.lib" )
-#endif
 
+class Texture;
+
+//-----------------------------------------------------------------------------
 // Define GUID for Texture Renderer
+// {71771540-2017-11cf-AE26-0020AFD79767}
+//-----------------------------------------------------------------------------
 struct __declspec(uuid("{71771540-2017-11cf-ae26-0020afd79767}")) CLSID_TextureRenderer;
 
-
-//-----------------------------------------------------------------------------
-// テクスチャに動画を書き込む作業を実際に行うためのクラス
-// 内部処理に利用するもの
-//-----------------------------------------------------------------------------
-class TextureRenderer : public CBaseVideoRenderer
+//! @class CMovieTexture 
+//! @brief ビデオをID3D11Texture2Dに書き込む処理を行うクラス
+class CMovieTexture : public CBaseVideoRenderer
 {
-	SmartPtr<IDirect3DDevice9>	m_pd3dDevice;
-	SmartPtr<IDirect3DTexture9>	m_pTexture;
+	CComPtr<ID3D11Device>	m_pd3dDevice;
+	CComPtr<ID3D11Texture2D>	m_pTexture;
 
-	D3DFORMAT		m_TextureFormat;
- 
-	BOOL	m_bUseDynamicTextures;	//! @param ダイナミックテクスチャを使うかどうかどうかのフラグ
+	typedef std::vector<BYTE> RenderBuffer;
+	RenderBuffer mRenderBuffer[2];
+	int mLockBuffer;
+	int mFrontBuffer;
+	int mBackBuffer;
 
-    LONG	m_lVidWidth;	//! @param ビデオの幅
-    LONG	m_lVidHeight;	//! @param ビデオの高さ
-    LONG	m_lVidPitch;	//! @param ビデオのピッチ
-
-
+	//D3DFORMAT		m_TextureFormat;
 
 public:
-    TextureRenderer(LPUNKNOWN pUnk,HRESULT *phr);
-    ~TextureRenderer();
- 
-	void SetDevice(IDirect3DDevice9 * pd3dDevice){ m_pd3dDevice = pd3dDevice; };
+	CMovieTexture(LPUNKNOWN pUnk, HRESULT *phr);
+	~CMovieTexture();
 
-	HRESULT CheckMediaType(const CMediaType *pmt );     // Format acceptable?
-    HRESULT SetMediaType(const CMediaType *pmt );       // Video format notification
-    HRESULT DoRenderSample(IMediaSample *pMediaSample); // New video sample
+	VOID SetDevice(ID3D11Device * pd3dDevice){ m_pd3dDevice = pd3dDevice; };
 
-	IDirect3DTexture9 * GetTexture(){ return m_pTexture; };
+	HRESULT CheckMediaType(const CMediaType *pmt);     // Format acceptable?
+	HRESULT SetMediaType(const CMediaType *pmt);       // Video format notification
+	HRESULT DoRenderSample(IMediaSample *pMediaSample); // New video sample
 
-	void GetVideoDesc(LONG* plVidWidth, LONG* plVidHeight, LONG* plVidPitch)
+	//! @fn ID3D11Resource * GetTexture()
+	//! @brief ムービーテクスチャの取得
+	//! @return ムービーがレンダリングされたテクスチャ
+	ID3D11Texture2D * GetTexture(){ return m_pTexture; };
+
+	void TextureRendering();
+
+	//! @fn VOID GetVideoDesc(LONG* plVidWidth, LONG* plVidHeight, LONG* plVidPitch)
+	//! @brief ビデオの幅、高さ、ピッチの取得
+	//! @param *plVidWidth (out) ビデオの幅
+	//! @param *plVidHeigh (out) ビデオの高
+	//! @param *plVidPitch (out) ビデオのピッチ
+	VOID GetVideoDesc(LONG* plVidWidth, LONG* plVidHeight, LONG* plVidPitch)
 	{
-		*plVidWidth		= m_lVidWidth;
-		*plVidHeight	= m_lVidHeight;
-		*plVidPitch		= m_lVidPitch;
+		*plVidWidth = m_lVidWidth;
+		*plVidHeight = m_lVidHeight;
+		*plVidPitch = m_lVidPitch;
 	};
+
+	//! @param ダイナミックテクスチャを使うかどうかどうかのフラグ
+	BOOL m_bUseDynamicTextures;
+	//! @param ビデオの幅
+	LONG m_lVidWidth;
+	//! @param ビデオの高さ
+	LONG m_lVidHeight;
+	//! @param ビデオのピッチ
+	LONG m_lVidPitch;
 };
 
-
-
-//-----------------------------------------------------------------------------
-// 動画テクスチャを取りだす制御を行うクラス
-// プログラマは、このクラスを使う
-//-----------------------------------------------------------------------------
-class MovieTexture
+//! @class CMovieToTexture
+//! @brief ムービーテクスチャクラス
+class CMovieToTexture
 {
-private:
-	SmartPtr<IDirect3DDevice9>	m_pd3dDevice;   // Our rendering device
-	SmartPtr<IDirect3DTexture9>	m_pTexture;     // Our texture
+	CComPtr<ID3D11Device>       m_pd3dDevice;   // Our rendering device
+	CComPtr<ID3D11Texture2D>      m_pTexture;     // Our texture
 
-	SmartPtr<IGraphBuilder>		m_pGB;          // GraphBuilder
-	SmartPtr<IMediaControl>		m_pMC;          // Media Control
-	SmartPtr<IMediaPosition>	m_pMP;          // Media Position
-	SmartPtr<IMediaEvent>		m_pME;          // Media Event
+	CComPtr<IGraphBuilder>  m_pGB;          // GraphBuilder
+	CComPtr<IMediaControl>  m_pMC;          // Media Control
+	CComPtr<IMediaPosition> m_pMP;          // Media Position
+	CComPtr<IMediaEvent>    m_pME;          // Media Event
+	CComPtr<IBaseFilter>    m_pRenderer;    // our custom renderer
+	CMovieTexture* mCMovieTexture;
+	Texture *m_Texture;
 
-	SmartPtr<IBaseFilter>		m_pRenderer;    // our custom renderer
-	
-	LONG	m_lWidth;			//! @param 幅  
-	LONG	m_lHeight;			//! @param 高さ
-	LONG	m_lPitch;			//! @param ピッチ
+	//! @param 幅  
+	LONG m_lWidth;
+	//! @param 高さ
+	LONG m_lHeight;
+	//! @param ピッチ
+	LONG m_lPitch;
 
-	FLOAT	m_fu, m_fv;			//! @param 元のムービーのサイズ(幅、高さ) / テクスチャのサイズ(幅、高さ)で算出するUV値
+	//! @param 元のムービーのサイズ(幅、高さ) / テクスチャのサイズ(幅、高さ)で算出するUV値
+	FLOAT m_fu, m_fv;
 
-	bool	m_loop;
-
-
-
-public:
-	MovieTexture();			// コンストラクタ
-	MovieTexture( IDirect3DDevice9 * pd3dDevice, WCHAR* wFileName, BOOL en_sound=TRUE, BOOL begin_play=TRUE );		// コンストラクタ
-	~MovieTexture();		// デストラクタ
-
-private:
-	void	CheckMovieStatus( void );			// （内部関数）動画の状態を調べる
-	void	CleanupDShow( void );				// （内部関数）破棄処理
+	void CheckMovieStatus(void);
+	void CleanupDShow(void);
 
 public:
-	HRESULT	Create( IDirect3DDevice9 * pd3dDevice, WCHAR* wFileName, bool en_sound=true, bool loop=true, bool begin_play=true );	// 初期化関数
-	HRESULT	Init( IDirect3DDevice9 * pd3dDevice, WCHAR* wFileName, const BOOL bSound );	// 初期化関数
+	CMovieToTexture();	//コンストラクタ
+	~CMovieToTexture();	//デストラクタ
 
-	IDirect3DTexture9*	GetTexture();			// ムービーテクスチャの取得
+	//! @fn HRESULT InitDShowTextureRenderer(WCHAR* wFileName, const BOOL bSound)
+	//! @brief DirectShowからテクスチャへのレンダリングへの初期化
+	//! @param *pd3dDevice (in) Direct3Dデバイス
+	//! @param *wFileName (in) ムービーファイルのパス
+	//! @param bSound (in) サウンド再生フラグ
+	//! @return 関数の成否
+	HRESULT InitDShowTextureRenderer(ID3D11Device * pd3dDevice, const WCHAR* wFileName, const BOOL bSound);
 
-	void	Play() { m_pMC->Run(); };			// ムービーの再生
-	void	Stop() { m_pMC->Stop(); };			// ムービーの停止
+	//! @fn IDirect3DTexture9 * GetTexture()
+	//! @brief ムービーテクスチャの取得
+	//! @return ムービーがレンダリングされたテクスチャ
+	Texture* GetTexture(){ return m_Texture; };
 
-	double	GetStopTime() { REFTIME time; m_pMP->get_StopTime(&time); return time; };	// 終了時間の取得
-	double	GetDuration() { REFTIME time; m_pMP->get_Duration(&time); return time; };	// ストリームの時間幅の取得
-	double	GetCurrentPosition() { REFTIME time; m_pMP->get_CurrentPosition(&time); return time; }	// 現在の再生位置の取得
-	bool	IsLoop( void )	{ return m_loop; };
+	void TextureRendering(){
+		if (mCMovieTexture)mCMovieTexture->TextureRendering();
+	}
 
-	void	SetTime( double time ) { m_pMP->put_CurrentPosition(time); };				// 現在の再生位置を指定位置にセット
-	void	SetSpeed( double time ) { m_pMP->put_Rate(time); };							// 再生スピードの変更
-	void	SetLoop( bool loop )	{ m_loop = loop; };
+	//! @fn VOID Play()
+	//! @brief ムービーの再生
+	VOID Play(){ m_pMC->Run(); };
 
-	void	GetUV(FLOAT* u, FLOAT* v) { *u = m_fu; *v = m_fv; };						// 再生するテクスチャのサイズとムービーのサイズが合わない場合の余剰分をカットするためのUV値取得
-	void	GetEvent( long* lEventCode, long* lParam1, long* lParam2, long msTimeout );	// ムービーのイベント取得
+	//! @fn VOID Stop()
+	//! @brief ムービーの停止
+	VOID Stop(){ m_pMC->Stop(); };
 
-	bool	IsEndPos( void )	{ return GetCurrentPosition() >= GetStopTime(); };
+	//! @fn VOID SetSpeed(double time)
+	//! @brief 再生スピードの変更
+	//! @param time (in) 再生スピードの倍率
+	VOID SetSpeed(double time){ m_pMP->put_Rate(time); };
+
+	//! @fn double GetStopTime()
+	//! @brief 終了時間の取得
+	//! @return 終了時間
+	double GetStopTime()
+	{
+		REFTIME time;
+		m_pMP->get_StopTime(&time);
+		return time;
+	};
+
+	//! @fn double GetDuration()
+	//! @brief ストリームの時間幅の取得
+	//! @return 全ストリーム長
+	double GetDuration()
+	{
+		REFTIME time;
+		m_pMP->get_Duration(&time);
+		return time;
+	}
+
+	//! @fn double GetCurrentPosition()
+	//! @brief 現在の再生位置の取得
+	//! @return 現在の再生位置
+	double GetCurrentPosition()
+	{
+		REFTIME time;
+		m_pMP->get_CurrentPosition(&time);
+		return time;
+	}
+
+	//! @fn VOID SetTime(double time)
+	//! @brief 現在の再生位置を指定位置にセット
+	//! @param time (in) セットしたい再生位置
+	VOID SetTime(double time){ m_pMP->put_CurrentPosition(time); };
+
+	//! @fn VOID GetUV(FLOAT* u, FLOAT* v)
+	//! @brief 再生するテクスチャのサイズとムービーのサイズが合わない場合の余剰分をカットするためのUV値取得
+	//! @param *u (out) テクスチャ座標U
+	//! @param *v (out) テクスチャ座標V
+	VOID GetUV(FLOAT* u, FLOAT* v)
+	{
+		*u = m_fu;
+		*v = m_fv;
+	}
+
+	//! @fn VOID GetEvent(long* lEventCode, long* lParam1, long* lParam2, long msTimeout)
+	//! @brief ムービーのイベント取得
+	//! @param lEventCode (out) イベント コードを受け取る変数へのポインタ
+	//! @param lParam1 (out) 第 1 イベント引数を受け取る変数へのポインタ。
+	//! @param lParam2 (out) 第 2 イベント引数を受け取る変数へのポインタ。
+	//! @param msTimeout (in) タイムアウト時間 (ミリ秒単位)。イベントが到着するまで動作を停止するには、INFINITE を使う。
+	VOID GetEvent(long* lEventCode, long* lParam1, long* lParam2, long msTimeout);
 };
 
 #endif // MOVIETEX_H
