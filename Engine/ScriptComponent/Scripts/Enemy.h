@@ -163,6 +163,7 @@ protected:
 	bool mIsAttckMode;						// 攻撃途中か(距離外に出た場合の攻撃中止の防止)
 	bool mIsTornadoBlowAway;				// 竜巻で吹き飛ばすか
 	bool mIsPlayerHeal;						// プレイヤーが回復したか
+	bool mIsCreateChase;					// 生成時にプレイヤーを追うか
 	// 距離行動コンテナ
 	typedef std::vector<EnemyState> DistanceVector;
 	DistanceVector mDistanceVector;

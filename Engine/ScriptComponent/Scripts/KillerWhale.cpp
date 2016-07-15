@@ -38,6 +38,11 @@ void KillerWhale::Start(){
 
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
 void KillerWhale::Update(){
+	// ‚¨ŽèŒy—Ž‚¿‚éˆ—
+	if (!mIsFloorHit) {
+		auto parentPosition = mParentObj->mTransform->Position();
+		mParentObj->mTransform->Position(parentPosition - mGRAVITY * Enemy::GetEnemyDeltaTime(60.0f));
+	}
 	Enemy::Move();
 }
 
@@ -64,10 +69,7 @@ void KillerWhale::OnCollideExit(Actor* target){
 void KillerWhale::PlayerSearchMove() {
 	// ‰½‚à‚µ‚È‚¢
 	mIsMove = false;
-	if (!mIsFloorHit && mInitSetCount == 1) {
-		auto parentPosition = mParentObj->mTransform->Position();
-		mParentObj->mTransform->Position(parentPosition - mGRAVITY * Enemy::GetEnemyDeltaTime(60.0f));
-	}
+
 	Enemy::SetAnimationID(0);
 	Enemy::SetAnimationTimeScale(1.0f * (mSpeed * 0.01f));
 	Enemy::SetAnimationLoop(true);

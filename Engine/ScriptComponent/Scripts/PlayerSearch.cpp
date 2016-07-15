@@ -27,6 +27,7 @@ void PlayerSearch::Update(){
 	// プレイヤーの捜索
 	auto playerObj = game->FindActor("Board");
 	if(playerObj == nullptr) mIsPlayerHit = false;
+
 	// プレイヤーが当たったら
 	if (mIsPlayerHit) {
 		// プレイヤーと親の頭部の距離を求める
@@ -135,6 +136,11 @@ void PlayerSearch::PlayerDistance(Actor* playerObj) {
 	auto targetRange = XMVector3Length(
 		playerObj->mTransform->Position() - parentHeadPoint);
 	mPlayerDistance = targetRange.z;
+}
+
+// 外部でプレイヤーを見つけたかの変更を行います
+void PlayerSearch::SetIsPlayerHit(bool isHit) {
+	mIsPlayerHit = isHit;
 }
 
 // 外部でIsLostの変更を行います

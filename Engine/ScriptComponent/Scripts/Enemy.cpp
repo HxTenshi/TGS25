@@ -52,6 +52,7 @@ void Enemy::Initialize(){
 	mIsChaseRotate = true;
 	mIsTornadoBlowAway = false;
 	mIsPlayerHeal = false;
+	mIsCreateChase = false;
 	// 配列に追跡行動のenumクラスを入れる
 	mDistanceVector.push_back(EnemyState::PlayerShortDistance);
 	mDistanceVector.push_back(EnemyState::PlayerCenterDistance);
@@ -70,8 +71,16 @@ void Enemy::Start(){
 	game->AddObject(mEnemyManagerObj);
 	mEnemyManagerObj->mTransform->SetParent(gameObject);
 	mEnemyManagerScript = mEnemyManagerObj->GetScript<EnemyManager>();
-	// 親である生成オブジェクトの捜索
-	mCreateEnemyObj = game->FindActor("CreateEnemyObj");
+	// おじいちゃんである生成オブジェクトの捜索
+	//mCreateEnemyObj = game->FindActor("CreateEnemyObj");
+	mCreateEnemyObj = mParentObj->mTransform->GetParent();
+	if (mCreateEnemyObj != nullptr) {
+		if (mCreateEnemyObj->Name() == "CreateEnemyObj") {
+			auto createEnemyScript = 
+				mCreateEnemyObj->GetScript<CreateEnemyObj>();
+			mIsCreateChase = createEnemyScript->GetIsPlayerChaseMode();
+		}
+	}
 }
 
 //毎フレーム呼ばれます
@@ -218,6 +227,9 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 		mPlayerSearchObj->mTransform->Position(-setPosition);
 		// 敵の子供に追加する
 		mPlayerSearchObj->mTransform->SetParent(mParentObj);
+		// 生成時に追跡するか
+		mSearchScript->SetIsPlayerHit(mIsCreateChase);
+		//if (mIsCreateChase) mSearchScript->SetIsPlayerHit(mIsCreateChase);
 		// CGの生成
 		std::string baseName = "Assets/Enemy/EnemyCGObj/" + gameObject->Name() + "CG";
 		auto createCGObjName = baseName.c_str();
@@ -254,13 +266,11 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 	else {
 		if (!mIsAttckMode) {
 			if (mSearchScript->IsLost()) {
-				// 戻る行動
-				mEnemyState = EnemyState::ReturnMove;
-				return;
-			}
-			else {
 				// 通常行動
 				mEnemyState = EnemyState::PlayerSearch;
+				// 戻る行動
+				if(mCreateEnemyObj->Name() == "CreateEnemyObj")
+					mEnemyState = EnemyState::ReturnMove;
 				return;
 			}
 		}
@@ -658,8 +668,8 @@ void Enemy::ReturnMove() {
 		// 生成オブジェクトの方向を向く
 		mParentObj->mTransform->Quaternion(quaternion);
 		// 前方に移動
-		auto forward = mParentObj->mTransform->Forward() * mSpeed;
-		mParentObj->mTransform->Position(parentPosition + forward);
+		auto forward = mParentObj->mTransform->Forward() * mSpeed * 0.01f;
+		mParentObj->mTransform->Position(parentPosition - forward);
 	}
 	else {
 		mEnemyState = EnemyState::PlayerSearch;

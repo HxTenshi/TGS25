@@ -63,7 +63,7 @@ void TitleMnager::Update()
 		mFadeOutScript->FadeOut(mFadeOutSecond);
 		// フェードアウト後シーン移動
 		if (mFadeOutScript->IsFadeOut()) {
-			if (mChangeTime <= mSceneChangeTimer) game->LoadScene("./Assets/Scenes/How_To.scene");
+			if (mChangeTime <= mSceneChangeTimer) game->LoadScene("./Assets/Scenes/PVPlay.scene");
 			else  mCursorScript->OnChangeScene();
 		}
 	}

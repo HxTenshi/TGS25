@@ -23,6 +23,7 @@ void CreateEnemyObj::Start(){
 	// 名前コンテナに追加
 	mNameContainer.push_back("FlyingFish");
 	mNameContainer.push_back("KillerWhale");
+	mNameContainer.push_back("KillerWhale");
 
 	// 現在の時刻で乱数を行うように設定
 	srand((unsigned int) time(NULL));
@@ -45,26 +46,21 @@ void CreateEnemyObj::Update(){
 
 			if (!mIsCreateObj) {
 				// 複数生成
-				for (auto i = 0; i != mOnceCreateCount; i++) {
-					CreateName();
-					// 敵オブジェの生成
-					auto createObj = game->CreateActor(mCreateObjName);
-					// 生成元がなかったら生成しない
-					//if (createObj == nullptr) return;
-					game->AddObject(createObj);
-					// 生成オブジェの子供に設定(終了時に削除などをするため)
-					createObj->mTransform->SetParent(gameObject);
-					// 子供に追加するので値の加算を行わない
-					// ランダムで位置を代入する
-					auto enemyPosition = XMVectorSet(
-						GetRandom(-mRandomCreateRange, mRandomCreateRange) / 10.0f,
-						GetRandom(-5, 20) / 10.0f,
-						GetRandom(-mRandomCreateRange, mRandomCreateRange) / 10.0f,
-						0.0f);
-					// 位置の変更
-					createObj->mTransform->Position(enemyPosition);
+				for (auto i = 0; i != mOnceCreateCount; ++i) {
+					// 生成オブジェの名前指定
+					std::string createStr;
+					if (!mIsRandom) {
+						// このスクリプトを持つオブジェの名前から判断します
+						if (mEnemyName == "") mEnemyName = "FlyingFish";
+						createStr = mBaseStr + mEnemyName;
+					}	// ランダム
+					else createStr = mBaseStr + mNameContainer[GetRandom(0, 1)];
+					createStr = createStr + "ParentObj";
+					// string型をchar*に変換
+					mCreateObjName = createStr.c_str();
+					// 生成
+					EnemyCreate();
 				}
-				game->Debug()->Log("生成");
 				// 生成カウントの減算
 				mCreateCount--;
 				mIsCreateObj = true;
@@ -108,17 +104,48 @@ void CreateEnemyObj::OnCollideExit(Actor* target){
 // 生成オブジェクトの名前を設定します
 void CreateEnemyObj::CreateName() {
 	// 生成オブジェの名前指定
-	std::string createStr;
-	if (!mIsRandom) {
-		// このスクリプトを持つオブジェの名前から判断します
-		if(mEnemyName == "") createStr = mBaseStr + gameObject->Name();
-		else createStr = mBaseStr + mEnemyName;
-		createStr.erase(createStr.end() - 9, createStr.end());
-	}	// ランダム
-	else createStr = mBaseStr + mNameContainer[GetRandom(0, 1)];
-	createStr = createStr + "ParentObj";
-	// string型をchar*に変換
-	mCreateObjName = createStr.c_str();
+	//std::string createStr;
+	//if (!mIsRandom) {
+	//	// このスクリプトを持つオブジェの名前から判断します
+	//	if(mEnemyName == "") createStr = mBaseStr + gameObject->Name();
+	//	else createStr = mBaseStr + mEnemyName;
+	//	createStr.erase(createStr.end() - 9, createStr.end());
+	//}	// ランダム
+	//else createStr = mBaseStr + mNameContainer[GetRandom(0, 1)];
+	//createStr = createStr + "ParentObj";
+	//// string型をchar*に変換
+	//mCreateObjName = createStr.c_str();
+}
+
+// 敵を生成します
+void CreateEnemyObj::EnemyCreate() {
+	if (mEnemyName != "FlyingFish" && mEnemyName != "KillerWhale") {
+		mEnemyName = "FlyingFish";
+		std::string createStr;
+		createStr = mBaseStr + mEnemyName;
+		createStr = createStr + "ParentObj";
+		// string型をchar*に変換
+		mCreateObjName = createStr.c_str();
+		mIsRandom = true;
+	}
+	// 敵オブジェの生成
+	auto createObj = game->CreateActor(mCreateObjName);
+	game->AddObject(createObj);
+	// 生成オブジェの子供に設定(終了時に削除などをするため)
+	createObj->mTransform->SetParent(gameObject);
+	if (mIsRandomPosition) ChangePosition(createObj);
+}
+
+// 敵の位置を変更します
+void CreateEnemyObj::ChangePosition(Actor* enemy) {
+	// ランダムで位置を代入する
+	auto enemyPosition = XMVectorSet(
+		GetRandom(-mRandomCreateRange, mRandomCreateRange) / 10.0f,
+		GetRandom(-5, 20) / 10.0f,
+		GetRandom(-mRandomCreateRange, mRandomCreateRange) / 10.0f,
+		0.0f);
+	// 位置の変更
+	enemy->mTransform->Position(enemyPosition);
 }
 
 // ランダム関数です
@@ -130,4 +157,9 @@ int CreateEnemyObj::GetRandom(int min, int max) {
 // 敵が生成オブジェクトに戻る距離を返します
 float CreateEnemyObj::GetReturnDistance() {
 	return mEnemyReturnDistance;
+}
+
+// 敵がプレイヤーを追跡するかの設定を返します
+bool CreateEnemyObj::GetIsPlayerChaseMode() {
+	return mIsPlayerChase;
 }

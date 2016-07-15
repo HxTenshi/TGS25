@@ -23,7 +23,7 @@ void SoundBox::Update(){
 	// Ä¶
 	if (!mIsSoundPlay) {
 		sound->LoadFile(mName);
-		sound->Play();
+		if(!sound->IsPlay()) sound->Play();
 		mIsSoundPlay = true;
 	}
 	//// Ä¶‚ªI‚í‚ê‚Îíœ‚·‚é(‚Å‚«‚È‚¢)

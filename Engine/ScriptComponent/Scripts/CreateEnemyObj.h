@@ -20,10 +20,16 @@ public:
 	void OnCollideExit(Actor* target)override;
 	// 生成オブジェクトの名前を設定します
 	void CreateName();
+	// 敵を生成します
+	void EnemyCreate();
+	// 敵の位置を変更します
+	void ChangePosition(Actor* enemy);
 	// ランダム関数です
 	int GetRandom(int min, int max);
 	// 敵が生成オブジェクトに戻る距離を返します
 	float GetReturnDistance();
+	// 敵がプレイヤーを追跡するかの設定を返します
+	bool GetIsPlayerChaseMode();
 
 private:
 	//メンバ変数
@@ -49,7 +55,12 @@ private:
 	bool mIsCreateObj;				// 敵を生成したか？
 	SERIALIZE
 	bool mIsRandom;					// 乱数を使用するか？
+	SERIALIZE
 	bool mIsInfinityCreate;			// 無限生成にするか？
+	SERIALIZE
+	bool mIsRandomPosition;			// ランダムの位置にするか？
+	SERIALIZE
+	bool mIsPlayerChase;			// 生成時にプレイヤーを追跡するか？
 	const char* mCreateObjName;		// 生成オブジェクトの名前
 	SERIALIZE
 	std::string mEnemyName;			// 生成する敵の名前

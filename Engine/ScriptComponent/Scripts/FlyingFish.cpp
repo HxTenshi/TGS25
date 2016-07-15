@@ -44,6 +44,8 @@ void FlyingFish::Start(){
 //毎フレーム呼ばれます
 void FlyingFish::Update(){
 	Enemy::Move();
+	// ジャンプ行動
+	JampMove();
 	// mIsJampがfalseならジャンプをしていない
 	if (mIsJamp == false) {
 		// mJampRestTimeが０になったら再度ジャンプする
@@ -131,28 +133,26 @@ void FlyingFish::OnCollideExit(Actor* target){
 void FlyingFish::PlayerSearchMove() {
 	auto parentRotate = mParentObj->mTransform->Rotate();
 	// 敵の回転
-	if (mWallHitCount % 2 == 0) {
-		parentRotate.y += (3.14f / 180.0f / mRotateInterval) * Enemy::GetEnemyDeltaTime(60.0f);
-	}
-	else {
-		parentRotate.y -= (3.14f / 180.0f / mRotateInterval) * Enemy::GetEnemyDeltaTime(60.0f);
-	}
+	if (mWallHitCount % 2 == 0) 
+		parentRotate.y += (3.14f / 180.0f / mRotateInterval)
+		* Enemy::GetEnemyDeltaTime(60.0f);
+	else 
+		parentRotate.y -= (3.14f / 180.0f / mRotateInterval)
+		* Enemy::GetEnemyDeltaTime(60.0f);
 
-	if (parentRotate.y >= 3.141593f * 2.0f) {
-		//mRotateY = 0.0f;
+	if (parentRotate.y >= 3.141593f * 2.0f)
 		parentRotate.y -= 3.141593f * 2.0f;
-	}
-	else if (parentRotate.y < 0.0f) {
+	else if (parentRotate.y < 0.0f)
 		parentRotate.y += 3.141593f * 2.0f;
-	}
-	if (mIsInitSet)mParentObj->mTransform->Rotate(parentRotate);
-	// ジャンプ行動
-	JampMove();
+	if (mIsInitSet)
+		mParentObj->mTransform->Rotate(parentRotate);
+	//// ジャンプ行動
+	//JampMove();
 }
 
 void FlyingFish::PlayerChaseMove() {
-	Enemy::PlayerChaseMode(5.0f, 2.0f);
-	JampMove();
+	Enemy::PlayerChaseMode(15.0f, 2.0f);
+	//JampMove();
 }
 
 void FlyingFish::JampMove() {
@@ -160,7 +160,6 @@ void FlyingFish::JampMove() {
 	auto forwardMove = mParentObj->mTransform->Forward() * -mSpeed * 0.01f;
 	// ジャンプ間隔
 	if (mJampRestTime <= 0) {
-		//mUpCosine += 3.141593f / mInitUpCount;
 		mUpCosine += (3.141593f / mInitUpCount) * Enemy::GetEnemyDeltaTime(60.0f);
 		if (mUpCosine > 3.141593f) mUpCosine = 3.141593f;
 		if (mUpCount > 0) {
