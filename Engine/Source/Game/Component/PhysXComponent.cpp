@@ -6,6 +6,7 @@
 PhysXComponent::PhysXComponent(){
 	mIsEngineMode = false;
 	mIsKinematic = false;
+	mIsGravity = true;
 	mRigidActor = NULL;
 }
 
@@ -21,6 +22,7 @@ void PhysXComponent::Initialize(){
 	}
 
 	SetKinematic(mIsKinematic);
+	SetGravity(mIsGravity);
 
 	mRigidActor->userData = gameObject;
 }
@@ -143,6 +145,9 @@ void PhysXComponent::CreateInspector() {
 
 	auto data = Window::CreateInspector();
 	Window::AddInspector(new TemplateInspectorDataSet<bool>("Kinematic", &mIsKinematic, collback), data);
+	Window::AddInspector(new TemplateInspectorDataSet<bool>("UseGravity", &mIsGravity, [&](bool value){
+		SetGravity(value);
+	}), data);
 	Window::ViewInspector("PhysX", this, data);
 }
 #endif
@@ -150,6 +155,7 @@ void PhysXComponent::CreateInspector() {
 void PhysXComponent::IO_Data(I_ioHelper* io){
 #define _KEY(x) io->func( x , #x)
 	_KEY(mIsKinematic);
+	_KEY(mIsGravity);
 
 #undef _KEY
 }
@@ -161,6 +167,15 @@ void PhysXComponent::SetKinematic(bool flag){
 		r->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, mIsKinematic);
 	}
 }
+
+void PhysXComponent::SetGravity(bool flag){
+	mIsGravity = flag;
+	if (mRigidActor){
+		auto r = (PxRigidDynamic*)mRigidActor;
+		r->setActorFlag(PxActorFlag::eDISABLE_GRAVITY,!mIsGravity);
+	}
+}
+
 
 XMVECTOR PhysXComponent::GetForceVelocity(){
 	PxRigidDynamic* a = (PxRigidDynamic*)mRigidActor;
