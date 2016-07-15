@@ -67,8 +67,10 @@ void Sail::Update(){
 	{
 		parent->GetComponent<PhysXComponent>()->SetForceVelocity(XMVectorSet(0, 0, 0, 0));
 	}
-	//if (!parent->GetScript<SailBoard>()->GetIsJump()) parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * Speed);
-	//parent->mTransform->AddForce(parent->mTransform->Forward() * MovePower() * 5);         //PCデバック
+	if (parent->GetScript<SailBoard>()->GetHitPoint() <= 0)
+	{
+		parent->GetComponent<PhysXComponent>()->SetForceVelocity(XMVectorSet(0, -9.81, 0, 0));
+	}
 
 }
 

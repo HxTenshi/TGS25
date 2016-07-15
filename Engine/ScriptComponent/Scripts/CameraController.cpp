@@ -38,25 +38,39 @@ void CameraController::Update()
 
 		Look();
 
-		//プレイヤーがジャンプしたらカメラの位置変更の準備
-		if (mPrevJump != mTarget->GetScript<SailBoard>()->GetIsJump())
+		if (mTarget->GetScript<SailBoard>()->GetHitPoint() <= 0)
 		{
-			mFromPos = mPosition;
-			mTimer = 0;
-			mPrevJump = mTarget->GetScript<SailBoard>()->GetIsJump();
-		}
-
-		if (!mTarget->GetScript<SailBoard>()->GetIsJump())
-		{
-			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -13) + XMVectorSet(0, 3.5f, 0, 1));
-			if (Input::Down(PAD_DS4_KeyCoord::Button_DOWN))
+			auto position = mTarget->mTransform->Position() + XMVectorSet(0,0,-10,0);
+			position.y = -5;
+			mPosition = position;
 			{
-				mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * 3) + XMVectorSet(0, 1, 0, 1));
+				auto at = XMMatrixLookAtLH(position,mTarget->mTransform->Position(), gameObject->mTransform->Up());
+				at = XMMatrixTranspose(at);
+				gameObject->mTransform->Quaternion(XMQuaternionRotationMatrix(at));
 			}
 		}
 		else
 		{
-			mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1));
+			//プレイヤーがジャンプしたらカメラの位置変更の準備
+			if (mPrevJump != mTarget->GetScript<SailBoard>()->GetIsJump())
+			{
+				mFromPos = mPosition;
+				mTimer = 0;
+				mPrevJump = mTarget->GetScript<SailBoard>()->GetIsJump();
+			}
+
+			if (!mTarget->GetScript<SailBoard>()->GetIsJump())
+			{
+				mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -13) + XMVectorSet(0, 3.5f, 0, 1));
+				if (Input::Down(PAD_DS4_KeyCoord::Button_DOWN))
+				{
+					mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * 3) + XMVectorSet(0, 1, 0, 1));
+				}
+			}
+			else
+			{
+				mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1));
+			}
 		}
 	}
 
