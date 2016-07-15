@@ -38,6 +38,7 @@ private:
 	bool Shake();
 	void PlaySE(std::string filename);
 	void ArrowUpdate();
+	bool AnimationIsEnd();
 
 
 	void AnimationChange(int id,bool loop,float timer);

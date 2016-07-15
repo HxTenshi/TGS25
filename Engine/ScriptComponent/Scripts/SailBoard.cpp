@@ -53,7 +53,7 @@ void SailBoard::Update(){
 
 	auto sail = game->FindActor("Sail")->GetScript<Sail>();
 	//トリックとダメージのモーション中ではない
-	if (sail && mAnimator->mCurrentSet != 1 && mAnimator->mCurrentSet != 2)
+	if (sail && mAnimator->mCurrentSet != 1 && AnimationIsEnd())
 	{
 		if (sail->GetSailRotateRad() < 0)
 		{
@@ -105,6 +105,7 @@ void SailBoard::Update(){
 			{
 				s->GetScript<MoveSmoke>()->SetMaxSpeed(50);
 				s->GetScript<MoveSmoke>()->SetSpeed(XMVector3Length(physx->GetForceVelocity()).x);
+				if (!isGround) s->GetScript<MoveSmoke>()->SetSpeed(0);
 			}
 		}
 	}
@@ -465,6 +466,23 @@ void SailBoard::ArrowUpdate()
 			game->AddObject(mArrow);
 		}
 	}
+	
+}
+
+bool SailBoard::AnimationIsEnd()
+{
+	if(mAnimator->mCurrentSet == 2)
+	{
+		if (mAnimator->GetAnimetionParam(mAnimator->mCurrentSet).mTime <= 20)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	return true;
 	
 }
 
