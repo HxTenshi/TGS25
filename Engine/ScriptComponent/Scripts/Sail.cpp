@@ -39,6 +39,7 @@ void Sail::Update(){
 	{
 		SailRotate();
 	}
+
 	auto parent = gameObject->mTransform->GetParent()->mTransform->GetParent();
 	auto forward = parent->mTransform->Forward();
 	forward.y = 0;
