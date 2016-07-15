@@ -17,8 +17,12 @@ public:
 	void CreditDown();
 	void CreditUp();
 	void ItemGet();
-	// サウンドボックス生成関数です
-	void CreateSoundBox(const std::string name);
+	// サウンドボックスを再生します(ステージ)
+	void StageSoundBox(const std::string name);
+	// サウンドボックスを再生します(プレイヤー)
+	void PlayerSoundBox(const std::string name);
+	// 指定したサウンドボックスを再生します
+	void PlaySoundBox(Actor* soundBox, std::string name);
 	bool IsGameStart();
 
 private:
@@ -43,7 +47,9 @@ private:
 	float mFadeInSecond;
 	SERIALIZE
 	float mTitleChangeTime;
-
+	bool mIsWarning;
+	bool mIsWarningSign;
 	Actor* mFadeOutObj;
-	Actor* mSoundBox;
+	Actor* mStageSoundBox;
+	Actor* mPlayerSoundBox;
 };

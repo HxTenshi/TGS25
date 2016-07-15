@@ -16,6 +16,8 @@ public:
 	void SetScalarZ(const float scalarZ);
 	// プレイヤーとの距離を計算します
 	void PlayerDistance(Actor* playerObj);
+	// 外部でプレイヤーを見つけたかの変更を行います
+	void SetIsPlayerHit(bool isHit);
 	// 外部でIsLostの変更を行います
 	void SetIsLost(bool isLost);
 	// プレイヤーと索敵範囲の始点との距離を返します

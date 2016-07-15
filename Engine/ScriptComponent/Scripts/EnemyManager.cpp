@@ -57,10 +57,16 @@ void EnemyManager::SetParentForwardObj(Actor* setObj) {
 		((colliderScale.z / 2.0f) + (setObjScale.z / 2.0f)) * sinf(parentRotate.y),
 		0.0f,
 		((colliderScale.z / 2.0f) + (setObjScale.z / 2.0f)) * cosf(parentRotate.y), 0.0f);
+
 	// 位置の変更
 	setObj->mTransform->Position(parentPosition + -setPosition);
 	// 生成元のオブジェの回転角に変更
 	setObj->mTransform->Rotate(parentRotate);
+	// 生成オブジェクトが親にあった場合
+	auto createObj = mEnemyParentObj->mTransform->GetParent();
+	if (createObj->Name() != "CreateEnemyObj") return;
+	auto createPosition = createObj->mTransform->Position();
+	setObj->mTransform->Position(parentPosition + createPosition + -setPosition);
 }
 
 // 親のステータスの初期化をします

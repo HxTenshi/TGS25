@@ -12,6 +12,7 @@
 #include"Fade.h"
 #include"h_standard.h"
 #include"HaneEffect.h"
+#include "SailBoard.h"
 // サウンドボックスのスクリプト
 #include "SoundBox.h"
 
@@ -22,6 +23,8 @@ void PlayerManager::Initialize()
 	mAlpha = 0.5;
 	mFadeOutObj = nullptr;
 	mGameStart = false;
+	mIsWarning = false;
+	mIsWarningSign = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -54,6 +57,24 @@ void PlayerManager::Update(){
 	{
 		GameClear();
 		
+	}
+
+	// 体力が一定以下なら再生
+	auto player = game->FindActor("Board");
+	if (player != nullptr) {
+		auto playerScript = player->GetScript<SailBoard>();
+		if (playerScript->GetHitPoint() <= 25.0f) mIsWarning = true;
+		else {
+			mIsWarning = false;
+			mIsWarningSign = true;
+		}
+
+		if (mIsWarning) {
+			if (mIsWarningSign) {
+				PlayerSoundBox("warning1");
+				mIsWarningSign = false;
+			}
+		}
 	}
 
 	/*auto text1 = game->FindActor("column1")->GetComponent<TextureModelComponent>();
@@ -141,7 +162,7 @@ void PlayerManager::GameStart()
 			auto startTex = game->CreateActor("Assets/UIPrefab/Start.json");
 			game->AddObject(startTex);
 			// サウンドボックスの生成
-			CreateSoundBox("start");
+			StageSoundBox("start");
 			mGameStart = true;
 		}
 }
@@ -154,7 +175,7 @@ void PlayerManager::GameClear()
 		cleartexture = game->CreateActor("Assets/UIPrefab/Clear.json");
 		game->AddObject(cleartexture);
 		// サウンドボックスの生成
-		CreateSoundBox("clear");
+		StageSoundBox("clear");
 	}
 	else
 	{
@@ -197,7 +218,7 @@ void PlayerManager::GameOver()
 			cleartexture = game->CreateActor("Assets/UIPrefab/GameOver.json");
 			game->AddObject(cleartexture);
 			// サウンドボックスの生成
-			CreateSoundBox("over");
+			StageSoundBox("over");
 		}
 		else
 		{
@@ -224,13 +245,27 @@ void PlayerManager::WingUI()
 	items[mPoint]->GetComponent<TextureModelComponent>()->SetTexture("./Assets/UI/hane.png");
 }
 
-// サウンドボックス生成関数です
-void PlayerManager::CreateSoundBox(const std::string name) {
-	if (mSoundBox == nullptr) {
-		mSoundBox = game->CreateActor("Assets/SoundBox.json");
-		game->AddObject(mSoundBox);
+// サウンドボックスを再生します
+void PlayerManager::StageSoundBox(const std::string name) {
+	if (mStageSoundBox == nullptr) {
+		mStageSoundBox = game->CreateActor("Assets/SoundBox.json");
+		game->AddObject(mStageSoundBox);
 	}
-	auto soundBoxScript = mSoundBox->GetScript<SoundBox>();
+	PlaySoundBox(mStageSoundBox, name);
+}
+
+// サウンドボックスを再生します(プレイヤー)
+void PlayerManager::PlayerSoundBox(const std::string name) {
+	if (mPlayerSoundBox == nullptr) {
+		mPlayerSoundBox = game->CreateActor("Assets/SoundBox.json");
+		game->AddObject(mPlayerSoundBox);
+	}
+	PlaySoundBox(mPlayerSoundBox, name);
+}
+
+// 指定したサウンドボックスを再生します
+void PlayerManager::PlaySoundBox(Actor* soundBox, std::string name) {
+	auto soundBoxScript = soundBox->GetScript<SoundBox>();
 	soundBoxScript->SetSoundName(name);
 }
 
