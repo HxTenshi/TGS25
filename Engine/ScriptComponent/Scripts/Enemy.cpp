@@ -45,6 +45,7 @@ void Enemy::Initialize(){
 	mIsMove = true;
 	mIsFloorHit = false;
 	mIsCloudHit = false;
+	mIsDamage = false;
 	mIsImmortalBody = false;
 	mIsDistanceAct = false;
 	mIsKnockBackDirection = false;
@@ -114,7 +115,12 @@ void Enemy::OnCollideBegin(Actor* target){
 				Enemy::SetAnimationID(2);
 				Enemy::SetAnimationLoop(false);
 			}
-			else playerScript->Damage(mDamage);
+			else {
+				if (!mIsDamage) {
+					playerScript->Damage(mDamage);
+					mIsDamage = true;
+				}
+			}
 			// サウンドの再生
 			mEnemyManagerScript->EnemyPlaySound("hit");
 		}
@@ -133,6 +139,14 @@ void Enemy::OnCollideBegin(Actor* target){
 	if (target->Name() == "Floor") {
 		mInitSetCount = 1;
 		mIsFloorHit = true;
+		mIsDamage = false;
+	}
+	if (target->Name() == "Tower" ||
+		target->Name() == "bridge" ||
+		target->Name() == "Tree") {
+		auto KnockBack = mParentObj->mTransform->Forward();
+		auto parentPosition = mParentObj->mTransform->Position();
+		mParentObj->mTransform->Position(parentPosition + KnockBack);
 	}
 	// 雲と当たったら消えるフラグを間接的にtrueにする
 	if (target->Name() == "Cloud_s" ||
@@ -170,6 +184,7 @@ void Enemy::OnCollideEnter(Actor* target){
 		}
 
 		mIsFloorHit = true;
+		mIsDamage = false;
 	}
 
 	// 竜巻に当たったら死亡する
@@ -279,6 +294,7 @@ void Enemy::PlayerSearchMode(const XMVECTOR objScale) {
 
 // プレイヤーの方向に回転します
 void  Enemy::PlayerChaseMode(const float startPoint, const float endPoint) {
+	if (!mIsFloorHit) return;
 	// プレイヤーの捜索
 	// プレイヤーの方向を向く
 	auto playerObj = game->FindActor("Board");

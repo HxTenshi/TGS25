@@ -84,7 +84,6 @@ void FlyingFish::OnCollideBegin(Actor* target){
 	Enemy::OnCollideBegin(target);
 	if (target->Name() == "Floor") {
 		// 接触した床の位置を入れる
-		//mFloorPosition = target->mTransform->Position().y + 0.9f;
 		mFloorPosition = mParentObj->mTransform->Position().y ;
 		// 床に接触したらtrue
 		if (!mIsInitSet && mParentObj->mTransform->Position().y <= mFloorPosition) {
@@ -102,7 +101,6 @@ void FlyingFish::OnCollideBegin(Actor* target){
 		target->Name() == "Tree") {
 		mWallHitCount++;
 		mIsWallHit = true;
-		//game->Debug()->Log("当たった");
 		auto parentRotate = mParentObj->mTransform->Rotate();
 		parentRotate.y += 3.141593f;
 		mParentObj->mTransform->Rotate(parentRotate);
@@ -146,13 +144,10 @@ void FlyingFish::PlayerSearchMove() {
 		parentRotate.y += 3.141593f * 2.0f;
 	if (mIsInitSet)
 		mParentObj->mTransform->Rotate(parentRotate);
-	//// ジャンプ行動
-	//JampMove();
 }
 
 void FlyingFish::PlayerChaseMove() {
-	Enemy::PlayerChaseMode(15.0f, 2.0f);
-	//JampMove();
+	Enemy::PlayerChaseMode(5.0f, 2.0f);
 }
 
 void FlyingFish::JampMove() {
@@ -177,7 +172,6 @@ void FlyingFish::JampMove() {
 				mJampVelocity = (mParentObj->mTransform->Up() * mUpPowar * cosf(mUpCosine) * 0.01f);
 				// 床と接触している場合は絶対に初期値に戻るように補正
 				// 接触していなかったら落ちていく
-				/*if (mIsFloorHit) {*/
 				if (parentPosition.y + mJampVelocity.y < mFloorPosition) {
 					if (mIsFloorHit) {
 						auto revasionVelocity = XMVectorSet(

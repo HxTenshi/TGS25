@@ -156,6 +156,7 @@ protected:
 	bool mIsMove;							// 動いているか
 	bool mIsFloorHit;						// 床と当たったか
 	bool mIsCloudHit;						// 雲と当たったか
+	bool mIsDamage;							// ダメージを与えるか
 	bool mIsImmortalBody;					// 不死身の敵か(未実装)
 	bool mIsDistanceAct;					// 距離判定の行動をするか
 	bool mIsKnockBackDirection;				// ノックバックの方向を決めたか

@@ -1,6 +1,6 @@
 #include "StageManager.h"
 //#include "SailBoard.h"
-#include "Fade.h"
+//#include "Fade.h"
 ////アクターなど基本のインクルード
 #include "h_standard.h"
 //コンポーネント全てのインクルード
@@ -16,20 +16,24 @@ void StageManager::Start(){
 
 //毎フレーム呼ばれます
 void StageManager::Update(){
-	auto player = game->FindActor("Board");
-	//auto playerScript = player->GetScript<SailBoard>();
-	auto deadline = game->FindActor("DeadLine");
-	if (deadline == nullptr) return;
-	if (player->mTransform->Position().y < deadline->mTransform->Position().y) {
-		if (mFadeOutObj == nullptr) {
-			mFadeOutObj = game->CreateActor("Assets/Fade");
-			game->AddObject(mFadeOutObj);
-		}
-		auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
-		mFadeOutScript->FadeOut(mFadeOutSecond);
-		// フェードアウト後シーン移動
-		if (mFadeOutScript->IsFadeOut()) game->LoadScene("Assets/Scenes/Title.scene");
-	}
+	/*auto player = game->FindActor("Board");
+	auto playerScript = player->GetScript<SailBoard>();
+
+	if (playerScript->GetHitPoint() <= 20) {
+
+	}*/
+	//auto deadline = game->FindActor("DeadLine");
+	//if (deadline == nullptr) return;
+	//if (player->mTransform->Position().y < deadline->mTransform->Position().y) {
+	//	if (mFadeOutObj == nullptr) {
+	//		mFadeOutObj = game->CreateActor("Assets/Fade");
+	//		game->AddObject(mFadeOutObj);
+	//	}
+	//	auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
+	//	mFadeOutScript->FadeOut(mFadeOutSecond);
+	//	// フェードアウト後シーン移動
+	//	if (mFadeOutScript->IsFadeOut()) game->LoadScene("Assets/Scenes/Title.scene");
+	//}
 	//if(playerScript->)
 }
 
