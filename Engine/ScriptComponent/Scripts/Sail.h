@@ -37,6 +37,7 @@ private:
 	float RotatePower;
 
 private:
+	float Lerp(float value1, float value2, float amount);
 	void SailRotate();
 	void SailAnimation();
 

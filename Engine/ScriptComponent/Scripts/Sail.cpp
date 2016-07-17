@@ -122,6 +122,11 @@ float Sail::GetSailRotateRad()
 	return mSailRotate;
 }
 
+float Sail::Lerp(float value1, float value2, float amount)
+{
+	return (value1 * (1.0f - amount)) + (value2 * amount);
+}
+
 void Sail::SailRotate()
 {
 	if (Input::Down(KeyCoord::Key_O) && mSailRotate > -XM_PI / 2) {
@@ -151,22 +156,29 @@ void Sail::SailAnimation()
 {
 	if (mBirdPos == BirdPosition::LEFT)
 	{
-		mRotate += RotatePower;
-		if (abs(mRotate) >= 5)
+		if (abs(mRotate) >= 360 * (XM_PI / 180))
 		{
 			mBirdPos = BirdPosition::RIGHT;
 			isAnimation = false;
 			mRotate = 0;
 		}
+		else
+		{
+			mRotate += RotatePower;
+		}
 	}
 	else if (mBirdPos == BirdPosition::RIGHT)
 	{
-		mRotate -= RotatePower;
-		if (abs(mRotate) >= 5)
+		
+		if (abs(mRotate) >= 360 * (XM_PI / 180))
 		{
 			mBirdPos = BirdPosition::LEFT;
 			isAnimation = false;
 			mRotate = 0;
+		}
+		else
+		{
+			mRotate -= RotatePower;
 		}
 	}
 	gameObject->mTransform->Rotate(XMVectorSet(0, mRotate, 0, 0));
