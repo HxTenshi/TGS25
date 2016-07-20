@@ -40,6 +40,7 @@ private:
 	float mLerpTime;
 	SERIALIZE
 	float mAddCursorPositionX;	// カーソルの位置を加算する(X)
+	bool mIsMove;				// 動くか
 	bool mIsCursorMove;			// カーソルが動いているか
 	bool mIsChangeScene;		// シーンが変わったか
 	XMVECTOR mLerp;

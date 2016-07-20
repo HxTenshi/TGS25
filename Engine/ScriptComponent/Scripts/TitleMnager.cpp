@@ -51,8 +51,9 @@ void TitleMnager::Update()
 		if (mCursorScript->IsCursorMove()) mSceneChangeTimer = 0.0f;
 		if (!mCursorScript->IsChangeScene())mSceneChangeTimer += deltaTime;
 	}
-	// フェードアウトしてシーン移動
-	if (mCursorScript->IsChangeScene() || mChangeTime <= mSceneChangeTimer) {
+	if (mCursorScript->IsChangeScene() ||
+		mChangeTime <= mSceneChangeTimer) {
+		// フェードアウトしてシーン移動
 		mCursorScript->SetIsCursorMove(true);
 		// 一度だけ生成
 		if (mFadeOutObj == nullptr) {

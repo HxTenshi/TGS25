@@ -14,6 +14,8 @@ void SceneCursor::Initialize(){
 	mButtonCount = 0;
 	mPastButtonCount = 0;
 	mLerpTime = 0.0f;
+	mIsMove = false;
+	mIsCursorMove = false;
 	mIsChangeScene = false;
 }
 
@@ -31,6 +33,9 @@ void SceneCursor::Start(){
 
 //毎フレーム呼ばれます
 void SceneCursor::Update(){
+	// 一生動かない
+	if (mIsMove) return;
+	// キー操作で動く場合
 	if (mIsCursorMove) {
 		auto buttonPosition = mButtonContainer[mButtonCount]->mTransform->Position();
 		auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
@@ -67,7 +72,6 @@ void SceneCursor::Update(){
 	if (mIsCursorMove) return;
 	// シーンが変わるなら入力処理を行わない
 	if (mIsChangeScene) return;
-	
 	// キー入力
 	if (Input::Trigger(PAD_DS4_KeyCoord::Button_UP) ||
 		Input::Trigger(KeyCoord::Key_A)) {
@@ -83,6 +87,7 @@ void SceneCursor::Update(){
 	}
 	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_CIRCLE) ||
 		Input::Trigger(KeyCoord::Key_SPACE)) {
+		mIsCursorMove = true;
 		mIsChangeScene = true;
 		auto sound = gameObject->GetComponent<SoundComponent>();
 		if (!sound) return;
@@ -128,7 +133,7 @@ void SceneCursor::OnChangeScene() {
 
 // カーソルの移動制限の設定します
 void SceneCursor::SetIsCursorMove(bool isMove) {
-	mIsCursorMove = isMove;
+	mIsMove = isMove;
 }
 
 // ボタンの値を取得します

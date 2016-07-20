@@ -87,7 +87,7 @@ void EnemyManager::ResetStatus() {
 void EnemyManager::EnemyPlaySound(const std::string soundName) {
 	std::string playSoundName = "Assets/Enemy/" + soundName + ".wav";
 	// ƒTƒEƒ“ƒh‚ð–Â‚ç‚·
-	auto sound = gameObject->GetComponent<SoundComponent>();
+	auto sound = mEnemyObj->GetComponent<SoundComponent>();
 	if (!sound) return;
 	sound->LoadFile(playSoundName);
 	sound->Play();
