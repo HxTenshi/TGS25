@@ -29,7 +29,7 @@ void TitleMnager::Start(){
 	mCursorScript->AddButtonContainer("How_To_Button");
 	mCursorScript->AddButtonContainer("GameEnd_Button");
 	// 遷移先のシーンの追加
-	mCursorScript->AddSceneContainer("Stage00");
+	mCursorScript->AddSceneContainer("Stage00_ex");
 	// クレジット(未実装)
 	//mCursorScript->AddSceneContainer("Stage00");
 	mCursorScript->AddSceneContainer("How_To");
