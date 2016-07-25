@@ -6,6 +6,7 @@
 #include "MySTL/File.h"
 #include "IComponent.h"
 #include "Type/ForceMode.h"
+#include "MySTL/ptr.h"
 
 namespace physx{
 	class PxRigidActor;
@@ -35,8 +36,7 @@ public:
 private:
 };
 
-
-class PhysXComponent :public IPhysXComponent{
+class PhysXComponent :public enable_shared_from_this<PhysXComponent>, public IPhysXComponent{
 public:
 	PhysXComponent();
 	~PhysXComponent();
@@ -56,7 +56,7 @@ public:
 
 	void SetTransform(bool RebirthSet);
 
-	void AddShape(physx::PxShape& shape);
+	bool AddShape(physx::PxShape& shape);
 	void RemoveShape(physx::PxShape& shape);
 
 	bool GetKinematic() override{ return mIsKinematic; };
@@ -71,6 +71,9 @@ public:
 
 	bool mIsEngineMode;
 private:
+
+	void ChildrenAttachShape(Actor* actor);
+
 	physx::PxRigidActor* mRigidActor;
 	bool mIsKinematic;
 	char mChengeTransformFlag;

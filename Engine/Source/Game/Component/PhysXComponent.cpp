@@ -1,4 +1,5 @@
 #include "PhysXComponent.h"
+#include "PhysXColliderComponent.h"
 
 #include "physx/physx3.h"
 
@@ -44,11 +45,62 @@ void PhysXComponent::Start(){
 	//	}
 	//}
 	//else{
-		mRigidActor->setGlobalPose(t);
+	mRigidActor->setGlobalPose(t);
 	//}
+	{
+		auto col = gameObject->GetComponent<PhysXColliderComponent>();
+		if (col){
+			col->AttachPhysxComponent(shared_from_this());
+		}
+	}
+	ChildrenAttachShape(gameObject);
+}
+
+void PhysXComponent::ChildrenAttachShape(Actor* actor){
+
+	for (auto& act : actor->mTransform->Children()){
+		auto com = act->GetComponent<PhysXComponent>();
+		if (com)continue;
+
+		auto col = act->GetComponent<PhysXColliderComponent>();
+		if (col){
+			col->AttachPhysxComponent(shared_from_this());
+		}
+
+		ChildrenAttachShape(act);
+	}
+
 }
 void PhysXComponent::Finish(){
 	if (mRigidActor){
+
+		weak_ptr<PhysXComponent> physxCom = NULL;
+		{
+			Actor* par = gameObject->mTransform->GetParent();
+			while (par){
+				auto com = par->GetComponent<PhysXComponent>();
+				if (com){
+					physxCom = com;
+					break;
+				}
+				par = par->mTransform->GetParent();
+			}
+		}
+
+		//シェイプのアタッチを解放
+		auto num = mRigidActor->getNbShapes();
+		for (int i = 0; i < num; i++){
+			PxShape* temp = NULL;
+			mRigidActor->getShapes(&temp,1);
+			if (!temp)continue;
+			auto act = (Actor*)temp->userData;
+			if (!act)continue;
+			auto com = act->GetComponent<PhysXColliderComponent>();
+			if (!com)continue;
+			com->AttachPhysxComponent(physxCom);
+			
+		}
+
 		mRigidActor->userData = NULL;
 		if (mIsEngineMode){
 			Game::RemovePhysXActorEngine(mRigidActor);
@@ -56,6 +108,7 @@ void PhysXComponent::Finish(){
 		else{
 			Game::RemovePhysXActor(mRigidActor);
 		}
+
 	}
 	mRigidActor = NULL;
 }
@@ -128,8 +181,10 @@ void PhysXComponent::SetTransform(bool RebirthSet){
 }
 
 
-void PhysXComponent::AddShape(physx::PxShape& shape){
+bool PhysXComponent::AddShape(physx::PxShape& shape){
+	if (!mRigidActor)return false;
 	mRigidActor->attachShape(shape);
+	return true;
 }
 void PhysXComponent::RemoveShape(physx::PxShape& shape){
 	if (mRigidActor)

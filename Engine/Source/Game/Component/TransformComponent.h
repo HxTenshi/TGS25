@@ -22,7 +22,10 @@ public:
 	virtual const XMVECTOR LossyScale() const = 0;
 	//virtual const XMVECTOR& WorldRotate() const = 0;
 	virtual const XMVECTOR& WorldPosition() const = 0;
+	virtual const XMVECTOR WorldQuaternion() const = 0;
 	virtual void WorldPosition(const XMVECTOR& position) = 0;
+	virtual void WorldQuaternion(const XMVECTOR& quaternion) = 0;
+	virtual void WorldScale(const XMVECTOR& scale) = 0;
 
 
 	virtual const XMVECTOR& Scale() const = 0;
@@ -49,8 +52,7 @@ public:
 	virtual Actor* GetParent() = 0;
 	virtual void SetParentUniqueID(int id) = 0;
 	virtual void SetParent(Actor* parent) = 0;
-
-	virtual void SetUndo(const XMVECTOR& pos) = 0;
+	virtual void SetParentWorld(Actor* parent) = 0;
 
 	virtual void AllChildrenDestroy() = 0;
 protected:
@@ -70,7 +72,10 @@ public:
 	const XMVECTOR LossyScale() const override;
 	//const XMVECTOR& WorldRotate() const override;
 	const XMVECTOR& WorldPosition() const override;
+	const XMVECTOR WorldQuaternion() const override;
 	void WorldPosition(const XMVECTOR& position) override;
+	void WorldQuaternion(const XMVECTOR& quaternion) override;
+	void WorldScale(const XMVECTOR& scale) override;
 
 	const XMVECTOR& Scale() const override;
 	const XMVECTOR& Rotate() const override;
@@ -112,14 +117,11 @@ public:
 		return !mFixMatrixFlag;
 	}
 
-	void SetUndo(const XMVECTOR& pos) override;
-
-	
-
 	std::list<Actor*>& Children() override;
 	Actor* GetParent() override;
 	void SetParentUniqueID(int id) override;
 	void SetParent(Actor* parent) override;
+	void SetParentWorld(Actor* parent) override;
 
 private:
 	XMVECTOR mScale;

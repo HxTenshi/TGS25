@@ -167,8 +167,7 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 
 	float NLDot = dot(N, -L);
 
-
-	float offset = 0.000000035;// +(NLDot)* 0.00000005;
+	float offset = 0.00000003;
 	// ライトデプスの準備
 	float4 LVPos = DepthTex.Sample(DepthSamLinear, input.Tex).zwyx;
 

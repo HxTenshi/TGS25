@@ -9,14 +9,18 @@ struct InspectorDataSet;
 class IDebugEngineScript{
 public:
 	virtual ~IDebugEngineScript(){}
-	virtual void Initialize(Actor* gameObject){}
+	virtual void Initialize(Actor* gameObject){ (void)gameObject; }
 	virtual void EngineUpdate(){}
 	virtual void Update(){}
 	virtual void Finish(){}
 #ifdef _ENGINE_MODE
-	virtual void CreateInspector(std::vector<InspectorDataSet>& data){}
+	virtual void CreateInspector(std::vector<InspectorDataSet>& data){
+		(void)data;
+	}
 #endif
-	virtual void IO_Data(I_ioHelper* io){}
+	virtual void IO_Data(I_ioHelper* io){
+		(void)io;
+	}
 };
 
 class DebugEngineScriptComponent : public Component{

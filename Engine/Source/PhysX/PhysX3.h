@@ -49,6 +49,7 @@ public:
 	PxRigidActor* createSphere();
 	PxRigidActor* createBody();
 	PxRigidActor* createBodyEngine();
+	PxRigidStatic* createRigidStatic();
 
 	void EngineDisplay();
 	void Display();
@@ -59,6 +60,7 @@ public:
 	void RemoveActorEngine(PxActor* act);
 
 	Actor* Raycast(const XMVECTOR& pos, const XMVECTOR& dir, float distance) override;
+	bool RaycastHit(const XMVECTOR& pos, const XMVECTOR& dir, float distance, ::RaycastHit* result) override;
 	Actor* EngineSceneRaycast(const XMVECTOR& pos, const XMVECTOR& dir);
 
 	PxShape* CreateShape();
@@ -66,14 +68,17 @@ public:
 	PxShape* CreateTriangleMesh(const IPolygonsData* poly);
 	PxController* CreateController();
 
+	void AddStaticShape(PxShape* shape);
+	void RemoveStaticShape(PxShape* shape);
+
 	PxPhysics* GetSDK(){
 		return gPhysicsSDK;
 	};
 
 	// Implements PxUserControllerHitReport
 	virtual void							onShapeHit(const PxControllerShapeHit& hit);
-	virtual void							onControllerHit(const PxControllersHit& hit)		{}
-	virtual void							onObstacleHit(const PxControllerObstacleHit& hit)	{}
+	virtual void							onControllerHit(const PxControllersHit& hit)		{ (void)hit; }
+	virtual void							onObstacleHit(const PxControllerObstacleHit& hit)	{ (void)hit; }
 
 	// Implements PxControllerBehaviorCallback
 	virtual PxControllerBehaviorFlags		getBehaviorFlags(const PxShape& shape, const PxActor& actor);
@@ -95,6 +100,7 @@ private:
 	PxSimulationFilterShader gDefaultFilterShader;
 	PxCooking*	mCooking;
 	PxControllerManager* mControllerManager;
+	PxRigidStatic* mRigidStatic;
 
 	PxScene* gScene;
 	PxScene* mEngineScene;

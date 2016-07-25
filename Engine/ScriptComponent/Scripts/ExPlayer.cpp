@@ -2,6 +2,7 @@
 
 #include "../h_standard.h"
 #include "../h_component.h"
+#include "Game/Component/CharacterControllerComponent.h"
 
 ExPlayer::ExPlayer(){
 	mSpeed = 1.0f;
@@ -9,10 +10,11 @@ ExPlayer::ExPlayer(){
 	mRotateSpeed = 1.0f;
 	mCameraName = "";
 
-	mGroundHitCount = 0;
 
 	mCurrentSpeed = 0.0f;
 	mJumpPower = 1.0f;
+
+	mVelocity = XMVectorSet(0, 0, 0, 1);
 }
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -44,29 +46,31 @@ void ExPlayer::Update(){
 	}
 
 	mCurrentSpeed -= mCurrentSpeed * 0.4f * game->DeltaTime()->GetDeltaTime();
-	mCurrentSpeed += z * mSpeed * game->DeltaTime()->GetDeltaTime();
+	mCurrentSpeed += z * mSpeed;
 	mCurrentSpeed = max(0.0f, min(mCurrentSpeed, mMaxSpeed));
 
-	auto physx = gameObject->GetComponent<PhysXComponent>();
-	if (!physx)return;
+	auto cc = gameObject->GetComponent<CharacterControllerComponent>();
+	if (!cc)return;
 	
 	x *= mRotateSpeed;
-	gameObject->mTransform->AddTorque(XMVectorSet(0, x, 0, 1), ForceMode::eVELOCITY_CHANGE);
+	auto quat = XMQuaternionRotationRollPitchYaw(0, x, 0);
+	auto rot = gameObject->mTransform->Quaternion();
+	rot = XMQuaternionMultiply(rot, quat);
+	gameObject->mTransform->Quaternion(rot);
+	
 
-	if (mGroundHitCount){
-
-		auto f = gameObject->mTransform->Forward() * mCurrentSpeed;
-		physx->SetForceVelocity(f);
-
-		if (Input::Down(KeyCoord::Key_Q)) {
-			physx->SetForceVelocity(XMVectorSet(0, 0, 0, 1));
-		}
+	if (cc->IsGround()){
+		auto v = gameObject->mTransform->Forward() * mCurrentSpeed;
+		mVelocity.x = v.x;
+		mVelocity.z = v.z;
+		mVelocity.y = 0.0f;
 
 		if (Input::Down(KeyCoord::Key_SPACE)) {
-			gameObject->mTransform->AddForce(XMVectorSet(0, mJumpPower, 0, 1), ForceMode::eIMPULSE);
+			mVelocity += XMVectorSet(0, mJumpPower, 0, 1);
 		}
 	}
-	mGroundHitCount = 0;
+	mVelocity.y -= 9.81f * 3 * game->DeltaTime()->GetDeltaTime();
+	cc->Move(mVelocity * game->DeltaTime()->GetDeltaTime());
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -84,9 +88,7 @@ void ExPlayer::OnCollideBegin(Actor* target){
 
 //コライダーとのヒット中に呼ばれます
 void ExPlayer::OnCollideEnter(Actor* target){
-	if (target->Name() == "Floor"){
-		mGroundHitCount = 1;
-	}
+
 }
 
 //コライダーとのロスト時に呼ばれます

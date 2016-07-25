@@ -3,9 +3,8 @@
 #include "main.h"
 
 
-class ExPlayer :public IDllScriptComponent{
+class PlayerController :public IDllScriptComponent{
 public:
-	ExPlayer();
 	void Initialize()override;
 	void Start()override;
 	void Update()override;
@@ -16,18 +15,8 @@ public:
 
 private:
 	//ÉÅÉìÉoïœêî
-	SERIALIZE
-	float mSpeed;
-	SERIALIZE
-	float mMaxSpeed;
-	SERIALIZE
-	float mRotateSpeed;
-	SERIALIZE
-	float mJumpPower;
 
-	SERIALIZE
-	std::string mCameraName;
-
-	XMVECTOR mVelocity;
-	float mCurrentSpeed;
+	XMVECTOR mJump;
+	XMVECTOR mGravity;
+	XMVECTOR mToQuaternion;
 };
