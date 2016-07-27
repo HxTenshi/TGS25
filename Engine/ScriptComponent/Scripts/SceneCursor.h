@@ -26,6 +26,8 @@ public:
 	int GetButtonCount();
 	// カーソルが動いているかを返します
 	bool IsCursorMove();
+	// カーソルが押されたかを返します
+	bool IsPushCursor();
 	// シーンが変わったかを返します
 	bool IsChangeScene();
 
@@ -42,6 +44,7 @@ private:
 	float mAddCursorPositionX;	// カーソルの位置を加算する(X)
 	bool mIsMove;				// 動くか
 	bool mIsCursorMove;			// カーソルが動いているか
+	bool mIsPushCursor;			// ボタンが押されたか
 	bool mIsChangeScene;		// シーンが変わったか
 	XMVECTOR mLerp;
 	// ボタンコンテナ

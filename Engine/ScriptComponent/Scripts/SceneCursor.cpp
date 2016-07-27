@@ -16,6 +16,7 @@ void SceneCursor::Initialize(){
 	mLerpTime = 0.0f;
 	mIsMove = false;
 	mIsCursorMove = false;
+	mIsPushCursor = false;
 	mIsChangeScene = false;
 }
 
@@ -52,14 +53,16 @@ void SceneCursor::Update(){
 		// 位置の変更
 		if (mLerpTime != 1.0f) {
 			auto deltaTime = game->DeltaTime()->GetDeltaTime();
+			auto timeScale = game->DeltaTime()->GetTimeScale();
 			auto moveVelocity = mLerp * deltaTime * mSpeed;
+			if (deltaTime == 0.0f) moveVelocity = mLerp * mSpeed * 0.01f;
 			auto distance = buttonPosition - position;
 			if (abs(moveVelocity.x) > abs(distance.x) ||
 				abs(moveVelocity.y) > abs(distance.y))
 				gameObject->mTransform->Position(buttonPosition - halfScale);
 			else gameObject->mTransform->Position(position + moveVelocity);
-			
 			mLerpTime += 1.0f / mSetLerpTime * deltaTime * mSpeed;
+			if (deltaTime == 0.0f) mLerpTime += 1.0f / mSetLerpTime * mSpeed * 0.01f;
 			if (mLerpTime >= 1.0f) mLerpTime = 1.0f;
 		}
 		else{
@@ -87,12 +90,18 @@ void SceneCursor::Update(){
 	}
 	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_CIRCLE) ||
 		Input::Trigger(KeyCoord::Key_SPACE)) {
-		mIsCursorMove = true;
-		mIsChangeScene = true;
+		mIsPushCursor = true;
+		// シーン遷移しない場合はすぐに返す
+		if (mSceneContainer[mButtonCount] == "./Assets/Scenes/NotMove.scene") {
+			return;
+		}
 		auto sound = gameObject->GetComponent<SoundComponent>();
 		if (!sound) return;
 		sound->LoadFile("Assets/SceneAssets/SceneSound/Decision.wav");
 		sound->Play();
+		// シーンの遷移 true
+		mIsCursorMove = true;
+		mIsChangeScene = true;
 	}
 }
 
@@ -144,6 +153,11 @@ int SceneCursor::GetButtonCount() {
 // カーソルが動いているかを返します
 bool SceneCursor::IsCursorMove() {
 	return mIsCursorMove;
+}
+
+// カーソルが押されたかを返します
+bool SceneCursor::IsPushCursor() {
+	return mIsPushCursor;
 }
 
 // シーンが変わったかを返します

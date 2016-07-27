@@ -61,7 +61,10 @@ void Fade::FadeOut(const float time, const float maxalpha) {
 	// デルタタイムの取得
 	auto deltaTime = game->DeltaTime()->GetDeltaTime();
 	if (mFadeOutAlpha > maxalpha) mFadeOutAlpha = maxalpha;
-	else if(mFadeOutAlpha < maxalpha) mFadeOutAlpha += maxalpha / time * deltaTime;
+	else if (mFadeOutAlpha < maxalpha) {
+		mFadeOutAlpha += maxalpha / time * deltaTime;
+		if(deltaTime == 0.0f) mFadeOutAlpha += maxalpha / time / 60.0f;
+	}
 	//game->Debug()->Log(std::to_string(mFadeOutAlpha));
 	//mFadeOutAlpha = 0.0f;
 	// 描画
