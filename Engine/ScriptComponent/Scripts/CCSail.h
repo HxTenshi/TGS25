@@ -1,14 +1,17 @@
 
 #pragma once
 #include "main.h"
+#include"h_standard.h"
+#include"h_component.h"
 
-enum BirdPositions
+
+enum BirdPosition
 {
-	LEFTs,
-	RIGHTs
+	LEFT,
+	RIGHT
 };
 
-class Sail :public IDllScriptComponent{
+class CCSail :public IDllScriptComponent {
 public:
 	void Initialize()override;
 	void Start()override;
@@ -17,28 +20,28 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+
 	float MovePower();
 	float GetSailRotateRad();
 
-
 private:
-	//ÉÅÉìÉoïœêî
 	float move;
 	float mSailRotate;
 	XMVECTOR mVelocity;
 	XMVECTOR mWindvec;
+
 	SERIALIZE
-	float Speed;
+		float Speed;
+
 	float mRotate;
-	BirdPositions mBirdPos;
+	BirdPosition mBirdPos;
 	bool isAnimation;
 
 	SERIALIZE
-	float RotatePower;
+		float RotatePower;
 
 private:
 	float Lerp(float value1, float value2, float amount);
 	void SailRotate();
 	void SailAnimation();
-
 };

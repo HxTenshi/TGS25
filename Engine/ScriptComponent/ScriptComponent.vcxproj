@@ -161,6 +161,8 @@
     <ClCompile Include="Scripts\Bullet.cpp" />
     <ClCompile Include="Scripts\BulletEmiter.cpp" />
     <ClCompile Include="Scripts\CameraController.cpp" />
+    <ClCompile Include="Scripts\CCBoard.cpp" />
+    <ClCompile Include="Scripts\CCSail.cpp" />
     <ClCompile Include="Scripts\CreateEnemyObj.cpp" />
     <ClCompile Include="Scripts\DeltaTimeScale.cpp" />
     <ClCompile Include="Scripts\DEMOCamera.cpp" />
@@ -207,6 +209,8 @@
     <ClInclude Include="Scripts\Bullet.h" />
     <ClInclude Include="Scripts\BulletEmiter.h" />
     <ClInclude Include="Scripts\CameraController.h" />
+    <ClInclude Include="Scripts\CCBoard.h" />
+    <ClInclude Include="Scripts\CCSail.h" />
     <ClInclude Include="Scripts\CreateEnemyObj.h" />
     <ClInclude Include="Scripts\DeltaTimeScale.h" />
     <ClInclude Include="Scripts\DEMOCamera.h" />

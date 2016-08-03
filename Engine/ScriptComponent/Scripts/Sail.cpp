@@ -19,7 +19,7 @@ void Sail::Initialize(){
 	move = 0;
 	mRotate = 0;
 	isAnimation = false;
-	mBirdPos = BirdPosition::RIGHT;
+	mBirdPos = BirdPositions::RIGHTs;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -136,8 +136,8 @@ void Sail::SailRotate()
 		mSailRotate += 0.05f;
 	}
 
-	if ((mSailRotate > 0 && mBirdPos == BirdPosition::RIGHT)
-		|| (mSailRotate < 0 && mBirdPos == BirdPosition::LEFT))
+	if ((mSailRotate > 0 && mBirdPos == BirdPositions::RIGHTs)
+		|| (mSailRotate < 0 && mBirdPos == BirdPositions::LEFTs))
 	{
 		isAnimation = true;
 	}
@@ -154,11 +154,11 @@ void Sail::SailRotate()
 
 void Sail::SailAnimation()
 {
-	if (mBirdPos == BirdPosition::LEFT)
+	if (mBirdPos == BirdPositions::LEFTs)
 	{
 		if (abs(mRotate) >= 360 * (XM_PI / 180))
 		{
-			mBirdPos = BirdPosition::RIGHT;
+			mBirdPos = BirdPositions::RIGHTs;
 			isAnimation = false;
 			mRotate = 0;
 		}
@@ -167,12 +167,12 @@ void Sail::SailAnimation()
 			mRotate += RotatePower;
 		}
 	}
-	else if (mBirdPos == BirdPosition::RIGHT)
+	else if (mBirdPos == BirdPositions::RIGHTs)
 	{
 		
 		if (abs(mRotate) >= 360 * (XM_PI / 180))
 		{
-			mBirdPos = BirdPosition::LEFT;
+			mBirdPos = BirdPositions::LEFTs;
 			isAnimation = false;
 			mRotate = 0;
 		}

@@ -3,7 +3,7 @@
 #include "main.h"
 
 
-class CameraController :public IDllScriptComponent{
+class CameraController :public IDllScriptComponent {
 public:
 	void Initialize()override;
 	void Start()override;
@@ -12,6 +12,11 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+	void StateUpdate(float deltaTime);
+	void Normal(float deltaTime);
+	void Jump(float deltaTime);
+	void Dead(float deltaTime);
+	void Tornado(float deltaTime);
 
 
 private:

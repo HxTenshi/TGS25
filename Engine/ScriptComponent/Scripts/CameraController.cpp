@@ -6,16 +6,17 @@
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"SailBoard.h"
+#include"CCBoard.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
-void CameraController::Initialize(){
+void CameraController::Initialize() {
 	mPrevJump = false;
 	mTimer = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
-void CameraController::Start(){
+void CameraController::Start() {
 	mTarget = game->FindActor("Board");
 	gameObject->mTransform->Position(XMVectorSet(0, 0, 0, 1));
 }
@@ -23,79 +24,80 @@ void CameraController::Start(){
 //毎フレーム呼ばれます
 void CameraController::Update()
 {
+	mTarget = game->FindActor("Board");
+	if (!mTarget) return;
+	if (!mTarget->GetScript<CCBoard>()) return;
 
-
-	auto temp = game->FindActor("Tornado");
-	if (temp)
-	{
-		mTarget = temp;
-		Look();
-		mPosition = mTarget->mTransform->Position() + XMVectorSet(0, 10, -50, 1);
-	}
-	else
-	{
-		mTarget = game->FindActor("Board");
-
-		Look();
-
-		if (mTarget->GetScript<SailBoard>()->GetHitPoint() <= 0)
-		{
-			auto position = mTarget->mTransform->Position() + XMVectorSet(0,0,-10,0);
-			position.y = -5;
-			mPosition = position;
-			{
-				auto at = XMMatrixLookAtLH(position,mTarget->mTransform->Position(), gameObject->mTransform->Up());
-				at = XMMatrixTranspose(at);
-				gameObject->mTransform->Quaternion(XMQuaternionRotationMatrix(at));
-			}
-		}
-		else
-		{
-			//プレイヤーがジャンプしたらカメラの位置変更の準備
-			if (mPrevJump != mTarget->GetScript<SailBoard>()->GetIsJump())
-			{
-				mFromPos = mPosition;
-				mTimer = 0;
-				mPrevJump = mTarget->GetScript<SailBoard>()->GetIsJump();
-			}
-
-			if (!mTarget->GetScript<SailBoard>()->GetIsJump())
-			{
-				mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -13) + XMVectorSet(0, 3.5f, 0, 1));
-				if (Input::Down(PAD_DS4_KeyCoord::Button_DOWN))
-				{
-					mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * 3) + XMVectorSet(0, 1, 0, 1));
-				}
-			}
-			else
-			{
-				mPosition = Lerp(mFromPos, mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1));
-			}
-		}
-	}
-
-	gameObject->mTransform->Position(mPosition);
+	StateUpdate(game->DeltaTime()->GetDeltaTime());
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
-void CameraController::Finish(){
+void CameraController::Finish() {
 
 }
 
 //コライダーとのヒット時に呼ばれます
-void CameraController::OnCollideBegin(Actor* target){
+void CameraController::OnCollideBegin(Actor* target) {
 	(void)target;
 }
 
 //コライダーとのヒット中に呼ばれます
-void CameraController::OnCollideEnter(Actor* target){
+void CameraController::OnCollideEnter(Actor* target) {
 	(void)target;
 }
 
 //コライダーとのロスト時に呼ばれます
-void CameraController::OnCollideExit(Actor* target){
+void CameraController::OnCollideExit(Actor* target) {
 	(void)target;
 }
+
+void CameraController::StateUpdate(float deltaTime)
+{
+	switch (mTarget->GetScript<CCBoard>()->GetState())
+	{
+	case State::MOVE: Normal(deltaTime); break;
+	case State::JUMP: Jump(deltaTime); break;
+	case State::TORNADO: Tornado(deltaTime); break;
+	}
+}
+
+void CameraController::Normal(float deltaTime)
+{
+	mPosition = XMVectorLerp(mPosition, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -13) + XMVectorSet(0, 3.5f, 0, 1), 0.2f);
+
+	auto at = XMMatrixLookAtLH(mPosition, mTarget->mTransform->Position(), gameObject->mTransform->Up());
+	at = XMMatrixTranspose(at);
+	gameObject->mTransform->Quaternion(XMQuaternionRotationMatrix(at));
+
+	gameObject->mTransform->Position(mPosition);
+}
+
+void CameraController::Jump(float deltaTime)
+{
+	mPosition = XMVectorLerp(mPosition, mTarget->mTransform->Position() + XMVectorSet(0, 1, -5, 1), 0.2f);
+
+	auto at = XMMatrixLookAtLH(mPosition, mTarget->mTransform->Position(), gameObject->mTransform->Up());
+	at = XMMatrixTranspose(at);
+	gameObject->mTransform->Quaternion(XMQuaternionRotationMatrix(at));
+
+	gameObject->mTransform->Position(mPosition);
+}
+
+void CameraController::Dead(float deltaTime)
+{
+}
+
+void CameraController::Tornado(float deltaTime)
+{
+	mPosition = XMVectorLerp(mPosition, mTarget->mTransform->Position() + XMVectorSet(0, 1, -50, 1), 0.2f);
+
+	auto at = XMMatrixLookAtLH(mPosition, mTarget->mTransform->Position(), gameObject->mTransform->Up());
+	at = XMMatrixTranspose(at);
+	gameObject->mTransform->Quaternion(XMQuaternionRotationMatrix(at));
+
+	gameObject->mTransform->Position(mPosition);
+}
+
 
 //プレイヤーを見る
 void CameraController::Look()
