@@ -1,8 +1,8 @@
 #include "CCBoard.h"
 #include "Game/Component/CharacterControllerComponent.h"
 #include"Game\Component\AnimationComponent.h"
-#include"CCSail.h"
 #include"MoveSmoke.h"
+#include"HaneEffect.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -48,6 +48,20 @@ void CCBoard::Finish() {
 //コライダーとのヒット時に呼ばれます
 void CCBoard::OnCollideBegin(Actor* target) {
 	(void)target;
+	if (target->Name() == "Tree" || target->Name() == "Tower")
+	{
+		PlaySE("Assets/PlayerSE/hit.wav");
+	}
+
+	if (target->Name() == "PointItem") {
+
+		/*auto effect = game->CreateActor("Assets/Effect/haneEffect.json");
+		game->AddObject(effect);
+		effect->GetScript<HaneEffect>()->SetPosition(XMVectorSet(200 + (70 * mPoint), 630, 0, 0));
+		mPoint++;
+		PlaySE("Assets/PlayerSE/recovery.wav");*/
+		game->DestroyObject(target);
+	}
 }
 
 //コライダーとのヒット中に呼ばれます
@@ -104,6 +118,8 @@ void CCBoard::StateUpdate(float deltaTime)
 
 void CCBoard::Move(float deltaTime)
 {
+	SailRotateAnimation();
+
 	isTornado = false;
 	float x = 0.0f;
 	if (Input::Down(KeyCoord::Key_A)) {
@@ -160,14 +176,13 @@ void CCBoard::Move(float deltaTime)
 
 	mVelocity.y -= 9.81f * 3 * game->DeltaTime()->GetDeltaTime();
 	mCC->Move(mVelocity * game->DeltaTime()->GetDeltaTime());
-	AnimationChange(3);
+	//AnimationChange(3);
 }
 
 void CCBoard::Jump(float deltaTime)
 {
 	MoveSmokeParameterSet(0, 10);
 
-	AnimationChange(1);
 	Trick();
 	auto mCC = gameObject->GetComponent<CharacterControllerComponent>();
 	if (!mCC) return;
@@ -189,6 +204,7 @@ void CCBoard::Jump(float deltaTime)
 
 	if (mTrickPoint > 0.2f && !isTornado)
 	{
+		AnimationChange(1);
 		isTornado = true;
 		CreateTornado();
 		StateChange(State::TORNADO);
@@ -295,7 +311,7 @@ void CCBoard::CreateTornado()
 	if (tornado)
 	{
 		game->AddObject(tornado);
-		//PlaySE("Assets/PlayerSE/wind.wav");
+		PlaySE("Assets/PlayerSE/wind.wav");
 		tornado->mTransform->Position(gameObject->mTransform->Position());
 		auto parent = game->FindActor("Tornados");
 		tornado->mTransform->SetParent(parent);
@@ -341,6 +357,15 @@ void CCBoard::MoveSmokeParameterSet(float speed, float max)
 	}
 }
 
+void CCBoard::PlaySE(std::string filename)
+{
+	auto component = gameObject->GetComponent<SoundComponent>();
+	if (!component) return;
+	component->SetLoop(false);
+	component->LoadFile(filename);
+	component->Play();
+}
+
 void CCBoard::AnimationChange(int id)
 {
 	//よくわからないバグが出てる
@@ -348,6 +373,7 @@ void CCBoard::AnimationChange(int id)
 	if (!bird) return;
 	auto mBirdAnimation = bird->GetComponent<AnimationComponent>();
 	if (!mBirdAnimation) return;
+
 	if (mBirdAnimation->mCurrentSet == id) return;
 	auto anima1 = mBirdAnimation->GetAnimetionParam(mBirdAnimation->mCurrentSet);
 	auto anima2 = mBirdAnimation->GetAnimetionParam(id);
@@ -361,4 +387,86 @@ void CCBoard::AnimationChange(int id)
 	mBirdAnimation->SetAnimetionParam(mBirdAnimation->mCurrentSet, anima1);
 	mBirdAnimation->SetAnimetionParam(id, anima2);
 	mBirdAnimation->mCurrentSet = id;
+}
+
+void CCBoard::SailRotateAnimation()
+{
+	auto sail = game->FindActor("Sail")->GetScript<CCSail>();
+	if (!sail) return;
+
+	auto bird = game->FindActor("Bird");
+	if (!bird) return;
+	auto mBirdAnimation = bird->GetComponent<AnimationComponent>();
+	if (!mBirdAnimation) return;
+
+
+	{
+		if ((sail->GetSailRotateRad() <= 0 && mBirdAnimation->mCurrentSet == 3))
+		{
+			auto anima1 = mBirdAnimation->GetAnimetionParam(mBirdAnimation->mCurrentSet);
+			anima1.mWeight = 0;
+
+			auto anima2 = mBirdAnimation->GetAnimetionParam(0);
+			anima2.mWeight = 1;
+			anima2.mTimeScale = -2.5f;
+			anima2.mTime = 61;
+			anima2.mLoop = false;
+
+			mBirdAnimation->SetAnimetionParam(mBirdAnimation->mCurrentSet, anima1);
+			mBirdAnimation->SetAnimetionParam(0, anima2);
+			mBirdAnimation->mCurrentSet = 0;
+		}
+		else if((sail->GetSailRotateRad() > 0 && mBirdAnimation->mCurrentSet == 4))
+		{
+			auto anima1 = mBirdAnimation->GetAnimetionParam(mBirdAnimation->mCurrentSet);
+			anima1.mWeight = 0;
+
+			auto anima2 = mBirdAnimation->GetAnimetionParam(0);
+			anima2.mWeight = 1;
+			anima2.mTimeScale = 2.5;
+			anima2.mTime = 0;
+			anima2.mLoop = false;
+
+			mBirdAnimation->SetAnimetionParam(mBirdAnimation->mCurrentSet, anima1);
+			mBirdAnimation->SetAnimetionParam(0, anima2);
+			mBirdAnimation->mCurrentSet = 0;
+		}
+	}
+
+	if (mBirdAnimation->mCurrentSet == 0)
+	{
+		auto anima = mBirdAnimation->GetAnimetionParam(0);
+		if ((anima.mTime != 0 && anima.mTimeScale <= -1) || (anima.mTime != 61 && anima.mTimeScale >= 1)) return;
+	}
+
+	if (sail->GetSailRotateRad() <= 0)
+	{
+		auto anima1 = mBirdAnimation->GetAnimetionParam(mBirdAnimation->mCurrentSet);
+		anima1.mWeight = 0;
+
+		auto anima2 = mBirdAnimation->GetAnimetionParam(4);
+		anima2.mWeight = 1;
+		anima2.mTimeScale = 0;
+		anima2.mTime = abs(sail->GetSailRotateRad()) * 10;
+		anima2.mLoop = false;
+
+		mBirdAnimation->SetAnimetionParam(mBirdAnimation->mCurrentSet, anima1);
+		mBirdAnimation->SetAnimetionParam(4, anima2);
+		mBirdAnimation->mCurrentSet = 4;
+	}
+	else
+	{
+		auto anima1 = mBirdAnimation->GetAnimetionParam(mBirdAnimation->mCurrentSet);
+		anima1.mWeight = 0;
+
+		auto anima2 = mBirdAnimation->GetAnimetionParam(3);
+		anima2.mWeight = 1;
+		anima2.mTimeScale = 0;
+		anima2.mTime = abs(sail->GetSailRotateRad()) * 10;
+		anima2.mLoop = false;
+
+		mBirdAnimation->SetAnimetionParam(mBirdAnimation->mCurrentSet, anima1);
+		mBirdAnimation->SetAnimetionParam(3, anima2);
+		mBirdAnimation->mCurrentSet = 3;
+	}
 }

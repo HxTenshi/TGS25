@@ -2,8 +2,9 @@
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
-void CCSail::Initialize() {
-
+void CCSail::Initialize() 
+{
+	mBirdPos = BirdPosition::RIGHT;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -44,6 +45,11 @@ void CCSail::OnCollideEnter(Actor* target) {
 //コライダーとのロスト時に呼ばれます
 void CCSail::OnCollideExit(Actor* target) {
 	(void)target;
+}
+
+BirdPosition CCSail::GetBirdPosition()
+{
+	return mBirdPos;
 }
 
 //返り値は

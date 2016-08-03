@@ -4,6 +4,7 @@
 #include "../h_standard.h"
 #include "../h_component.h"
 #include "Game/Component/CharacterControllerComponent.h"
+#include"CCSail.h"
 
 enum State
 {
@@ -11,6 +12,12 @@ enum State
 	JUMP,          //ジャンプしたとき
 	TORNADO,       //トルネードを出したとき
 	DEAD           //死亡したとき 
+};
+
+enum SailPos
+{
+	LEFTPOS,
+	RIGHTPOS
 };
 
 class CCBoard :public IDllScriptComponent {
@@ -41,9 +48,12 @@ private:
 	void CreateAttackWind();
 	void MoveSmokeParameterSet(float speed, float max = 0);
 
+	void PlaySE(std::string filename);
+
 
 private: //アニメーション関連 クラスに分けたいけどウィークポインタのクラス間の渡し方がわからない
 	void AnimationChange(int id);
+	void SailRotateAnimation();
 
 
 private:
