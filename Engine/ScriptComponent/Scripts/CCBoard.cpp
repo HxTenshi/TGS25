@@ -4,13 +4,14 @@
 #include"MoveSmoke.h"
 #include"HaneEffect.h"
 #include"Wind.h"
+#include"PlayerManager.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void CCBoard::Initialize()
 {
 	mWindVector = XMVectorSet(1, 0, 0, 1);
-	mState = State::MOVE;
+	mState = State::STANDBY;
 
 	mSpeed = 1.0f;
 	mMaxSpeed = 10.0f;
@@ -28,6 +29,7 @@ void CCBoard::Initialize()
 	isJump = false;
 	isTornado = false;
 	mPlyerHP = 100;
+	mPoint = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -65,11 +67,11 @@ void CCBoard::OnCollideBegin(Actor* target) {
 
 	if (target->Name() == "PointItem") {
 
-		/*auto effect = game->CreateActor("Assets/Effect/haneEffect.json");
+		auto effect = game->CreateActor("Assets/Effect/haneEffect.json");
 		game->AddObject(effect);
 		effect->GetScript<HaneEffect>()->SetPosition(XMVectorSet(200 + (70 * mPoint), 630, 0, 0));
 		mPoint++;
-		PlaySE("Assets/PlayerSE/recovery.wav");*/
+		PlaySE("Assets/PlayerSE/recovery.wav");
 		game->DestroyObject(target);
 	}
 }
@@ -135,10 +137,23 @@ void CCBoard::StateUpdate(float deltaTime)
 	//game->Debug()->Log(std::to_string(mState));
 	switch (mState)
 	{
+	case State::STANDBY: Standby(deltaTime); break;
 	case State::MOVE: Move(deltaTime); break;
 	case State::JUMP: Jump(deltaTime); break;
 	case State::TORNADO: Tornado(deltaTime); break;
 	case State::DEAD: Dead(deltaTime); break;
+	}
+}
+
+void CCBoard::Standby(float deltaTime)
+{
+	auto manager = game->FindActor("PlayerManager");
+	if (!manager){ StateChange(State::MOVE); return;}
+	auto script = manager->GetScript<PlayerManager>();
+	if(!script) { StateChange(State::MOVE); return; }
+	if (script->IsGameStart())
+	{
+		StateChange(State::MOVE);
 	}
 }
 

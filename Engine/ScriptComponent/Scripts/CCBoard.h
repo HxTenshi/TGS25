@@ -8,6 +8,7 @@
 
 enum State
 {
+	STANDBY,       //開始する前
 	MOVE,          //地面に接地してるとき
 	JUMP,          //ジャンプしたとき
 	TORNADO,       //トルネードを出したとき
@@ -38,6 +39,7 @@ public:
 
 private:
 	void StateUpdate(float deltaTime);
+	void Standby(float deltaTime);
 	void Move(float deltaTime);
 	void Jump(float deltaTime);
 	void Tornado(float deltaTime);
@@ -91,5 +93,6 @@ private:
 	float mPrevAcceler;
 	XMVECTOR mWindVector;
 	float mPlyerHP;
+	float mPoint;
 
 };

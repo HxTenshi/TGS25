@@ -55,11 +55,23 @@ void CameraController::StateUpdate(float deltaTime)
 {
 	switch (mTarget->GetScript<CCBoard>()->GetState())
 	{
+	case State::STANDBY: Standby(deltaTime); break;
 	case State::MOVE: Normal(deltaTime); break;
 	case State::JUMP: Jump(deltaTime); break;
 	case State::TORNADO: Tornado(deltaTime); break;
 	case State::DEAD: Dead(deltaTime); break;
 	}
+}
+
+void CameraController::Standby(float deltaTIme)
+{
+	mPosition = XMVectorLerp(mPosition, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -13) + XMVectorSet(0, 3.5f, 0, 1), 0.2f);
+
+	auto at = XMMatrixLookAtLH(mPosition, mTarget->mTransform->Position(), gameObject->mTransform->Up());
+	at = XMMatrixTranspose(at);
+	gameObject->mTransform->Quaternion(XMQuaternionRotationMatrix(at));
+
+	gameObject->mTransform->Position(mPosition);
 }
 
 void CameraController::Normal(float deltaTime)

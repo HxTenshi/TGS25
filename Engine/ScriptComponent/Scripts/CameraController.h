@@ -13,6 +13,7 @@ public:
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
 	void StateUpdate(float deltaTime);
+	void Standby(float deltaTIme);
 	void Normal(float deltaTime);
 	void Jump(float deltaTime);
 	void Dead(float deltaTime);
