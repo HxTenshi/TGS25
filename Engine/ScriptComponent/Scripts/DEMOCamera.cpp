@@ -6,6 +6,7 @@
 #include "Engine\DebugEngine.h"
 #include<math.h>
 #include"SailBoard.h"
+#include"SailBoard.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）

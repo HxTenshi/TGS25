@@ -5,6 +5,7 @@
 #include "h_standard.h"
 //コンポーネント全てのインクルード
 #include "h_component.h"
+#include"CCBoard.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void WaterGunBullet::Initialize(){
@@ -39,7 +40,7 @@ void WaterGunBullet::Finish(){
 void WaterGunBullet::OnCollideBegin(Actor* target){
 	// プレイヤーに当たったら消す
 	if (target->Name() == "Board") {
-		auto playerScript = target->GetScript<SailBoard>();
+		auto playerScript = target->GetScript<CCBoard>();
 		playerScript->Damage(mSetDamege);
 		//// サウンドを鳴らす
 		/*auto sound = gameObject->GetComponent<SoundComponent>();

@@ -11,6 +11,7 @@
 //コンポーネント全てのインクルード
 #include "h_component.h"
 #include "Engine\DebugEngine.h"
+#include"CCBoard.h"
 
 Enemy::~Enemy() {
 	//gameObject->mTransform->AllChildrenDestroy();
@@ -96,7 +97,7 @@ void Enemy::Finish(){
 void Enemy::OnCollideBegin(Actor* target){
 	if (mEnemyState != EnemyState::DeadMove) {
 		if (target->Name() == "Board") {
-			auto playerScript = target->GetScript<SailBoard>();
+			auto playerScript = target->GetScript<CCBoard>();
 			// プレイヤーが無敵状態なら死亡
 			// そうでない場合はプレイヤーにダメージを与える
 			if (playerScript->IsUnrivaled()) {
@@ -698,7 +699,7 @@ void Enemy::PlayerHeal() {
 	auto player = game->FindActor("Board");
 	// プレイヤーがいなければ死亡判定を優先する
 	if (player->Name() != "Board") return;
-	auto playerScript = player->GetScript<SailBoard>();
+	auto playerScript = player->GetScript<CCBoard>();
 	playerScript->Damage(-mDamage);
 }
 

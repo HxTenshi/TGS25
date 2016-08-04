@@ -9,6 +9,7 @@
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
 #include"Game\Component\MaterialComponent.h"
+#include"CCBoard.h"
 
 
 #include"SailBoard.h"
@@ -37,7 +38,7 @@ void HPGauge::Update()
 		gameObject->mTransform->Position(XMVectorSet(1093, 735 - (height / 2), 1, 1));
 	}*/
 
-	auto playerScript = game->FindActor("Board")->GetScript<SailBoard>();
+	auto playerScript = game->FindActor("Board")->GetScript<CCBoard>();
 	if (playerScript)
 	{
 		auto height = (playerScript->GetHitPoint() / 100.0f) * 1850;

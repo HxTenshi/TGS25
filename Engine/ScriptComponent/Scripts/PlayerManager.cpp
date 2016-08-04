@@ -15,6 +15,7 @@
 #include "SailBoard.h"
 // サウンドボックスのスクリプト
 #include "SoundBox.h"
+#include"CCBoard.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PlayerManager::Initialize()
@@ -62,7 +63,7 @@ void PlayerManager::Update(){
 	// 体力が一定以下なら再生
 	auto player = game->FindActor("Board");
 	if (player != nullptr) {
-		auto playerScript = player->GetScript<SailBoard>();
+		auto playerScript = player->GetScript<CCBoard>();
 		if (playerScript->GetHitPoint() <= 25.0f) mIsWarning = true;
 		else {
 			mIsWarning = false;
