@@ -13,14 +13,16 @@ void CCBoard::Initialize()
 	mWindVector = XMVectorSet(1, 0, 0, 1);
 	mState = State::STANDBY;
 
+	//シリアライズ------------------------
 	mSpeed = 1.0f;
 	mMaxSpeed = 10.0f;
 	mRotateSpeed = 1.0f;
-	mCameraName = "";
-
-
 	mCurrentSpeed = 0.0f;
 	mJumpPower = 10.0f;
+	mAttackSpeed = 1.0f;
+	mTrickCondition = 1.0f;
+	mTrickRotatePower = 0.05f;
+	//-------------------------------------
 
 	mVelocity = XMVectorSet(0, 0, 0, 1);
 
@@ -242,7 +244,7 @@ void CCBoard::Jump(float deltaTime)
 
 	MoveSmokeParameterSet(0, 10);
 
-	Trick();
+	Trick(deltaTime);
 	auto mCC = gameObject->GetComponent<CharacterControllerComponent>();
 	if (!mCC) return;
 
@@ -261,7 +263,7 @@ void CCBoard::Jump(float deltaTime)
 	mVelocity.y -= 9.81f * 3 * game->DeltaTime()->GetDeltaTime();
 	mCC->Move(mVelocity * game->DeltaTime()->GetDeltaTime());
 
-	if (mTrickPoint > 0.2f && !isTornado)
+	if (mTrickPoint > mTrickCondition && !isTornado)
 	{
 		AnimationChange(1);
 		isTornado = true;
@@ -346,24 +348,26 @@ void CCBoard::GroundCheck()
 	}
 }
 
-void CCBoard::Trick()
+void CCBoard::Trick(float deltaTime)
 {
 	if (Input::Down(KeyCoord::Key_W)) {
-		mTrickRotate.x -= 0.05f;
+		mTrickRotate.x -= mTrickRotatePower;
 	}
 	if (Input::Down(KeyCoord::Key_S)) {
-		mTrickRotate.x += 0.05f;
+		mTrickRotate.x += mTrickRotatePower;
 	}
 	if (Input::Down(KeyCoord::Key_A)) {
-		mTrickRotate.y -= 0.05f;
+		mTrickRotate.y -= mTrickRotatePower;
 	}
 	if (Input::Down(KeyCoord::Key_D)) {
 
-		mTrickRotate.y += 0.05f;
+		mTrickRotate.y += mTrickRotatePower;
 	}
 
 	mTrickRotate.x -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y * 0.1f;
 	mTrickRotate.y += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x * 0.1f;
+
+	mTrickRotate *= (deltaTime * 60);
 
 	mTrickPoint = abs(mTrickRotate.x) + abs(mTrickRotate.y);
 

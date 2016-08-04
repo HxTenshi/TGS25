@@ -46,7 +46,7 @@ private:
 	void Dead(float deltaTime);
 	void StateChange(State next);
 	void GroundCheck();
-	void Trick();
+	void Trick(float deltaTime);
 	void CreateTornado();
 	void CreateAttackWind();
 	void MoveSmokeParameterSet(float speed, float max = 0);
@@ -75,9 +75,10 @@ private:
 		float mAttackSpeed;
 	SERIALIZE
 		float mSlipDamage;
-
 	SERIALIZE
-		std::string mCameraName;
+		float mTrickCondition;
+	SERIALIZE
+		float mTrickRotatePower;
 
 	XMVECTOR mVelocity;
 	float mCurrentSpeed;
