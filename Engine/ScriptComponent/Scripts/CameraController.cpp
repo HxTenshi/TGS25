@@ -11,7 +11,7 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void CameraController::Initialize() {
-	mPrevJump = false;
+	mIsDead = false;
 	mTimer = 0;
 }
 
@@ -58,6 +58,7 @@ void CameraController::StateUpdate(float deltaTime)
 	case State::MOVE: Normal(deltaTime); break;
 	case State::JUMP: Jump(deltaTime); break;
 	case State::TORNADO: Tornado(deltaTime); break;
+	case State::DEAD: Dead(deltaTime); break;
 	}
 }
 
@@ -85,6 +86,18 @@ void CameraController::Jump(float deltaTime)
 
 void CameraController::Dead(float deltaTime)
 {
+	if (!mIsDead)
+	{
+		mNextPos = mTarget->mTransform->Position() + XMVectorSet(0, -10, -5, 1);
+		mIsDead = true;
+	}
+	mPosition = XMVectorLerp(mPosition, mNextPos, 0.2f);
+
+	auto at = XMMatrixLookAtLH(mPosition, mTarget->mTransform->Position(), gameObject->mTransform->Up());
+	at = XMMatrixTranspose(at);
+	gameObject->mTransform->Quaternion(XMQuaternionRotationMatrix(at));
+
+	gameObject->mTransform->Position(mPosition);
 }
 
 void CameraController::Tornado(float deltaTime)

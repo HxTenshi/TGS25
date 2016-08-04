@@ -3,11 +3,13 @@
 #include"Game\Component\AnimationComponent.h"
 #include"MoveSmoke.h"
 #include"HaneEffect.h"
+#include"Wind.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void CCBoard::Initialize()
 {
+	mWindVector = XMVectorSet(1, 0, 0, 1);
 	mState = State::MOVE;
 
 	mSpeed = 1.0f;
@@ -31,18 +33,26 @@ void CCBoard::Initialize()
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void CCBoard::Start()
 {
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
+	mArrow = game->FindActor("Arrow");
 }
 
 //毎フレーム呼ばれます
 void CCBoard::Update()
 {
+	mPlyerHP -= mSlipDamage * (game->DeltaTime()->GetDeltaTime() * 60);
+	mPlyerHP = min(max(mPlyerHP, 0), 100);
 	CreateAttackWind();
 	StateUpdate(game->DeltaTime()->GetDeltaTime());
+	if (mPlyerHP <= 0)
+	{
+		StateChange(State::DEAD);
+	}
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
-void CCBoard::Finish() {
-
+void CCBoard::Finish() 
+{
 }
 
 //コライダーとのヒット時に呼ばれます
@@ -67,11 +77,26 @@ void CCBoard::OnCollideBegin(Actor* target) {
 //コライダーとのヒット中に呼ばれます
 void CCBoard::OnCollideEnter(Actor* target) {
 	(void)target;
+	if (mState == State::DEAD)
+	{
+		auto collider = target->GetComponent<PhysXColliderComponent>();
+		if (!collider) return;
+		collider->SetIsTrigger(true);
+	}
+	if (target->Name() == "Wind")
+	{
+		if (target->GetScript<Wind>()) mWindVector = target->GetScript<Wind>()->GetWindVelocity();
+	}
 }
 
 //コライダーとのロスト時に呼ばれます
 void CCBoard::OnCollideExit(Actor* target) {
 	(void)target;
+}
+
+XMVECTOR CCBoard::GetWind()
+{
+	return mWindVector;
 }
 
 int CCBoard::GetState()
@@ -83,7 +108,7 @@ void CCBoard::Damage(int damage)
 {
 	if (damage > 0) AnimationChange(2);
 	mPlyerHP -= damage;
-	mPlyerHP = min(max(mPlyerHP, -100), 100);
+	mPlyerHP = min(max(mPlyerHP, 0), 100);
 }
 
 bool CCBoard::IsTrick()
@@ -113,11 +138,24 @@ void CCBoard::StateUpdate(float deltaTime)
 	case State::MOVE: Move(deltaTime); break;
 	case State::JUMP: Jump(deltaTime); break;
 	case State::TORNADO: Tornado(deltaTime); break;
+	case State::DEAD: Dead(deltaTime); break;
 	}
 }
 
 void CCBoard::Move(float deltaTime)
 {
+	if (mArrow == nullptr)
+	{
+		mArrow = game->CreateActor("Assets/board/Arrow.json");
+		game->AddObject(mArrow);
+	}
+
+	auto bird = game->FindActor("Bird");
+	if (!bird) return;
+	auto mBirdAnimation = bird->GetComponent<AnimationComponent>();
+	if (!mBirdAnimation) return;
+
+	if ((mBirdAnimation->mCurrentSet != 2 || mBirdAnimation->GetAnimetionParam(2).mTime >= 21))
 	SailRotateAnimation();
 
 	isTornado = false;
@@ -181,6 +219,12 @@ void CCBoard::Move(float deltaTime)
 
 void CCBoard::Jump(float deltaTime)
 {
+	if (mArrow)
+	{
+		game->DestroyObject(mArrow);
+		mArrow = nullptr;
+	}
+
 	MoveSmokeParameterSet(0, 10);
 
 	Trick();
@@ -230,6 +274,18 @@ void CCBoard::Tornado(float deltaTime)
 
 void CCBoard::Dead(float deltaTime)
 {
+	auto upRotate = XMQuaternionRotationAxis(gameObject->mTransform->Up(), 0.1f);
+	auto leftRotate = XMQuaternionRotationAxis(gameObject->mTransform->Left(), 0.1f);
+	auto mix = XMQuaternionMultiply(XMQuaternionMultiply(gameObject->mTransform->Quaternion(), upRotate), leftRotate);
+	gameObject->mTransform->Quaternion(mix);
+
+	auto mCC = gameObject->GetComponent<CharacterControllerComponent>();
+	if (!mCC) return;
+	mCurrentSpeed = 0.0f;
+	mVelocity.x = 0;
+	mVelocity.z = 0;
+	mVelocity.y -= 9.81f * 3 * game->DeltaTime()->GetDeltaTime();
+	mCC->Move(mVelocity * game->DeltaTime()->GetDeltaTime());
 }
 
 void CCBoard::StateChange(State next)
@@ -355,6 +411,18 @@ void CCBoard::MoveSmokeParameterSet(float speed, float max)
 			s->GetScript<MoveSmoke>()->SetSpeed(speed);
 		}
 	}
+}
+
+bool CCBoard::Shake()
+{
+	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z);
+	if (f < -0.5f)
+	{
+		mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
+		return true;
+	}
+	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
+	return false;
 }
 
 void CCBoard::PlaySE(std::string filename)

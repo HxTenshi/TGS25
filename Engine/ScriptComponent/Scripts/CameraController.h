@@ -24,9 +24,8 @@ private:
 	Actor* mTarget;
 	XMVECTOR mPosition;
 
-	bool mPrevJump;
-
-	XMVECTOR mFromPos;
+	bool mIsDead;
+	XMVECTOR mNextPos;
 	float mTimer;
 
 private:

@@ -29,6 +29,7 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+	XMVECTOR GetWind();
 	int GetState();
 	void Damage(int damage);
 	bool IsTrick();
@@ -47,6 +48,7 @@ private:
 	void CreateTornado();
 	void CreateAttackWind();
 	void MoveSmokeParameterSet(float speed, float max = 0);
+	bool Shake();
 
 	void PlaySE(std::string filename);
 
@@ -69,6 +71,8 @@ private:
 		float mJumpPower;
 	SERIALIZE
 		float mAttackSpeed;
+	SERIALIZE
+		float mSlipDamage;
 
 	SERIALIZE
 		std::string mCameraName;
@@ -82,7 +86,10 @@ private:
 	float mTrickPoint; //トリックの点数
 	Actor* mTornado;
 	Actor* mSpeedEffect;
+	Actor* mArrow;
 
+	float mPrevAcceler;
+	XMVECTOR mWindVector;
 	float mPlyerHP;
 
 };
