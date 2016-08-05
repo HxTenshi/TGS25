@@ -28,6 +28,7 @@ private:
 	bool mIsDead;
 	XMVECTOR mNextPos;
 	float mTimer;
+	float mAngle;
 
 private:
 	void Look();

@@ -1,4 +1,5 @@
 #include "CCSail.h"
+#include"CCBoard.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -55,10 +56,10 @@ BirdPosition CCSail::GetBirdPosition()
 //返り値は
 float CCSail::MovePower()
 {
-	//auto wind = gameObject->mTransform->GetParent()->mTransform->GetParent()->GetScript<SailBoard>();
-	//if (!wind)return 0.0f;
-	//auto windvec = wind->GetWind();
-	auto windvec = XMVectorSet(1, 0, 0, 0);
+	auto wind = gameObject->mTransform->GetParent()->mTransform->GetParent()->GetScript<CCBoard>();
+	if (!wind)return 0.0f;
+
+	auto windvec = wind->GetWind();
 	windvec.y = 0;
 
 	auto saildir = gameObject->mTransform->Left();

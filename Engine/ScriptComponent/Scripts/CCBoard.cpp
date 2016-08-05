@@ -14,14 +14,14 @@ void CCBoard::Initialize()
 	mState = State::STANDBY;
 
 	//シリアライズ------------------------
-	mSpeed = 1.0f;
+	/*mSpeed = 1.0f;
 	mMaxSpeed = 10.0f;
 	mRotateSpeed = 1.0f;
 	mCurrentSpeed = 0.0f;
 	mJumpPower = 10.0f;
 	mAttackSpeed = 1.0f;
 	mTrickCondition = 1.0f;
-	mTrickRotatePower = 0.05f;
+	mTrickRotatePower = 0.05f;*/
 	//-------------------------------------
 
 	mVelocity = XMVectorSet(0, 0, 0, 1);
@@ -224,7 +224,6 @@ void CCBoard::Move(float deltaTime)
 	else
 	{
 		if (isJump) StateChange(State::JUMP);
-		//game->Debug()->Log("浮いてる");
 	}
 
 	GroundCheck();
@@ -242,7 +241,7 @@ void CCBoard::Jump(float deltaTime)
 		mArrow = nullptr;
 	}
 
-	MoveSmokeParameterSet(0, 10);
+	MoveSmokeParameterSet(0, mMaxSpeed);
 
 	Trick(deltaTime);
 	auto mCC = gameObject->GetComponent<CharacterControllerComponent>();
@@ -275,7 +274,7 @@ void CCBoard::Jump(float deltaTime)
 
 void CCBoard::Tornado(float deltaTime)
 {
-	MoveSmokeParameterSet(0, 10);
+	MoveSmokeParameterSet(0, mMaxSpeed);
 	auto tornado = game->FindActor("Tornado");
 	if (tornado)
 	{

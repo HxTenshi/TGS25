@@ -13,6 +13,7 @@
 void CameraController::Initialize() {
 	mIsDead = false;
 	mTimer = 0;
+	mAngle = 0.0f;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -65,7 +66,13 @@ void CameraController::StateUpdate(float deltaTime)
 
 void CameraController::Standby(float deltaTIme)
 {
-	mPosition = XMVectorLerp(mPosition, mTarget->mTransform->Position() + (mTarget->mTransform->Forward() * -13) + XMVectorSet(0, 3.5f, 0, 1), 0.2f);
+	mAngle += deltaTIme * 2;
+	XMVECTOR nextPos;
+	nextPos.x = (mTarget->mTransform->Position().x) + cos(mAngle) * 30;
+	nextPos.y = mTarget->mTransform->Position().y + 10;
+	nextPos.z = (mTarget->mTransform->Position().z) + sin(mAngle) * 30;
+
+	mPosition = XMVectorLerp(mPosition, nextPos, 0.2f);
 
 	auto at = XMMatrixLookAtLH(mPosition, mTarget->mTransform->Position(), gameObject->mTransform->Up());
 	at = XMMatrixTranspose(at);
