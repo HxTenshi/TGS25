@@ -16,8 +16,9 @@
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
-void HPGauge::Initialize(){
-
+void HPGauge::Initialize()
+{
+	mTimer = 0.0f;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -51,7 +52,8 @@ void HPGauge::Update()
 		{
 			if (playerScript->GetHitPoint() < 100 / 4)
 			{
-				mat->SetAlbedoColor(XMFLOAT4(1, 0, 0, 1));
+				mTimer += game->DeltaTime()->GetDeltaTime() * 4;
+				mat->SetAlbedoColor(XMFLOAT4(1, sin(mTimer), 0, 1));
 			}
 			else if (playerScript->GetHitPoint() < 100 / 2)
 			{

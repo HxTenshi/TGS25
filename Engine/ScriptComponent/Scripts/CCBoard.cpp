@@ -199,7 +199,7 @@ void CCBoard::Move(float deltaTime)
 
 	MoveSmokeParameterSet(mCurrentSpeed, 10);
 
-	x *= mRotateSpeed;
+	x *= mRotateSpeed * (mCurrentSpeed /mMaxSpeed);
 	auto quat = XMQuaternionRotationRollPitchYaw(0, x, 0);
 	auto rot = gameObject->mTransform->Quaternion();
 	rot = XMQuaternionMultiply(rot, quat);
@@ -262,7 +262,7 @@ void CCBoard::Jump(float deltaTime)
 	mVelocity.y -= 9.81f * 3 * game->DeltaTime()->GetDeltaTime();
 	mCC->Move(mVelocity * game->DeltaTime()->GetDeltaTime());
 
-	if (mTrickPoint > mTrickCondition && !isTornado)
+	if (mTrickPoint > mTrickCondition && !isTornado && IsUnrivaled())
 	{
 		AnimationChange(1);
 		isTornado = true;

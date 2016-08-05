@@ -50,7 +50,7 @@ void PlayerManager::Update(){
 	}
 
 
-	if (mCredit <= 0)
+	if (GameEnd())
 	{
 		GameOver();
 	}
@@ -273,4 +273,16 @@ void PlayerManager::PlaySoundBox(Actor* soundBox, std::string name) {
 bool PlayerManager::IsClear()
 {
 	return (mPoint >= mMaxPoint - 1);
+}
+
+bool PlayerManager::GameEnd()
+{
+	auto player = game->FindActor("Board");
+	auto deadLine = game->FindActor("DeadLine");
+	if (!player || !deadLine) return true;
+	if (player->mTransform->Position().y <= deadLine->mTransform->Position().y)
+	{
+		return true;
+	}
+	return false;
 }

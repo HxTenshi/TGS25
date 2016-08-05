@@ -31,6 +31,7 @@ private:
 	void GameOver();
 	void WingUI();
 	bool IsClear();
+	bool GameEnd();
 
 private:
 	float mAlpha;
