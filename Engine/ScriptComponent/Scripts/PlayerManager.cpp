@@ -39,6 +39,12 @@ void PlayerManager::Start()
 		haneTex->mTransform->Scale(XMVectorSet(100, 100, 0, 0));
 		haneTex->mTransform->SetParent(gameObject);
 	}
+
+	mFadeOutObj = game->FindActor("Fade");
+	if (mFadeOutObj == nullptr) {
+		mFadeOutObj = game->CreateActor("Assets/Fade");
+		game->AddObject(mFadeOutObj);
+	}
 }
 
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
@@ -150,9 +156,10 @@ bool PlayerManager::IsGameStart()
 void PlayerManager::GameStart()
 {
 	
-		// ˆê“x‚¾‚¯¶¬
+		mFadeOutObj = game->FindActor("Fade");
 		if (mFadeOutObj == nullptr) {
-			mFadeOutObj = game->FindActor("Fade");
+			mFadeOutObj = game->CreateActor("Assets/Fade");
+			game->AddObject(mFadeOutObj);
 		}
 		auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 		mFadeOutScript->FadeIn(mFadeInSecond);

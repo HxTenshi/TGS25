@@ -39,6 +39,9 @@ void CCBoard::Start()
 {
 	mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
 	mArrow = game->FindActor("Arrow");
+	auto mCC = gameObject->GetComponent<CharacterControllerComponent>();
+	if (!mCC)return;
+	mCC->Teleport(gameObject->mTransform->Position());
 }
 
 //–ˆƒtƒŒ[ƒ€ŒÄ‚Î‚ê‚Ü‚·
@@ -207,8 +210,6 @@ void CCBoard::Move(float deltaTime)
 
 	auto mCC = gameObject->GetComponent<CharacterControllerComponent>();
 	if (!mCC)return;
-
-
 	if (mCC->IsGround()) {
 		auto v = gameObject->mTransform->Forward() * mCurrentSpeed;
 		mVelocity.x = v.x;
