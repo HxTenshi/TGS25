@@ -53,7 +53,9 @@ void HPGauge::Update()
 			if (playerScript->GetHitPoint() < 100 / 4)
 			{
 				mTimer += game->DeltaTime()->GetDeltaTime() * 4;
-				mat->SetAlbedoColor(XMFLOAT4(1, sin(mTimer), 0, 1));
+				mat->SetAlbedoColor(XMFLOAT4(1, abs(sin(mTimer)), 0, 1));
+				float scale = abs(sin(mTimer) * 25.0f);
+				gameObject->mTransform->Scale(XMVectorSet(height + scale, 400 - scale, 1, 1));
 			}
 			else if (playerScript->GetHitPoint() < 100 / 2)
 			{

@@ -152,6 +152,7 @@ void CCBoard::StateUpdate(float deltaTime)
 
 void CCBoard::Standby(float deltaTime)
 {
+	MoveSmokeParameterSet(0,mMaxSpeed);
 	auto manager = game->FindActor("PlayerManager");
 	if (!manager){ StateChange(State::MOVE); return;}
 	auto script = manager->GetScript<PlayerManager>();
@@ -200,7 +201,7 @@ void CCBoard::Move(float deltaTime)
 	mCurrentSpeed += windPower * mSpeed;
 	mCurrentSpeed = max(0.0f, min(mCurrentSpeed, mMaxSpeed));
 
-	MoveSmokeParameterSet(mCurrentSpeed, 10);
+	MoveSmokeParameterSet(mCurrentSpeed, mMaxSpeed);
 
 	x *= mRotateSpeed * (mCurrentSpeed /mMaxSpeed);
 	auto quat = XMQuaternionRotationRollPitchYaw(0, x, 0);
