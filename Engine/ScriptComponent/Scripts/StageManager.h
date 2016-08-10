@@ -24,10 +24,13 @@ public:
 
 private:
 	//ƒƒ“ƒo•Ï”
+	int mButtonCreateCount;
 	int mPauseCount;
 	SERIALIZE
 	float mFadeOutSecond;
 	bool mIsPause;
+	SERIALIZE
+	std::string mRetryScene;
 	Actor* mFadeOutObj;
 	SceneCursor* mCursorScript;
 	Fade* mFadeOutScript;

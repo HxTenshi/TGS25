@@ -24,9 +24,10 @@ void SceneCursor::Initialize(){
 void SceneCursor::Start(){
 	auto buttonPosition = mButtonContainer[mButtonCount]->mTransform->Position();
 	auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
+	auto scale = gameObject->mTransform->Scale();
 	// ボタンの半分の大きさを取得する
 	auto halfScale = XMVectorSet(
-		buttonScale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
+		buttonScale.x / 3.5f + scale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
 	// 位置の変更
 	gameObject->mTransform->Position(buttonPosition - halfScale);
 	if (mSetLerpTime <= 0) mSetLerpTime = 1;
@@ -41,9 +42,10 @@ void SceneCursor::Update(){
 		auto buttonPosition = mButtonContainer[mButtonCount]->mTransform->Position();
 		auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
 		auto position = gameObject->mTransform->Position();
+		auto scale = gameObject->mTransform->Scale();
 		// ボタンの半分の大きさを取得する
 		auto halfScale = XMVectorSet(
-			buttonScale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
+			buttonScale.x / 3.5f + scale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
 		// 線形補間ように
 		if (mButtonCount != mPastButtonCount) {
 			auto distance = buttonPosition - position;
@@ -54,15 +56,19 @@ void SceneCursor::Update(){
 		if (mLerpTime != 1.0f) {
 			auto deltaTime = game->DeltaTime()->GetDeltaTime();
 			auto timeScale = game->DeltaTime()->GetTimeScale();
-			auto moveVelocity = mLerp * deltaTime * mSpeed;
-			if (deltaTime == 0.0f) moveVelocity = mLerp * mSpeed * 0.01f;
+			auto moveVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+			if (deltaTime == 0.0f) moveVelocity = mLerp * 0.0167f * mSpeed;
+			else moveVelocity = mLerp * deltaTime * mSpeed;
 			auto distance = buttonPosition - position;
 			if (abs(moveVelocity.x) > abs(distance.x) ||
 				abs(moveVelocity.y) > abs(distance.y))
 				gameObject->mTransform->Position(buttonPosition - halfScale);
 			else gameObject->mTransform->Position(position + moveVelocity);
-			mLerpTime += 1.0f / mSetLerpTime * deltaTime * mSpeed;
-			if (deltaTime == 0.0f) mLerpTime += 1.0f / mSetLerpTime * mSpeed * 0.01f;
+			//mLerpTime += 1.0f / mSetLerpTime * deltaTime * mSpeed;
+			auto lerpSpeed = 0.0f;
+			if (deltaTime == 0.0f) lerpSpeed = 1.0f / mSetLerpTime * 0.0167f * mSpeed;
+			else lerpSpeed = 1.0f / mSetLerpTime * deltaTime * mSpeed;
+			mLerpTime += lerpSpeed;
 			if (mLerpTime >= 1.0f) mLerpTime = 1.0f;
 		}
 		else{
