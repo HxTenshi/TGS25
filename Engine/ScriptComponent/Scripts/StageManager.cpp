@@ -8,9 +8,11 @@
 #include "Input/Input.h"
 #include "SceneCursor.h"
 #include "Fade.h"
+#include "RetryScene.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void StageManager::Initialize(){
+	mButtonCreateCount = 0;
 	mPauseCount = 0;
 	mIsPause = false;
 	mFadeOutObj = nullptr;
@@ -18,6 +20,15 @@ void StageManager::Initialize(){
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void StageManager::Start(){
+	// リスタートの名前が空ならば、移動さきをタイトルにする
+	if (mRetryScene == "") mRetryScene = "Title";
+	// リスタートオブジェの生成
+	auto retryObj = game->CreateActor("Assets/RetrySceneObj");
+	game->AddObject(retryObj);
+	retryObj->mTransform->SetParent(gameObject);
+	auto retryScript = retryObj->GetScript<RetryScene>();
+	// リスタートするシーンの名前を入れる
+	retryScript->SetRetrySceneName(mRetryScene);
 }
 
 //毎フレーム呼ばれます
@@ -53,6 +64,7 @@ void StageManager::Update(){
 		// フェードアウト後シーン移動
 		if (mFadeOutScript->IsFadeOut()) {
 			game->DeltaTime()->SetTimeScale(1.0f);
+			// シーン遷移ON
 			mCursorScript->OnChangeScene();
 		}
 	}
@@ -83,23 +95,23 @@ void StageManager::createPause() {
 	auto poseButtons = game->CreateActor("Assets/SceneAssets/Buttons");
 	game->AddObject(poseButtons);
 	poseButtons->mTransform->SetParent(gameObject);
-	game->DeltaTime()->SetTimeScale(0.0f);
 	// カーソル
 	auto cursorObject = game->CreateActor("Assets/SceneAssets/SceneCursor");
 	game->AddObject(cursorObject);
 	cursorObject->mTransform->SetParent(gameObject);
 	mCursorScript = cursorObject->GetScript<SceneCursor>();
 	// ボタンの追加
-	mCursorScript->AddButtonContainer("ReStart_Button");
+	mCursorScript->AddButtonContainer("Continue_Button");
 	// リトライ（未実装）
-	//mCursorScript->AddButtonContainer("Retry_Button");
+	mCursorScript->AddButtonContainer("Retry_Button");
 	mCursorScript->AddButtonContainer("TitleBack_Button");
 	// 遷移先のシーンの追加
 	mCursorScript->AddSceneContainer("NotMove");
 	// クレジット(未実装)
-	//mCursorScript->AddSceneContainer("Stage00_ex");
+	mCursorScript->AddSceneContainer("RetryScene");
 	mCursorScript->AddSceneContainer("Title");
 	playPauseSE();
+	game->DeltaTime()->SetTimeScale(0.0f);
 	mIsPause = true;
 }
 
