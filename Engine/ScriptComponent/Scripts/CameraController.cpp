@@ -19,7 +19,10 @@ void CameraController::Initialize() {
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void CameraController::Start() {
 	mTarget = game->FindActor("Board");
-	gameObject->mTransform->Position(XMVectorSet(0, 0, 0, 1));
+	//gameObject->mTransform->Position(XMVectorSet(0, 0, 0, 1));
+	mNextPos = mTarget->mTransform->Position();
+	mNextPos += (mTarget->mTransform->Forward() * 40) + (mTarget->mTransform->Left() * 5) + XMVectorSet(0,4,0,0);
+	
 }
 
 //毎フレーム呼ばれます
@@ -66,13 +69,8 @@ void CameraController::StateUpdate(float deltaTime)
 
 void CameraController::Standby(float deltaTIme)
 {
-	mAngle += deltaTIme * 2;
-	XMVECTOR nextPos;
-	nextPos.x = (mTarget->mTransform->Position().x) + cos(mAngle) * 30;
-	nextPos.y = mTarget->mTransform->Position().y + 10;
-	nextPos.z = (mTarget->mTransform->Position().z) + sin(mAngle) * 30;
 
-	mPosition = XMVectorLerp(mPosition, nextPos, 0.2f);
+	mPosition = mNextPos;
 
 	auto at = XMMatrixLookAtLH(mPosition, mTarget->mTransform->Position(), gameObject->mTransform->Up());
 	at = XMMatrixTranspose(at);

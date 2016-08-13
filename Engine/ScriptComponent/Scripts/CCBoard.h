@@ -95,5 +95,5 @@ private:
 	XMVECTOR mWindVector;
 	float mPlyerHP;
 	float mPoint;
-
+	float mPadGyroX;
 };

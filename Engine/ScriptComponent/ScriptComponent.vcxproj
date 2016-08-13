@@ -186,6 +186,8 @@
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
     <ClCompile Include="Scripts\PointItem.cpp" />
     <ClCompile Include="Scripts\RainbowShiningWing.cpp" />
+    <ClCompile Include="Scripts\RetryScene.cpp" />
+    <ClCompile Include="Scripts\RetrySceneManager.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
     <ClCompile Include="Scripts\SceneCursor.cpp" />
@@ -234,6 +236,8 @@
     <ClInclude Include="Scripts\PlayerSearch.h" />
     <ClInclude Include="Scripts\PointItem.h" />
     <ClInclude Include="Scripts\RainbowShiningWing.h" />
+    <ClInclude Include="Scripts\RetryScene.h" />
+    <ClInclude Include="Scripts\RetrySceneManager.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
     <ClInclude Include="Scripts\SceneCursor.h" />

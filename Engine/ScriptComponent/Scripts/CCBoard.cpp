@@ -32,6 +32,7 @@ void CCBoard::Initialize()
 	isTornado = false;
 	mPlyerHP = 100;
 	mPoint = 0;
+	mPadGyroX = 0;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -152,7 +153,14 @@ void CCBoard::StateUpdate(float deltaTime)
 
 void CCBoard::Standby(float deltaTime)
 {
-	MoveSmokeParameterSet(0,mMaxSpeed);
+	auto mCC = gameObject->GetComponent<CharacterControllerComponent>();
+	if (!mCC)return;
+	mCurrentSpeed = 30;
+	mVelocity = gameObject->mTransform->Forward() * mCurrentSpeed;
+	mVelocity.y -= 9.81f * 3 * game->DeltaTime()->GetDeltaTime();
+	mCC->Move(mVelocity * game->DeltaTime()->GetDeltaTime());
+	MoveSmokeParameterSet(mCurrentSpeed,mMaxSpeed);
+
 	auto manager = game->FindActor("PlayerManager");
 	if (!manager){ StateChange(State::MOVE); return;}
 	auto script = manager->GetScript<PlayerManager>();
@@ -180,12 +188,19 @@ void CCBoard::Move(float deltaTime)
 	SailRotateAnimation();
 
 	isTornado = false;
-	float x = 0.0f;
+	float x = 0;
 	if (Input::Down(KeyCoord::Key_A)) {
-		x -= 0.1f;
+		x -= 1 * deltaTime;
 	}
 	if (Input::Down(KeyCoord::Key_D)) {
-		x += 0.1f;
+		x += 1 * deltaTime;
+	}
+	mPadGyroX += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x;
+	x += mPadGyroX;
+
+	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS))
+	{
+		mPadGyroX = 0;
 	}
 
 	auto sail = game->FindActor("Sail");
@@ -232,7 +247,6 @@ void CCBoard::Move(float deltaTime)
 
 	mVelocity.y -= 9.81f * 3 * game->DeltaTime()->GetDeltaTime();
 	mCC->Move(mVelocity * game->DeltaTime()->GetDeltaTime());
-	//AnimationChange(3);
 }
 
 void CCBoard::Jump(float deltaTime)
