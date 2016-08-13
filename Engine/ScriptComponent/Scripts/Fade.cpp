@@ -41,6 +41,14 @@ void Fade::OnCollideExit(Actor* target){
 	(void)target;
 }
 
+// フェードの透明度を設定します
+void Fade::SetFadeAlpha(const float alpha) {
+	// 描画
+	auto mate = gameObject->GetComponent<MaterialComponent>();
+	auto color = XMFLOAT4(0.0f, 0.0f, 0.0f, alpha);
+	if (mate) mate->SetAlbedoColor(color);
+}
+
 void Fade::FadeIn(const float time) {
 	// デルタタイムの取得
 	auto deltaTime = game->DeltaTime()->GetDeltaTime();

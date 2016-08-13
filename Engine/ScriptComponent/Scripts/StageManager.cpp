@@ -6,6 +6,7 @@
 //コンポーネント全てのインクルード
 #include "h_component.h"
 #include "Input/Input.h"
+#include "PlayerManager.h"
 #include "SceneCursor.h"
 #include "Fade.h"
 #include "RetryScene.h"
@@ -33,13 +34,32 @@ void StageManager::Start(){
 
 //毎フレーム呼ばれます
 void StageManager::Update(){
+	// プレイヤーを探す
+	auto playerManager = game->FindActor("PlayerManager");
+	if (playerManager->Name() != "PlayerManager") return;
+	auto playerManagerScript = playerManager->GetScript<PlayerManager>();
+	// フェードオブジェクトを探す
+	auto fadeObj = game->FindActor("Fade");
+	auto startObj = game->FindActor("Start");
+	// ゲーム開始状態　もしくは　フェードオブジェクトがある場合ならばすぐに返す
+	if (!playerManagerScript->IsGameStart()) return;
 	// キー入力
-	if (Input::Trigger(PAD_DS4_KeyCoord::Button_OPTIONS) ||
-		Input::Trigger(KeyCoord::Key_G)) {
-		mPauseCount++;
-		// ポーズの生成、削除
-		if (mPauseCount % 2 == 1) createPause();
-		else deletePause();
+	if (fadeObj == nullptr && startObj == nullptr) {
+		if (Input::Trigger(PAD_DS4_KeyCoord::Button_OPTIONS) ||
+			Input::Trigger(KeyCoord::Key_G)) {
+			mPauseCount++;
+			// ポーズの生成、削除
+			if (mPauseCount % 2 == 1) createPause();
+			else deletePause();
+		}
+		else if (
+			(Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS) ||
+				Input::Trigger(KeyCoord::Key_H)) &&
+			mPauseCount % 2 == 1) {
+			mPauseCount++;
+			deletePause();
+		}
+		// ×ボタンが押されてもポーズ画面を消すようにする
 	}
 	// ポーズでなければ返す
 	if (!mIsPause) return;
@@ -91,6 +111,13 @@ void StageManager::OnCollideExit(Actor* target){
 
 // ポーズ画面の生成
 void StageManager::createPause() {
+	// フェードの作成
+	auto fadeObj = game->CreateActor("Assets/Fade");
+	game->AddObject(fadeObj);
+	fadeObj->mTransform->SetParent(gameObject);
+	fadeObj->Name("PauseFade");
+	auto fadeScript = fadeObj->GetScript<Fade>();
+	fadeScript->SetFadeAlpha(mFadeAlpha);
 	// ボタンボックス
 	auto poseButtons = game->CreateActor("Assets/SceneAssets/Buttons");
 	game->AddObject(poseButtons);
@@ -117,6 +144,8 @@ void StageManager::createPause() {
 
 // ポーズ画面の削除
 void StageManager::deletePause() {
+	auto fadeObj = game->FindActor("PauseFade");
+	if (fadeObj != nullptr) game->DestroyObject(fadeObj);
 	game->DeltaTime()->SetTimeScale(1.0f);
 	gameObject->mTransform->AllChildrenDestroy();
 	playPauseSE();

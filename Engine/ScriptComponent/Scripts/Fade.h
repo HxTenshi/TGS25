@@ -12,6 +12,8 @@ public:
 	void OnCollideBegin(Actor* target)override;
 	void OnCollideEnter(Actor* target)override;
 	void OnCollideExit(Actor* target)override;
+	// フェードの透明度を設定します
+	void SetFadeAlpha(const float alpha);
 	// 指定した時間でフェードインを行います
 	void FadeIn(const float time);
 	// 指定した時間でフェードアウトを行います

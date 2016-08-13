@@ -27,9 +27,11 @@ void SceneCursor::Start(){
 	auto scale = gameObject->mTransform->Scale();
 	// ボタンの半分の大きさを取得する
 	auto halfScale = XMVectorSet(
-		buttonScale.x / 3.5f + scale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
+		buttonScale.x / 2.0f * (1.0f - buttonScale.x / 7000) + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
 	// 位置の変更
 	gameObject->mTransform->Position(buttonPosition - halfScale);
+	// 大きさの変更
+	mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale * 1.3f);
 	if (mSetLerpTime <= 0) mSetLerpTime = 1;
 }
 
@@ -43,9 +45,9 @@ void SceneCursor::Update(){
 		auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
 		auto position = gameObject->mTransform->Position();
 		auto scale = gameObject->mTransform->Scale();
-		// ボタンの半分の大きさを取得する
+		// ボタンの半分の大きさを取得する(よくわからない計算)
 		auto halfScale = XMVectorSet(
-			buttonScale.x / 3.5f + scale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
+			buttonScale.x / 2.0f * (1.0f - buttonScale.x / 7000) + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
 		// 線形補間ように
 		if (mButtonCount != mPastButtonCount) {
 			auto distance = buttonPosition - position;
@@ -73,24 +75,28 @@ void SceneCursor::Update(){
 		}
 		else{
 			gameObject->mTransform->Position(buttonPosition - halfScale);
+			mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale * 1.3f);
 			mLerpTime = 0.0f;
 			mIsCursorMove = false;
 		}
 	}
 	// カーソルが動き終わるまで入力処理を行わない
 	if (mIsCursorMove) return;
+	auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
 	// シーンが変わるなら入力処理を行わない
 	if (mIsChangeScene) return;
 	// キー入力
 	if (Input::Trigger(PAD_DS4_KeyCoord::Button_UP) ||
 		Input::Trigger(KeyCoord::Key_A)) {
 		if (mButtonCount == 0) return;
+		mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale / 1.3f);
 		mButtonCount--;
 		mIsCursorMove = true;
 	}
 	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_DOWN) ||
 		Input::Trigger(KeyCoord::Key_Z)) {
 		if (mButtonCount == mButtonContainer.size() - 1) return;
+		mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale / 1.3f);
 		mButtonCount++;
 		mIsCursorMove = true;
 	}
