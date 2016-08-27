@@ -15,6 +15,8 @@
 void StageManager::Initialize(){
 	mButtonCreateCount = 0;
 	mPauseCount = 0;
+	mChangeTime = 2.0f * 60.0f;
+	mSceneChangeTimer = 0.0f;
 	mIsPause = false;
 	mFadeOutObj = nullptr;
 }
@@ -70,8 +72,14 @@ void StageManager::Update(){
 		deletePause();
 		return;
 	}
+	// タイムが一定以上になったらフェイドアウトしてPVシーンに移行
+	if (mChangeTime > mSceneChangeTimer) {
+		if (mCursorScript->IsCursorMove()) mSceneChangeTimer = 0.0f;
+		if (!mCursorScript->IsChangeScene())mSceneChangeTimer += 0.0167f;
+	}
 	// 特定のボタンが押されたらシーン遷移
-	if (mCursorScript->IsChangeScene()) {
+	if (mCursorScript->IsChangeScene() ||
+		mChangeTime <= mSceneChangeTimer) {
 		// フェードアウトしてシーン移動
 		mCursorScript->SetIsCursorMove(true);
 		// 一度だけ生成
@@ -85,7 +93,8 @@ void StageManager::Update(){
 		if (mFadeOutScript->IsFadeOut()) {
 			game->DeltaTime()->SetTimeScale(1.0f);
 			// シーン遷移ON
-			mCursorScript->OnChangeScene();
+			if (mChangeTime <= mSceneChangeTimer) game->LoadScene("./Assets/Scenes/Title.scene");
+			else mCursorScript->OnChangeScene();
 		}
 	}
 }
@@ -139,6 +148,7 @@ void StageManager::createPause() {
 	mCursorScript->AddSceneContainer("Title");
 	playPauseSE();
 	game->DeltaTime()->SetTimeScale(0.0f);
+	mSceneChangeTimer = 0.0f;
 	mIsPause = true;
 }
 
