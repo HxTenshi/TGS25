@@ -297,6 +297,9 @@ void CCBoard::Tornado(float deltaTime)
 		mCurrentSpeed = 0.0f;
 		mVelocity = XMVectorSet(0, 0, 0, 0);
 		gameObject->mTransform->Position(tornado->mTransform->Position() + XMVectorSet(0, 5, 0, 0));
+
+		auto yrotate = XMQuaternionRotationAxis(XMVectorSet(0,1,0,0), 1);
+		gameObject->mTransform->Quaternion(XMQuaternionMultiply(gameObject->mTransform->Quaternion(), yrotate));
 	}
 	else
 	{
