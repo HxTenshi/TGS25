@@ -30,6 +30,8 @@ private:
 	float mFadeOutSecond;		// フェードアウトの時間
 	SERIALIZE
 	float mFadeAlpha;			// フェードの透明度
+	float mChangeTime;
+	float mSceneChangeTimer;
 	bool mIsPause;				// ポーズ中か？
 	SERIALIZE
 	std::string mRetryScene;	// リトライするシーンの名前
