@@ -142,7 +142,8 @@ inline float LightingFuncGGX_REF(float3 N, float3 V, float3 L,
 	return specular;
 }
 
-
+//フロートイプシロン
+//1.192092896e-07F
 
 inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 	PS_OUTPUT_1 Out;
@@ -167,7 +168,8 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 
 	float NLDot = dot(N, -L);
 
-	float offset = 0.00000003;
+
+	float offset = 0.00000003;// 1.192092896e-07F;// 0.000000035 + (NLDot)* 0.00000005;
 	// ライトデプスの準備
 	float4 LVPos = DepthTex.Sample(DepthSamLinear, input.Tex).zwyx;
 
@@ -200,27 +202,27 @@ inline PS_OUTPUT_1 main(PS_INPUT input,float normalVec){
 	float shadow = step(LD, LVPos.z + offset);
 
 	// ディフューズ角度減衰率計算
-	float DifGen = saturate(NLDot);
-	DifGen *= shadow * 0.75;
-	DifGen = DifGen + 0.25;
+	const float PI = 3.14159265359;
+	float DifGen = saturate(NLDot)  * 1.0f / PI;
+	//DifGen *= shadow * 0.75;
+	//DifGen = DifGen + 0.25;
+	DifGen *= shadow;
 
 
 	float roughness = norCol.a - 1;
 	roughness = max(roughness, 0.1f);
 	float spec = LightingFuncGGX_REF(N, -normalize(vpos), -L, roughness, 0.1);
 
-	float r = 0.75f;
-	float g = 0.83f;
-	float b = 0.95f;
-	if (shadow == 1){
-		Out.Diffuse = LightColor * (DifGen* float4(1 - r, 1 - g, 1 - b, 1) + float4(r, g, b, 1));
-	}
-	else{
-		Out.Diffuse = LightColor * float4(r, g, b, 1);
-	}
+	//if (shadow==1){
+	//	Out.Diffuse = LightColor * (DifGen*0.75+0.25);
+	//}
+	//else{
+	//	Out.Diffuse = LightColor * float4(0.2,0.2,0.3,1);
+	//}
+	Out.Diffuse = LightColor * DifGen;
 	Out.Diffuse.a = LightColor.a;
 
-	Out.Specular = LightColor * spec;
+	Out.Specular = LightColor * spec * shadow;
 	Out.Specular.a = LightColor.a;
 
 	return Out;
