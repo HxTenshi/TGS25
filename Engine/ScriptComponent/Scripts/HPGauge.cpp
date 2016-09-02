@@ -9,14 +9,16 @@
 #include<math.h>
 #include"PhysX\IPhysXEngine.h"
 #include"Game\Component\MaterialComponent.h"
+#include"CCBoard.h"
 
 
 #include"SailBoard.h"
 
 
 //生成時に呼ばれます（エディター中も呼ばれます）
-void HPGauge::Initialize(){
-
+void HPGauge::Initialize()
+{
+	mTimer = 0.0f;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -37,7 +39,7 @@ void HPGauge::Update()
 		gameObject->mTransform->Position(XMVectorSet(1093, 735 - (height / 2), 1, 1));
 	}*/
 
-	auto playerScript = game->FindActor("Board")->GetScript<SailBoard>();
+	auto playerScript = game->FindActor("Board")->GetScript<CCBoard>();
 	if (playerScript)
 	{
 		auto height = (playerScript->GetHitPoint() / 100.0f) * 1850;
@@ -50,7 +52,10 @@ void HPGauge::Update()
 		{
 			if (playerScript->GetHitPoint() < 100 / 4)
 			{
-				mat->SetAlbedoColor(XMFLOAT4(1, 0, 0, 1));
+				mTimer += game->DeltaTime()->GetDeltaTime() * 4;
+				mat->SetAlbedoColor(XMFLOAT4(1, abs(sin(mTimer)), 0, 1));
+				float scale = abs(sin(mTimer) * 25.0f);
+				gameObject->mTransform->Scale(XMVectorSet(height + scale, 400 - scale, 1, 1));
 			}
 			else if (playerScript->GetHitPoint() < 100 / 2)
 			{

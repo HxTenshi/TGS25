@@ -6,29 +6,62 @@
 //コンポーネント全てのインクルード
 #include "h_component.h"
 #include "Input/Input.h"
+#include "PlayerManager.h"
 #include "SceneCursor.h"
 #include "Fade.h"
+#include "RetryScene.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void StageManager::Initialize(){
+	mButtonCreateCount = 0;
 	mPauseCount = 0;
+	mChangeTime = 2.0f * 60.0f;
+	mSceneChangeTimer = 0.0f;
 	mIsPause = false;
 	mFadeOutObj = nullptr;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void StageManager::Start(){
+	// リスタートの名前が空ならば、移動さきをタイトルにする
+	if (mRetryScene == "") mRetryScene = "Title";
+	// リスタートオブジェの生成
+	auto retryObj = game->CreateActor("Assets/RetrySceneObj");
+	game->AddObject(retryObj);
+	retryObj->mTransform->SetParent(gameObject);
+	auto retryScript = retryObj->GetScript<RetryScene>();
+	// リスタートするシーンの名前を入れる
+	retryScript->SetRetrySceneName(mRetryScene);
 }
 
 //毎フレーム呼ばれます
 void StageManager::Update(){
+	// プレイヤーを探す
+	auto playerManager = game->FindActor("PlayerManager");
+	if (playerManager->Name() != "PlayerManager") return;
+	auto playerManagerScript = playerManager->GetScript<PlayerManager>();
+	// フェードオブジェクトを探す
+	auto fadeObj = game->FindActor("Fade");
+	auto startObj = game->FindActor("Start");
+	// ゲーム開始状態　もしくは　フェードオブジェクトがある場合ならばすぐに返す
+	if (!playerManagerScript->IsGameStart()) return;
 	// キー入力
-	if (Input::Trigger(PAD_DS4_KeyCoord::Button_OPTIONS) ||
-		Input::Trigger(KeyCoord::Key_G)) {
-		mPauseCount++;
-		// ポーズの生成、削除
-		if (mPauseCount % 2 == 1) createPause();
-		else deletePause();
+	if (fadeObj == nullptr && startObj == nullptr) {
+		if (Input::Trigger(PAD_DS4_KeyCoord::Button_OPTIONS) ||
+			Input::Trigger(KeyCoord::Key_G)) {
+			mPauseCount++;
+			// ポーズの生成、削除
+			if (mPauseCount % 2 == 1) createPause();
+			else deletePause();
+		}
+		else if (
+			(Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS) ||
+				Input::Trigger(KeyCoord::Key_H)) &&
+			mPauseCount % 2 == 1) {
+			mPauseCount++;
+			deletePause();
+		}
+		// ×ボタンが押されてもポーズ画面を消すようにする
 	}
 	// ポーズでなければ返す
 	if (!mIsPause) return;
@@ -39,8 +72,14 @@ void StageManager::Update(){
 		deletePause();
 		return;
 	}
+	// タイムが一定以上になったらフェイドアウトしてPVシーンに移行
+	if (mChangeTime > mSceneChangeTimer) {
+		if (mCursorScript->IsCursorMove()) mSceneChangeTimer = 0.0f;
+		if (!mCursorScript->IsChangeScene())mSceneChangeTimer += 0.0167f;
+	}
 	// 特定のボタンが押されたらシーン遷移
-	if (mCursorScript->IsChangeScene()) {
+	if (mCursorScript->IsChangeScene() ||
+		mChangeTime <= mSceneChangeTimer) {
 		// フェードアウトしてシーン移動
 		mCursorScript->SetIsCursorMove(true);
 		// 一度だけ生成
@@ -53,7 +92,9 @@ void StageManager::Update(){
 		// フェードアウト後シーン移動
 		if (mFadeOutScript->IsFadeOut()) {
 			game->DeltaTime()->SetTimeScale(1.0f);
-			mCursorScript->OnChangeScene();
+			// シーン遷移ON
+			if (mChangeTime <= mSceneChangeTimer) game->LoadScene("./Assets/Scenes/Title.scene");
+			else mCursorScript->OnChangeScene();
 		}
 	}
 }
@@ -79,32 +120,42 @@ void StageManager::OnCollideExit(Actor* target){
 
 // ポーズ画面の生成
 void StageManager::createPause() {
+	// フェードの作成
+	auto fadeObj = game->CreateActor("Assets/Fade");
+	game->AddObject(fadeObj);
+	fadeObj->mTransform->SetParent(gameObject);
+	fadeObj->Name("PauseFade");
+	auto fadeScript = fadeObj->GetScript<Fade>();
+	fadeScript->SetFadeAlpha(mFadeAlpha);
 	// ボタンボックス
 	auto poseButtons = game->CreateActor("Assets/SceneAssets/Buttons");
 	game->AddObject(poseButtons);
 	poseButtons->mTransform->SetParent(gameObject);
-	game->DeltaTime()->SetTimeScale(0.0f);
 	// カーソル
 	auto cursorObject = game->CreateActor("Assets/SceneAssets/SceneCursor");
 	game->AddObject(cursorObject);
 	cursorObject->mTransform->SetParent(gameObject);
 	mCursorScript = cursorObject->GetScript<SceneCursor>();
 	// ボタンの追加
-	mCursorScript->AddButtonContainer("ReStart_Button");
+	mCursorScript->AddButtonContainer("Continue_Button");
 	// リトライ（未実装）
-	//mCursorScript->AddButtonContainer("Retry_Button");
+	mCursorScript->AddButtonContainer("Retry_Button");
 	mCursorScript->AddButtonContainer("TitleBack_Button");
 	// 遷移先のシーンの追加
 	mCursorScript->AddSceneContainer("NotMove");
 	// クレジット(未実装)
-	//mCursorScript->AddSceneContainer("Stage00_ex");
+	mCursorScript->AddSceneContainer("RetryScene");
 	mCursorScript->AddSceneContainer("Title");
 	playPauseSE();
+	game->DeltaTime()->SetTimeScale(0.0f);
+	mSceneChangeTimer = 0.0f;
 	mIsPause = true;
 }
 
 // ポーズ画面の削除
 void StageManager::deletePause() {
+	auto fadeObj = game->FindActor("PauseFade");
+	if (fadeObj != nullptr) game->DestroyObject(fadeObj);
 	game->DeltaTime()->SetTimeScale(1.0f);
 	gameObject->mTransform->AllChildrenDestroy();
 	playPauseSE();

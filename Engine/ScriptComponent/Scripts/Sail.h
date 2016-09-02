@@ -2,10 +2,10 @@
 #pragma once
 #include "main.h"
 
-enum BirdPosition
+enum BirdPositions
 {
-	LEFT,
-	RIGHT
+	LEFTs,
+	RIGHTs
 };
 
 class Sail :public IDllScriptComponent{
@@ -30,7 +30,7 @@ private:
 	SERIALIZE
 	float Speed;
 	float mRotate;
-	BirdPosition mBirdPos;
+	BirdPositions mBirdPos;
 	bool isAnimation;
 
 	SERIALIZE

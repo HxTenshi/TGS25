@@ -24,11 +24,14 @@ void SceneCursor::Initialize(){
 void SceneCursor::Start(){
 	auto buttonPosition = mButtonContainer[mButtonCount]->mTransform->Position();
 	auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
+	auto scale = gameObject->mTransform->Scale();
 	// ボタンの半分の大きさを取得する
 	auto halfScale = XMVectorSet(
-		buttonScale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
+		buttonScale.x / 2.0f * (1.0f - buttonScale.x / 7000) + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
 	// 位置の変更
 	gameObject->mTransform->Position(buttonPosition - halfScale);
+	// 大きさの変更
+	mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale * 1.3f);
 	if (mSetLerpTime <= 0) mSetLerpTime = 1;
 }
 
@@ -41,9 +44,10 @@ void SceneCursor::Update(){
 		auto buttonPosition = mButtonContainer[mButtonCount]->mTransform->Position();
 		auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
 		auto position = gameObject->mTransform->Position();
-		// ボタンの半分の大きさを取得する
+		auto scale = gameObject->mTransform->Scale();
+		// ボタンの半分の大きさを取得する(よくわからない計算)
 		auto halfScale = XMVectorSet(
-			buttonScale.x / 2.0f + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
+			buttonScale.x / 2.0f * (1.0f - buttonScale.x / 7000) + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
 		// 線形補間ように
 		if (mButtonCount != mPastButtonCount) {
 			auto distance = buttonPosition - position;
@@ -54,37 +58,45 @@ void SceneCursor::Update(){
 		if (mLerpTime != 1.0f) {
 			auto deltaTime = game->DeltaTime()->GetDeltaTime();
 			auto timeScale = game->DeltaTime()->GetTimeScale();
-			auto moveVelocity = mLerp * deltaTime * mSpeed;
-			if (deltaTime == 0.0f) moveVelocity = mLerp * mSpeed * 0.01f;
+			auto moveVelocity = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+			if (deltaTime == 0.0f) moveVelocity = mLerp * 0.0167f * mSpeed;
+			else moveVelocity = mLerp * deltaTime * mSpeed;
 			auto distance = buttonPosition - position;
 			if (abs(moveVelocity.x) > abs(distance.x) ||
 				abs(moveVelocity.y) > abs(distance.y))
 				gameObject->mTransform->Position(buttonPosition - halfScale);
 			else gameObject->mTransform->Position(position + moveVelocity);
-			mLerpTime += 1.0f / mSetLerpTime * deltaTime * mSpeed;
-			if (deltaTime == 0.0f) mLerpTime += 1.0f / mSetLerpTime * mSpeed * 0.01f;
+			//mLerpTime += 1.0f / mSetLerpTime * deltaTime * mSpeed;
+			auto lerpSpeed = 0.0f;
+			if (deltaTime == 0.0f) lerpSpeed = 1.0f / mSetLerpTime * 0.0167f * mSpeed;
+			else lerpSpeed = 1.0f / mSetLerpTime * deltaTime * mSpeed;
+			mLerpTime += lerpSpeed;
 			if (mLerpTime >= 1.0f) mLerpTime = 1.0f;
 		}
 		else{
 			gameObject->mTransform->Position(buttonPosition - halfScale);
+			mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale * 1.3f);
 			mLerpTime = 0.0f;
 			mIsCursorMove = false;
 		}
 	}
 	// カーソルが動き終わるまで入力処理を行わない
 	if (mIsCursorMove) return;
+	auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
 	// シーンが変わるなら入力処理を行わない
 	if (mIsChangeScene) return;
 	// キー入力
 	if (Input::Trigger(PAD_DS4_KeyCoord::Button_UP) ||
 		Input::Trigger(KeyCoord::Key_A)) {
 		if (mButtonCount == 0) return;
+		mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale / 1.3f);
 		mButtonCount--;
 		mIsCursorMove = true;
 	}
 	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_DOWN) ||
 		Input::Trigger(KeyCoord::Key_Z)) {
 		if (mButtonCount == mButtonContainer.size() - 1) return;
+		mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale / 1.3f);
 		mButtonCount++;
 		mIsCursorMove = true;
 	}

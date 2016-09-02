@@ -14,5 +14,6 @@ public:
 	void OnCollideExit(Actor* target)override;
 
 private:
+	float mTimer;
 	
 };

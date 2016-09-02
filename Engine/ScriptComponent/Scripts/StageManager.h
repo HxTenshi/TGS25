@@ -24,11 +24,18 @@ public:
 
 private:
 	//メンバ変数
-	int mPauseCount;
+	int mButtonCreateCount;		// ボタンカウント
+	int mPauseCount;			// ポーズの回数
 	SERIALIZE
-	float mFadeOutSecond;
-	bool mIsPause;
-	Actor* mFadeOutObj;
-	SceneCursor* mCursorScript;
-	Fade* mFadeOutScript;
+	float mFadeOutSecond;		// フェードアウトの時間
+	SERIALIZE
+	float mFadeAlpha;			// フェードの透明度
+	float mChangeTime;
+	float mSceneChangeTimer;
+	bool mIsPause;				// ポーズ中か？
+	SERIALIZE
+	std::string mRetryScene;	// リトライするシーンの名前
+	Actor* mFadeOutObj;			// フェードオブジェ
+	SceneCursor* mCursorScript;	// カーソルスクリプト
+	Fade* mFadeOutScript;		// フェードスクリプト
 };

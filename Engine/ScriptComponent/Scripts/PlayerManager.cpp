@@ -15,6 +15,7 @@
 #include "SailBoard.h"
 // サウンドボックスのスクリプト
 #include "SoundBox.h"
+#include"CCBoard.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void PlayerManager::Initialize()
@@ -38,6 +39,12 @@ void PlayerManager::Start()
 		haneTex->mTransform->Scale(XMVectorSet(100, 100, 0, 0));
 		haneTex->mTransform->SetParent(gameObject);
 	}
+
+	mFadeOutObj = game->FindActor("Fade");
+	if (mFadeOutObj == nullptr) {
+		mFadeOutObj = game->CreateActor("Assets/Fade");
+		game->AddObject(mFadeOutObj);
+	}
 }
 
 //毎フレーム呼ばれます
@@ -49,7 +56,7 @@ void PlayerManager::Update(){
 	}
 
 
-	if (mCredit <= 0)
+	if (GameEnd())
 	{
 		GameOver();
 	}
@@ -62,7 +69,7 @@ void PlayerManager::Update(){
 	// 体力が一定以下なら再生
 	auto player = game->FindActor("Board");
 	if (player != nullptr) {
-		auto playerScript = player->GetScript<SailBoard>();
+		auto playerScript = player->GetScript<CCBoard>();
 		if (playerScript->GetHitPoint() <= 25.0f) mIsWarning = true;
 		else {
 			mIsWarning = false;
@@ -149,9 +156,10 @@ bool PlayerManager::IsGameStart()
 void PlayerManager::GameStart()
 {
 	
-		// 一度だけ生成
+		mFadeOutObj = game->FindActor("Fade");
 		if (mFadeOutObj == nullptr) {
-			mFadeOutObj = game->FindActor("Fade");
+			mFadeOutObj = game->CreateActor("Assets/Fade");
+			game->AddObject(mFadeOutObj);
 		}
 		auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 		mFadeOutScript->FadeIn(mFadeInSecond);
@@ -272,4 +280,16 @@ void PlayerManager::PlaySoundBox(Actor* soundBox, std::string name) {
 bool PlayerManager::IsClear()
 {
 	return (mPoint >= mMaxPoint - 1);
+}
+
+bool PlayerManager::GameEnd()
+{
+	auto player = game->FindActor("Board");
+	auto deadLine = game->FindActor("DeadLine");
+	if (!player || !deadLine) return true;
+	if (player->mTransform->Position().y <= deadLine->mTransform->Position().y)
+	{
+		return true;
+	}
+	return false;
 }

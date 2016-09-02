@@ -7,6 +7,7 @@
 #include "SailBoard.h"
 #include "Engine\DebugEngine.h"
 #include<math.h>
+#include"CCBoard.h"
 
 
 
@@ -28,7 +29,7 @@ void WindArrow::Update(){
 	{
 		gameObject->mTransform->Position(mPlayer->mTransform->Position() + mPlayer->mTransform->Left() * 1.0f + XMVectorSet(0,1.0f,0,0));
 	}
-	auto player = mPlayer->GetScript<SailBoard>();
+	auto player = mPlayer->GetScript<CCBoard>();
 	if (player) {
 		auto windvec = player->GetWind();
 		if (XMVector3Length(windvec).x > 0)

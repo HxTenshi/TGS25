@@ -161,6 +161,8 @@
     <ClCompile Include="Scripts\Bullet.cpp" />
     <ClCompile Include="Scripts\BulletEmiter.cpp" />
     <ClCompile Include="Scripts\CameraController.cpp" />
+    <ClCompile Include="Scripts\CCBoard.cpp" />
+    <ClCompile Include="Scripts\CCSail.cpp" />
     <ClCompile Include="Scripts\CreateEnemyObj.cpp" />
     <ClCompile Include="Scripts\DeltaTimeScale.cpp" />
     <ClCompile Include="Scripts\DEMOCamera.cpp" />
@@ -184,6 +186,8 @@
     <ClCompile Include="Scripts\PlayerSearch.cpp" />
     <ClCompile Include="Scripts\PointItem.cpp" />
     <ClCompile Include="Scripts\RainbowShiningWing.cpp" />
+    <ClCompile Include="Scripts\RetryScene.cpp" />
+    <ClCompile Include="Scripts\RetrySceneManager.cpp" />
     <ClCompile Include="Scripts\Sail.cpp" />
     <ClCompile Include="Scripts\SailBoard.cpp" />
     <ClCompile Include="Scripts\SceneCursor.cpp" />
@@ -207,6 +211,8 @@
     <ClInclude Include="Scripts\Bullet.h" />
     <ClInclude Include="Scripts\BulletEmiter.h" />
     <ClInclude Include="Scripts\CameraController.h" />
+    <ClInclude Include="Scripts\CCBoard.h" />
+    <ClInclude Include="Scripts\CCSail.h" />
     <ClInclude Include="Scripts\CreateEnemyObj.h" />
     <ClInclude Include="Scripts\DeltaTimeScale.h" />
     <ClInclude Include="Scripts\DEMOCamera.h" />
@@ -230,6 +236,8 @@
     <ClInclude Include="Scripts\PlayerSearch.h" />
     <ClInclude Include="Scripts\PointItem.h" />
     <ClInclude Include="Scripts\RainbowShiningWing.h" />
+    <ClInclude Include="Scripts\RetryScene.h" />
+    <ClInclude Include="Scripts\RetrySceneManager.h" />
     <ClInclude Include="Scripts\Sail.h" />
     <ClInclude Include="Scripts\SailBoard.h" />
     <ClInclude Include="Scripts\SceneCursor.h" />
