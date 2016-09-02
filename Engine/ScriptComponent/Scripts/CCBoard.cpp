@@ -195,7 +195,7 @@ void CCBoard::Move(float deltaTime)
 	if (Input::Down(KeyCoord::Key_D)) {
 		x += 1 * deltaTime;
 	}
-	mPadGyroX += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x;
+	mPadGyroX += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x * 0.1f;
 	x += mPadGyroX;
 
 	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS))
@@ -232,7 +232,7 @@ void CCBoard::Move(float deltaTime)
 		mVelocity.z = v.z;
 		mVelocity.y = 0.0f;
 
-		if (Input::Down(KeyCoord::Key_SPACE)) {
+		if (Input::Down(KeyCoord::Key_SPACE) || Shake()) {
 			isJump = true;
 			mVelocity += XMVectorSet(0, mJumpPower, 0, 1);
 
@@ -450,7 +450,11 @@ void CCBoard::MoveSmokeParameterSet(float speed, float max)
 bool CCBoard::Shake()
 {
 	auto f = abs(mPrevAcceler - Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z);
-	if (f < -0.5f)
+
+	/*game->Debug()->Log("Ì" + std::to_string(mPrevAcceler));
+	game->Debug()->Log("¡" + std::to_string(Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z));*/
+
+	if (f > 0.5f)
 	{
 		mPrevAcceler = Input::Analog(PAD_DS4_Velo3Coord::Velo3_Acceleration).z;
 		return true;
