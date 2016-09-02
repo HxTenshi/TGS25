@@ -67,6 +67,8 @@ public:
 	PxShape* CreateShapeSphere();
 	PxShape* CreateTriangleMesh(const IPolygonsData* poly);
 	PxController* CreateController();
+	PxRevoluteJoint* CreateRevoluteJoint();
+	PxDistanceJoint* CreateDistanceJoint();
 
 	void AddStaticShape(PxShape* shape);
 	void RemoveStaticShape(PxShape* shape);
@@ -100,6 +102,7 @@ private:
 	PxSimulationFilterShader gDefaultFilterShader;
 	PxCooking*	mCooking;
 	PxControllerManager* mControllerManager;
+	PxRigidDynamic* mRigidDynamic;
 	PxRigidStatic* mRigidStatic;
 
 	PxScene* gScene;

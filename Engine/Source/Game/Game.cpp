@@ -26,12 +26,14 @@ static CameraComponent** gMainCamera;
 //
 Actor* Game::mRootObject;
 #ifdef _ENGINE_MODE
+static CameraComponent** gMainCameraEngineUpdate;
 static SelectActor* gSelectActor;
 Actor* Game::mEngineRootObject;
 #endif
 Game* mGame = NULL;
 Scene Game::m_Scene;
 DeltaTime* gpDeltaTime;
+SystemHelper Game::mSystemHelper;
 
 #ifdef _ENGINE_MODE
 static bool gIsPlay;
@@ -59,6 +61,7 @@ Game::Game(){
 	_SYSTEM_LOG_H("ゲームシーンの初期化");
 	mGame = this;
 	mMainCamera = NULL;
+	mMainCameraEngineUpdate = NULL;
 
 	gpDeltaTime = &mDeltaTime;
 #ifdef _ENGINE_MODE
@@ -103,6 +106,7 @@ Game::Game(){
 	gMainCamera = &mMainCamera;
 
 #ifdef _ENGINE_MODE
+	gMainCameraEngineUpdate = &mMainCameraEngineUpdate;
 	gCommandManager = &mCommandManager;
 	gIsPlay = mIsPlay;
 #endif
@@ -498,6 +502,9 @@ PhysXEngine* Game::GetPhysXEngine(){
 DeltaTime* Game::GetDeltaTime(){
 	return gpDeltaTime;
 }
+System* Game::System(){
+	return &mSystemHelper;
+}
 void Game::RemovePhysXActor(PxActor* act){
 	return gpPhysX3Main->RemoveActor(act);
 }
@@ -561,6 +568,10 @@ RenderTarget Game::GetMainViewRenderTarget(){
 bool Game::IsGamePlay(){
 	return gIsPlay;
 }
+
+void Game::SetMainCameraEngineUpdate(CameraComponent* Camera){
+	*gMainCameraEngineUpdate = Camera;
+}
 #endif
 
 void Game::LoadScene(const std::string& FilePath){
@@ -601,6 +612,7 @@ void Game::ChangePlayGame(bool isPlay){
 		}
 	}
 	else{
+		mSystemHelper.Initialize();
 
 		mSelectActor.SetSelect(NULL);
 
@@ -616,9 +628,24 @@ void Game::ChangePlayGame(bool isPlay){
 #ifdef _ENGINE_MODE
 bool g_DebugRender = true;
 #endif
-
+#include "../Engine/AssetFile/Material/TextureFileData.h"
 void Game::Draw(){
 	auto render = RenderingEngine::GetEngine(ContextType::MainDeferrd);
+
+	// Setup the viewport
+	D3D11_VIEWPORT vp;
+	vp.Width = (FLOAT)WindowState::mWidth;
+	vp.Height = (FLOAT)WindowState::mHeight;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	render->m_Context->RSSetViewports(1, &vp);
+
+	// Set primitive topology
+	//インデックスの並び　Z字など
+	render->m_Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	if (!mMainCamera){
 
 		Device::mRenderTargetBack->ClearView(render->m_Context);
@@ -631,6 +658,13 @@ void Game::Draw(){
 	mMainCamera->VSSetConstantBuffers(render->m_Context);
 	mMainCamera->PSSetConstantBuffers(render->m_Context);
 	mMainCamera->GSSetConstantBuffers(render->m_Context);
+	Texture skyTex = mMainCamera->GetSkyTexture();
+#ifdef _ENGINE_MODE
+	if(mMainCameraEngineUpdate){
+		skyTex = mMainCameraEngineUpdate->GetSkyTexture();
+	}
+#endif
+	m_DeferredRendering.SetSkyTexture(skyTex);
 
 	//Device::mRenderTargetBack->ClearView(Device::mpImmediateContext);
 	Device::mRenderTargetBack->ClearDepth(render->m_Context);
@@ -694,7 +728,7 @@ void Game::Draw(){
 		mMainCamera->GSSetConstantBuffers(render->m_Context);
 
 		m_DeferredRendering.G_Buffer_Rendering(render, [&](){
-			mMainCamera->ScreenClear();
+			//mMainCamera->ScreenClear();
 			PlayDrawList(DrawStage::Diffuse);
 		});
 
@@ -719,7 +753,7 @@ void Game::Draw(){
 
 		m_DeferredRendering.Debug_G_Buffer_Rendering(render,
 			[&](){
-			mMainCamera->ScreenClear();
+			//mMainCamera->ScreenClear();
 			PlayDrawList(DrawStage::Diffuse);
 		});
 
@@ -763,7 +797,24 @@ void Game::Draw(){
 	ClearDrawList();
 
 	SetMainCamera(NULL);
+#ifdef _ENGINE_MODE
+	SetMainCameraEngineUpdate(NULL);
+#endif
 
+	{
+		ID3D11ShaderResourceView *const pNULL[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		ID3D11SamplerState *const pSNULL[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		render->m_Context->PSSetShaderResources(0, 8, pNULL);
+		render->m_Context->PSSetSamplers(0, 8, pSNULL);
+		render->m_Context->VSSetShaderResources(0, 8, pNULL);
+		render->m_Context->VSSetSamplers(0, 8, pSNULL);
+		render->m_Context->GSSetShaderResources(0, 8, pNULL);
+		render->m_Context->GSSetSamplers(0, 8, pSNULL);
+		render->m_Context->PSSetShader(NULL, NULL, 0);
+		render->m_Context->VSSetShader(NULL, NULL, 0);
+		render->m_Context->GSSetShader(NULL, NULL, 0);
+		render->m_Context->CSSetShader(NULL, NULL, 0);
+	}
 }
 
 
@@ -832,6 +883,7 @@ void Game::GameStop(){
 }
 #endif
 void Game::GamePlay(){
+	mSystemHelper.Update();
 	float deltaTime = mDeltaTime.GetDeltaTime();
 
 	mRootObject->UpdateComponent(deltaTime);

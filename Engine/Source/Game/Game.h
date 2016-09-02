@@ -26,6 +26,7 @@
 #include "Engine/WorldGrid.h"
 
 #include "DeltaTime.h"
+#include "System.h"
 
 class CameraComponent;
 
@@ -80,11 +81,13 @@ public:
 	static RenderTarget GetMainViewRenderTarget();
 	static void LoadScene(const std::string& FilePath);
 	static DeltaTime* GetDeltaTime();
+	static System* System();
 
 #ifdef _ENGINE_MODE
 	static void AddEngineObject(Actor* actor);
 	static bool IsGamePlay();
 	void GameStop();
+	static void SetMainCameraEngineUpdate(CameraComponent* Camera);
 #endif
 
 	void ChangePlayGame(bool isPlay);
@@ -118,6 +121,8 @@ private:
 	static Actor* mRootObject;
 
 	EngineDeltaTime mDeltaTime;
+	static SystemHelper mSystemHelper;
+
 
 #ifdef _ENGINE_MODE
 	//ツリービューのアイテム削除に失敗したアクター
@@ -139,6 +144,7 @@ private:
 
 
 	CameraComponent* mMainCamera;
+	CameraComponent* mMainCameraEngineUpdate;
 	RenderTarget mMainViewRenderTarget;
 	DeferredRendering m_DeferredRendering;
 	PostEffectRendering mPostEffectRendering;
