@@ -84,6 +84,16 @@ void Fade::FadeOut(const float time, const float maxalpha) {
 	if (mFadeOutAlpha == maxalpha) mIsFadeOut = true;
 }
 
+// フェードの値を取得します
+float Fade::GetFadeInAlpha() {
+	return mFadeInAlpha;
+}
+
+// フェードアウトの値を取得します
+float Fade::GetFadeOutAlpha() {
+	return mFadeOutAlpha;
+}
+
 // フェードインをしたかを返します
 bool Fade::IsFadeIn() {
 	return mIsFadeIn;

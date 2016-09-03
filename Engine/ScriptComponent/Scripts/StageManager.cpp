@@ -48,6 +48,7 @@ void StageManager::Update(){
 	// キー入力
 	if (fadeObj == nullptr && startObj == nullptr) {
 		if (Input::Trigger(PAD_DS4_KeyCoord::Button_OPTIONS) ||
+			Input::Trigger(PAD_X_KeyCoord::Button_START) ||
 			Input::Trigger(KeyCoord::Key_G)) {
 			mPauseCount++;
 			// ポーズの生成、削除
@@ -56,6 +57,7 @@ void StageManager::Update(){
 		}
 		else if (
 			(Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS) ||
+				Input::Trigger(PAD_X_KeyCoord::Button_A) ||
 				Input::Trigger(KeyCoord::Key_H)) &&
 			mPauseCount % 2 == 1) {
 			mPauseCount++;

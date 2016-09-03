@@ -48,9 +48,17 @@ private:
 	float mFadeInSecond;
 	SERIALIZE
 	float mTitleChangeTime;
+	float mFadeAlpha;			// フェードの透明度
+	float mStageNumberAlpha;	// ステージナンバーの透明値
+	// ステージ名
+	SERIALIZE
+	std::string mStageName;
+	SERIALIZE
+	std::string mNextStageName;	// クリア時の次に移動するシーン名
 	bool mIsWarning;
 	bool mIsWarningSign;
 	Actor* mFadeOutObj;
+	Actor* mStageNumberObj;
 	Actor* mStageSoundBox;
 	Actor* mPlayerSoundBox;
 };

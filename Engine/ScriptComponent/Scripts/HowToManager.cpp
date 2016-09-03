@@ -69,7 +69,9 @@ void HowToManager::Update(){
 		// ボタンが押されたら二度と押せない
 		if (mIsChangeScene) return;
 		// ボタンが押されたら強制終了？
-		if (Input::Trigger(PAD_DS4_KeyCoord::Button_CIRCLE) || Input::Trigger(KeyCoord::Key_SPACE)) {
+		if (Input::Trigger(PAD_DS4_KeyCoord::Button_CIRCLE) ||
+			Input::Trigger(PAD_X_KeyCoord::Button_B) ||
+			Input::Trigger(KeyCoord::Key_SPACE)) {
 			mIsChangeScene = true;
 			auto sound = gameObject->GetComponent<SoundComponent>();
 			if (!sound) return;

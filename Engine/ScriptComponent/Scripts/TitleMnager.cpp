@@ -14,7 +14,26 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void TitleMnager::Initialize(){
+	mTitleButtonCount = 0;
 	mSceneChangeTimer = 0.0f;
+	// タイトルセレクト
+	mSelectNumberContainer.push_back("StageSelectButtons");
+	mSelectNumberContainer.push_back("Assets/SceneAssets/Title_Buttons");
+	mSelectNumberContainer.push_back("GameStart_Button");
+	mSelectNumberContainer.push_back("How_To_Button");
+	mSelectNumberContainer.push_back("GameEnd_Button");
+	mSelectNumberContainer.push_back("NotMove");
+	mSelectNumberContainer.push_back("How_To");
+	mSelectNumberContainer.push_back("GameEnd");
+	// ステージセレクト
+	mSelectNumberContainer.push_back("Title_Buttons");
+	mSelectNumberContainer.push_back("Assets/SceneAssets/StageSelectButtons");
+	mSelectNumberContainer.push_back("Stage01_Button");
+	mSelectNumberContainer.push_back("Stage02_Button");
+	mSelectNumberContainer.push_back("Stage03_Button");
+	mSelectNumberContainer.push_back("FastStage");
+	mSelectNumberContainer.push_back("Stage01");
+	mSelectNumberContainer.push_back("Stage02");
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -23,17 +42,7 @@ void TitleMnager::Start(){
 	mCursorObj = game->FindActor("SceneCursor");
 	mCursorScript = mCursorObj->GetScript<SceneCursor>();
 	// ボタンの追加
-	mCursorScript->AddButtonContainer("GameStart_Button");
-	// クレジット(未実装)
-	//mCursorScript->AddButtonContainer("Credit_Button");
-	mCursorScript->AddButtonContainer("How_To_Button");
-	mCursorScript->AddButtonContainer("GameEnd_Button");
-	// 遷移先のシーンの追加
-	mCursorScript->AddSceneContainer("Stage00_ex");
-	// クレジット(未実装)
-	//mCursorScript->AddSceneContainer("Stage00");
-	mCursorScript->AddSceneContainer("How_To");
-	mCursorScript->AddSceneContainer("GameEnd");
+	createButton(TITLESELECT_NUMBER, TITLESELECT_COUNT);
 }
 
 //毎フレーム呼ばれます
@@ -45,6 +54,18 @@ void TitleMnager::Update()
 	auto cameraRotate = camera->mTransform->Rotate();
 	// デルタタイムの取得
 	auto deltaTime = game->DeltaTime()->GetDeltaTime();
+
+	if (mTitleButtonCount % 2 == 1) {
+		if (mCursorScript->IsPushCursor() &&
+			mCursorScript->GetButtonCount() == 0)
+			createButton(STAGESELECT_NUMBER, STAGESELECT_COUNT);
+	}
+	else {
+		if (mCursorScript->IsBackCursor())
+			createButton(TITLESELECT_NUMBER, TITLESELECT_COUNT);
+	}
+	// createButton()
+
 	// 何も入力がなければタイム加算
 	// タイムが一定以上になったらフェイドアウトしてPVシーンに移行
 	if (mChangeTime > mSceneChangeTimer) {
@@ -102,4 +123,39 @@ void TitleMnager::OnCollideEnter(Actor* target){
 //コライダーとのロスト時に呼ばれます
 void TitleMnager::OnCollideExit(Actor* target){
 	(void)target;
+}
+
+// タイトルのデフォルトのボタンを作成します
+void TitleMnager::createButton(const int number, const int count) {
+	//mSelectNumberContainer[selectNumber]
+	/*auto stageSelectButtons = game->FindActor("StageSelectButtons");
+	if (stageSelectButtons != nullptr) {
+		deleteButtonObj("StageSelectButtons");
+		auto titleObj = game->CreateActor("Assets/SceneAssets/Title_Buttons");
+		game->AddObject(titleObj);
+	}*/
+	auto stageSelectButtons = game->FindActor(mSelectNumberContainer[number]);
+	if (stageSelectButtons != nullptr) {
+		deleteButtonObj(mSelectNumberContainer[number]);
+		auto titleObj = game->CreateActor(mSelectNumberContainer[number + 1]);
+		game->AddObject(titleObj);
+	}
+	for (auto i = 0; i != count; i++)
+	{
+		auto selectNumber = i + number + 2;
+		// ボタンの追加
+		mCursorScript->AddButtonContainer(mSelectNumberContainer[selectNumber]);
+		// 遷移先のシーンの追加
+		mCursorScript->AddSceneContainer(mSelectNumberContainer[selectNumber + count]);
+	}
+	if(mTitleButtonCount != 0) mCursorScript->SetPosition();
+	mTitleButtonCount += 1;
+	//mTitleButtonCount = 0;
+}
+
+// ボタンオブジェクトの削除
+void TitleMnager::deleteButtonObj(const char* name) {
+	mCursorScript->ResetButtonContainer();
+	auto buttonObj = game->FindActor(name);
+	game->DestroyObject(buttonObj);
 }

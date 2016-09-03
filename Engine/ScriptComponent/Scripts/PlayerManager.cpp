@@ -21,6 +21,8 @@
 void PlayerManager::Initialize()
 {
 	mPoint = -1;
+	mFadeAlpha = 0.0f;
+	mStageNumberAlpha = 1.0f;
 	mAlpha = 0.5;
 	mFadeOutObj = nullptr;
 	mGameStart = false;
@@ -45,6 +47,8 @@ void PlayerManager::Start()
 		mFadeOutObj = game->CreateActor("Assets/Fade");
 		game->AddObject(mFadeOutObj);
 	}
+	// 何も入力されていなかったらタイトルに戻るようにする
+	if (mNextStageName == "") mNextStageName = "Title";
 }
 
 //毎フレーム呼ばれます
@@ -155,24 +159,43 @@ bool PlayerManager::IsGameStart()
 
 void PlayerManager::GameStart()
 {
-	
-		mFadeOutObj = game->FindActor("Fade");
-		if (mFadeOutObj == nullptr) {
-			mFadeOutObj = game->CreateActor("Assets/Fade");
-			game->AddObject(mFadeOutObj);
-		}
-		auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
-		mFadeOutScript->FadeIn(mFadeInSecond);
-		if (mFadeOutScript->IsFadeIn())
-		{
-			game->DestroyObject(mFadeOutObj);
-			mFadeOutObj = nullptr;
-			auto startTex = game->CreateActor("Assets/UIPrefab/Start.json");
-			game->AddObject(startTex);
-			// サウンドボックスの生成
-			StageSoundBox("start");
-			mGameStart = true;
-		}
+	// ステージ名の表示
+	if (mStageNumberObj == nullptr) {
+		auto name = "Assets/UIPrefab/" + mStageName + ".json";
+		auto stageName = name.c_str();
+		mStageNumberObj = game->CreateActor(stageName);
+		game->AddObject(mStageNumberObj);
+		mStageNumberObj->mTransform->SetParent(gameObject);
+	}
+	mFadeOutObj = game->FindActor("Fade");
+	if (mFadeOutObj == nullptr) {
+		mFadeOutObj = game->CreateActor("Assets/Fade");
+		game->AddObject(mFadeOutObj);
+	}
+	auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
+	mFadeOutScript->FadeIn(mFadeInSecond);
+	// ステージナンバーの透明処理
+	if (mFadeOutScript->GetFadeInAlpha() <= 0.3f) {
+		if(mFadeAlpha == 0.0f)
+			mFadeAlpha = mFadeOutScript->GetFadeInAlpha();
+		auto deltaTime = game->DeltaTime()->GetDeltaTime();
+		mStageNumberAlpha -= (1.0f / mFadeInSecond * deltaTime) / mFadeAlpha;
+	}
+	auto mate = mStageNumberObj->GetComponent<MaterialComponent>();
+	auto color = XMFLOAT4(1.0f, 1.0f, 1.0f, mStageNumberAlpha);
+	if (mate) mate->SetAlbedoColor(color);
+
+	if (mFadeOutScript->IsFadeIn())
+	{
+		game->DestroyObject(mFadeOutObj);
+		game->DestroyObject(mStageNumberObj);
+		mFadeOutObj = nullptr;
+		//auto startTex = game->CreateActor("Assets/UIPrefab/Start.json");
+		//game->AddObject(startTex);
+		// サウンドボックスの生成
+		StageSoundBox("start");
+		mGameStart = true;
+	}
 }
 
 void PlayerManager::GameClear()
@@ -198,7 +221,8 @@ void PlayerManager::GameClear()
 			auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 			mFadeOutScript->FadeOut(mFadeOutSecond);
 			// フェードアウト後シーン移動
-			if (mFadeOutScript->IsFadeOut()) game->LoadScene("./Assets/Scenes/Title.scene");
+			auto sceneName = "./Assets/Scenes/" + mNextStageName + ".scene";
+			if (mFadeOutScript->IsFadeOut()) game->LoadScene(mNextStageName);
 		}
 	}
 }

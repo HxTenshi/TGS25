@@ -18,6 +18,10 @@ public:
 	void FadeIn(const float time);
 	// 指定した時間でフェードアウトを行います
 	void FadeOut(const float time,const float maxalpha = 1.0f);
+	// フェードインの値を取得します
+	float GetFadeInAlpha();
+	// フェードアウトの値を取得します
+	float GetFadeOutAlpha();
 	// フェードインをしたかを返します
 	bool IsFadeIn();
 	// フェードアウトをしたかを返します
