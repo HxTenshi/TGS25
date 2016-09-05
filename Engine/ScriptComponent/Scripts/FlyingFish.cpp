@@ -18,6 +18,7 @@ void FlyingFish::Initialize(){
 	mInitJampRestTime = mJampRestTime;
 	mRotateInterval = 2.0f;
 	mSpeed = mSetSpeed;
+	mObjSpace = 3.0f;
 	mIsJamp = true;
 	mIsInitSet = false;
 	mIsWallHit = false;

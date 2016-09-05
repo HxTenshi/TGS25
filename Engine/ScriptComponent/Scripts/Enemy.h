@@ -104,6 +104,15 @@ public:
 	float GetAnimationTime();
 	// デルタタイムを取得します
 	float GetEnemyDeltaTime(float framerate);
+private:
+	// コンテナに追加する関数です
+	void AddObjContainer();
+	// 壁が前方にあるかを返します
+	bool IsWallHit();
+	// 壁が前方にある場合に、どこに曲がるかを返します
+	float WallHitRotate();
+	// ランダム関数
+	int GetRandom(int min, int max);
 
 protected:
 	//メンバ変数
@@ -153,6 +162,8 @@ protected:
 	float mBlowAwayY;						// 竜巻に吹っ飛んだときのYの角度
 	float mBlowAwayPower;					// 吹き飛ぶ速度
 	float mBlowAwayInterval;				// 吹き飛び間隔
+	float mObjSpace;						// 壁捜索オブジェクトの間隔
+	//float mObjSpaceRevesion;				// 上記の補正
 	bool mIsMove;							// 動いているか
 	bool mIsFloorHit;						// 床と当たったか
 	bool mIsCloudHit;						// 雲と当たったか
@@ -168,7 +179,16 @@ protected:
 	// 距離行動コンテナ
 	typedef std::vector<EnemyState> DistanceVector;
 	DistanceVector mDistanceVector;
+	// 名前コンテナ
+	typedef std::vector<std::string> NameContainer;
+	NameContainer mNameContainer;
+	// オブジェクト配置コンテナ
+	typedef std::vector<XMVECTOR> PositionContainer;
+	PositionContainer mPositionContainer;
 
 private:
 	const float mResPawnHeigth = -100.0f;	// リスポーンする高さ
+	bool mIsForwardHit;						// 壁が前方にあるか
+	bool mIsRightHit;						// 壁が右側にあるか
+	bool mIsLeftHit;						// 壁が左側にあるか
 };
