@@ -173,6 +173,7 @@
     <ClCompile Include="Scripts\Fade.cpp" />
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\GameEnd.cpp" />
+    <ClCompile Include="Scripts\GameQuit.cpp" />
     <ClCompile Include="Scripts\HaneEffect.cpp" />
     <ClCompile Include="Scripts\HowToManager.cpp" />
     <ClCompile Include="Scripts\HPGauge.cpp" />
@@ -223,6 +224,7 @@
     <ClInclude Include="Scripts\Fade.h" />
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\GameEnd.h" />
+    <ClInclude Include="Scripts\GameQuit.h" />
     <ClInclude Include="Scripts\HaneEffect.h" />
     <ClInclude Include="Scripts\HowToManager.h" />
     <ClInclude Include="Scripts\HPGauge.h" />

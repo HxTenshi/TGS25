@@ -100,6 +100,7 @@ void CCSail::SailRotate()
 		isAnimation = true;
 	}
 
+	mSailRotate -= Input::Analog(PAD_X_Velo2Coord::Velo2_RStick).x * 0.1f;
 	mSailRotate += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).z;
 
 	mSailRotate = min(max(mSailRotate, -XM_PI / 2), XM_PI / 2);

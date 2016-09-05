@@ -195,6 +195,7 @@ void CCBoard::Move(float deltaTime)
 	if (Input::Down(KeyCoord::Key_D)) {
 		x += 1 * deltaTime;
 	}
+	mPadGyroX = Input::Analog(PAD_X_Velo2Coord::Velo2_LStick).x * 0.1f;
 	mPadGyroX += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x * 0.1f;
 	x += mPadGyroX;
 
@@ -232,7 +233,8 @@ void CCBoard::Move(float deltaTime)
 		mVelocity.z = v.z;
 		mVelocity.y = 0.0f;
 
-		if (Input::Down(KeyCoord::Key_SPACE) || Shake()) {
+		if (Input::Down(KeyCoord::Key_SPACE) || Shake() || Input::Down(PAD_X_KeyCoord::Button_L1) || Input::Down(PAD_X_KeyCoord::Button_R1))
+		{
 			isJump = true;
 			mVelocity += XMVectorSet(0, mJumpPower, 0, 1);
 
@@ -381,6 +383,9 @@ void CCBoard::Trick(float deltaTime)
 
 		mTrickRotate.y += mTrickRotatePower;
 	}
+
+	mTrickRotate.x -= Input::Analog(PAD_X_Velo2Coord::Velo2_LStick).x * 0.1f;
+	mTrickRotate.y += Input::Analog(PAD_X_Velo2Coord::Velo2_LStick).y* 0.1f;
 
 	mTrickRotate.x -= Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).y * 0.1f;
 	mTrickRotate.y += Input::Analog(PAD_DS4_Velo3Coord::Velo3_Angular).x * 0.1f;
