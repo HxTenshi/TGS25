@@ -39,6 +39,8 @@ void SceneCursor::Start(){
 void SceneCursor::Update(){
 	// 一生動かない
 	if (mIsMove) return;
+	mIsPushCursor = false;
+	mIsBackCursor = false;
 	// キー操作で動く場合
 	if (mIsCursorMove) {
 		auto buttonPosition = mButtonContainer[mButtonCount]->mTransform->Position();
@@ -87,6 +89,7 @@ void SceneCursor::Update(){
 	if (mIsChangeScene) return;
 	// キー入力
 	if (Input::Trigger(PAD_DS4_KeyCoord::Button_UP) ||
+		Input::Trigger(PAD_X_KeyCoord::Button_UP) ||
 		Input::Trigger(KeyCoord::Key_A)) {
 		if (mButtonCount == 0) return;
 		mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale / 1.3f);
@@ -94,6 +97,7 @@ void SceneCursor::Update(){
 		mIsCursorMove = true;
 	}
 	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_DOWN) ||
+		Input::Trigger(PAD_X_KeyCoord::Button_DOWN) ||
 		Input::Trigger(KeyCoord::Key_Z)) {
 		if (mButtonCount == mButtonContainer.size() - 1) return;
 		mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale / 1.3f);
@@ -101,6 +105,7 @@ void SceneCursor::Update(){
 		mIsCursorMove = true;
 	}
 	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_CIRCLE) ||
+		Input::Trigger(PAD_X_KeyCoord::Button_B) ||
 		Input::Trigger(KeyCoord::Key_SPACE)) {
 		mIsPushCursor = true;
 		// シーン遷移しない場合はすぐに返す
@@ -115,6 +120,10 @@ void SceneCursor::Update(){
 		mIsCursorMove = true;
 		mIsChangeScene = true;
 	}
+	else if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS) ||
+		Input::Trigger(PAD_X_KeyCoord::Button_A) ||
+		Input::Trigger(KeyCoord::Key_H))
+		mIsBackCursor = true;
 }
 
 //開放時に呼ばれます（Initialize１回に対してFinish１回呼ばれます）（エディター中も呼ばれます）
@@ -156,6 +165,22 @@ void SceneCursor::OnChangeScene() {
 void SceneCursor::SetIsCursorMove(bool isMove) {
 	mIsMove = isMove;
 }
+// カーソルの位置を変更します
+void SceneCursor::SetPosition() {
+	auto buttonPosition = mButtonContainer[mButtonCount]->mTransform->Position();
+	auto buttonScale = mButtonContainer[mButtonCount]->mTransform->Scale();
+	auto halfScale = XMVectorSet(
+		buttonScale.x / 2.0f * (1.0f - buttonScale.x / 7000) + mAddCursorPositionX, 0.0f, 0.0f, 0.0f);
+	gameObject->mTransform->Position(buttonPosition - halfScale);
+	mButtonContainer[mButtonCount]->mTransform->Scale(buttonScale * 1.3f);
+}
+
+// ボタンコンテナをリセットします
+void SceneCursor::ResetButtonContainer() {
+	mButtonContainer.clear();
+	mSceneContainer.clear();
+	mButtonCount = 0;
+}
 
 // ボタンの値を取得します
 int SceneCursor::GetButtonCount() {
@@ -170,6 +195,11 @@ bool SceneCursor::IsCursorMove() {
 // カーソルが押されたかを返します
 bool SceneCursor::IsPushCursor() {
 	return mIsPushCursor;
+}
+
+// カーソルで戻るかどうかを返します
+bool SceneCursor::IsBackCursor() {
+	return mIsBackCursor;
 }
 
 // シーンが変わったかを返します

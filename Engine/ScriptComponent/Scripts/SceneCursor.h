@@ -22,12 +22,18 @@ public:
 	void OnChangeScene();
 	// カーソルの移動制限の設定します
 	void SetIsCursorMove(bool isMove);
+	// カーソルの位置を変更します
+	void SetPosition();
+	// ボタンコンテナをリセットします
+	void ResetButtonContainer();
 	// ボタンの値を取得します
 	int GetButtonCount();
 	// カーソルが動いているかを返します
 	bool IsCursorMove();
 	// カーソルが押されたかを返します
 	bool IsPushCursor();
+	// カーソルで戻るかどうかを返します
+	bool IsBackCursor();
 	// シーンが変わったかを返します
 	bool IsChangeScene();
 
@@ -45,6 +51,7 @@ private:
 	bool mIsMove;				// 動くか
 	bool mIsCursorMove;			// カーソルが動いているか
 	bool mIsPushCursor;			// ボタンが押されたか
+	bool mIsBackCursor;			// 戻るボタンが押されたか
 	bool mIsChangeScene;		// シーンが変わったか
 	XMVECTOR mLerp;
 	// ボタンコンテナ
