@@ -13,6 +13,7 @@ void KillerWhale::Initialize(){
 	Enemy::Initialize();
 	
 	mSpeed = mSetSpeed;
+	mObjSpace = 0.4f;
 	mIsShot = false;
 	mIsDistanceAct = true;
 	//mIsBlowAway = false;

@@ -173,6 +173,7 @@
     <ClCompile Include="Scripts\Fade.cpp" />
     <ClCompile Include="Scripts\FlyingFish.cpp" />
     <ClCompile Include="Scripts\GameEnd.cpp" />
+    <ClCompile Include="Scripts\GameQuit.cpp" />
     <ClCompile Include="Scripts\HaneEffect.cpp" />
     <ClCompile Include="Scripts\HowToManager.cpp" />
     <ClCompile Include="Scripts\HPGauge.cpp" />
@@ -180,6 +181,7 @@
     <ClCompile Include="Scripts\KillerWhale.cpp" />
     <ClCompile Include="Scripts\LongSpinePorcupineFish.cpp" />
     <ClCompile Include="Scripts\MoveSmoke.cpp" />
+    <ClCompile Include="Scripts\OperationSceneManager.cpp" />
     <ClCompile Include="Scripts\ParentObj.cpp" />
     <ClCompile Include="Scripts\PlayerController.cpp" />
     <ClCompile Include="Scripts\PlayerManager.cpp" />
@@ -199,6 +201,7 @@
     <ClCompile Include="Scripts\TextureScroll.cpp" />
     <ClCompile Include="Scripts\TitleMnager.cpp" />
     <ClCompile Include="Scripts\Tornado.cpp" />
+    <ClCompile Include="Scripts\WallSearch.cpp" />
     <ClCompile Include="Scripts\WaterGunBullet.cpp" />
     <ClCompile Include="Scripts\Wind.cpp" />
     <ClCompile Include="Scripts\WindArrow.cpp" />
@@ -223,6 +226,7 @@
     <ClInclude Include="Scripts\Fade.h" />
     <ClInclude Include="Scripts\FlyingFish.h" />
     <ClInclude Include="Scripts\GameEnd.h" />
+    <ClInclude Include="Scripts\GameQuit.h" />
     <ClInclude Include="Scripts\HaneEffect.h" />
     <ClInclude Include="Scripts\HowToManager.h" />
     <ClInclude Include="Scripts\HPGauge.h" />
@@ -230,6 +234,7 @@
     <ClInclude Include="Scripts\KillerWhale.h" />
     <ClInclude Include="Scripts\LongSpinePorcupineFish.h" />
     <ClInclude Include="Scripts\MoveSmoke.h" />
+    <ClInclude Include="Scripts\OperationSceneManager.h" />
     <ClInclude Include="Scripts\ParentObj.h" />
     <ClInclude Include="Scripts\PlayerController.h" />
     <ClInclude Include="Scripts\PlayerManager.h" />
@@ -250,6 +255,7 @@
     <ClInclude Include="Scripts\TextureScroll.h" />
     <ClInclude Include="Scripts\TitleMnager.h" />
     <ClInclude Include="Scripts\Tornado.h" />
+    <ClInclude Include="Scripts\WallSearch.h" />
     <ClInclude Include="Scripts\WaterGunBullet.h" />
     <ClInclude Include="Scripts\Wind.h" />
     <ClInclude Include="Scripts\WindArrow.h" />

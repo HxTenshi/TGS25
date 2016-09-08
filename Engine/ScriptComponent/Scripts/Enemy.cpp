@@ -4,6 +4,7 @@
 #include "SailBoard.h"
 #include "ParentObj.h"
 #include "EnemyCG.h"
+#include "WallSearch.h"
 #include "CreateEnemyObj.h"
 #include "MoveSmoke.h"
 //アクターなど基本のインクルード
@@ -11,7 +12,9 @@
 //コンポーネント全てのインクルード
 #include "h_component.h"
 #include "Engine\DebugEngine.h"
-#include"CCBoard.h"
+#include "CCBoard.h"
+// 乱数時間の使用
+#include <time.h>
 
 Enemy::~Enemy() {
 	//gameObject->mTransform->AllChildrenDestroy();
@@ -55,10 +58,15 @@ void Enemy::Initialize(){
 	mIsTornadoBlowAway = false;
 	mIsPlayerHeal = false;
 	mIsCreateChase = false;
+	mIsForwardHit = false;
+	mIsRightHit = false;
+	mIsLeftHit = false;
 	// 配列に追跡行動のenumクラスを入れる
 	mDistanceVector.push_back(EnemyState::PlayerShortDistance);
 	mDistanceVector.push_back(EnemyState::PlayerCenterDistance);
 	mDistanceVector.push_back(EnemyState::PlayerLongDistance);
+	// 現在の時刻で乱数を行うように設定
+	srand((unsigned int)time(NULL));
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -82,6 +90,22 @@ void Enemy::Start(){
 				mCreateEnemyObj->GetScript<CreateEnemyObj>();
 			mIsCreateChase = createEnemyScript->GetIsPlayerChaseMode();
 		}
+		// このままだとゲッダンするので生成オブジェクトとの親子関係解除
+		auto position = mParentObj->mTransform->Position();
+		auto createObjPosition = mCreateEnemyObj->mTransform->Position();
+		mParentObj->mTransform->Position(position + createObjPosition);
+		// EnemyObjを探す
+		auto EnemysObj = game->FindActor("Enemy");
+		mParentObj->mTransform->SetParent(EnemysObj);
+	}	
+	// 戻るときに必要なオブジェクトの追加
+	AddObjContainer();
+	for (auto i = 0; i != 8; i++) {
+		auto obj = game->CreateActor("Assets/Enemy/Box");
+		game->AddObject(obj);
+		obj->Name(mNameContainer[i]);
+		obj->mTransform->Position(mPositionContainer[i]);
+		obj->mTransform->SetParent(gameObject);
 	}
 }
 
@@ -95,6 +119,18 @@ void Enemy::Finish(){
 
 //コライダーとのヒット時に呼ばれます
 void Enemy::OnCollideBegin(Actor* target){
+	if (target->Name() == "Floor") {
+		mInitSetCount = 1;
+		mIsFloorHit = true;
+		mIsDamage = false;
+	}
+	if (target->Name() == "Tower" ||
+		target->Name() == "bridge" ||
+		target->Name() == "Tree") {
+		auto KnockBack = mParentObj->mTransform->Forward();
+		auto parentPosition = mParentObj->mTransform->Position();
+		mParentObj->mTransform->Position(parentPosition + KnockBack);
+	}
 	if (mEnemyState != EnemyState::DeadMove) {
 		if (target->Name() == "Board") {
 			auto playerScript = target->GetScript<CCBoard>();
@@ -136,18 +172,6 @@ void Enemy::OnCollideBegin(Actor* target){
 			auto collider = gameObject->GetComponent<PhysXColliderComponent>();
 			collider->SetIsTrigger(true);
 		}
-	}
-	if (target->Name() == "Floor") {
-		mInitSetCount = 1;
-		mIsFloorHit = true;
-		mIsDamage = false;
-	}
-	if (target->Name() == "Tower" ||
-		target->Name() == "bridge" ||
-		target->Name() == "Tree") {
-		auto KnockBack = mParentObj->mTransform->Forward();
-		auto parentPosition = mParentObj->mTransform->Position();
-		mParentObj->mTransform->Position(parentPosition + KnockBack);
 	}
 	// 雲と当たったら消えるフラグを間接的にtrueにする
 	if (target->Name() == "Cloud_s" ||
@@ -542,8 +566,12 @@ void Enemy::SearchTornado() {
 				}
 			}
 			// 範囲内なら竜巻に巻き込まれる行動を行う
-			if (mTornadoMinDistance <= mTornadoDistance)
+			if (mTornadoMinDistance <= mTornadoDistance) {
+				auto rotate = XMVectorSet(
+					0.0f, mParentObj->mTransform->Rotate().y, 0.0f, 0.0f);
+				mParentObj->mTransform->Rotate(rotate);
 				mEnemyState = EnemyState::TornadoEscape;
+			}
 			else mEnemyState = EnemyState::PlayerSearch;
 		}
 		else {
@@ -668,27 +696,35 @@ void Enemy::ReturnMove() {
 		return;
 	}
 	mIsMove = true;
-
 	auto createEnemyPosition = mCreateEnemyObj->mTransform->Position();
 	// 親のステータスの取得
-	auto parentPosition = mParentObj->mTransform->Position();
+	auto parentPosition = mParentObj->mTransform->Position();	
 	// 生成オブジェクトとの距離の計算
 	auto distance = XMVector3Length(parentPosition - createEnemyPosition);
 	auto createEnemyScript = mCreateEnemyObj->GetScript<CreateEnemyObj>();
 	// 一定距離まで近づいたら通常行動に戻す
 	if (createEnemyScript->GetReturnDistance() <= distance.x) {
-		// 生成オブジェクトとのベクトルの向きを計算
-		auto v = parentPosition - createEnemyPosition;
-		auto angle = atan2(v.x, v.z);
-		auto quaternion = XMQuaternionRotationAxis(
-			mParentObj->mTransform->Up(), angle);
-		// 生成オブジェクトの方向を向く
-		mParentObj->mTransform->Quaternion(quaternion);
+		// 前方に壁があるなら曲がる
+		if (Enemy::IsWallHit()) {
+			auto rotate = mParentObj->mTransform->Rotate();
+			rotate.y += Enemy::WallHitRotate();
+			mParentObj->mTransform->Rotate(rotate);
+		}
+		else {
+			// 生成オブジェクトとのベクトルの向きを計算
+			auto v = parentPosition - createEnemyPosition;
+			auto angle = atan2(v.x, v.z);
+			auto quaternion = XMQuaternionRotationAxis(
+				mParentObj->mTransform->Up(), angle);
+			// 生成オブジェクトの方向を向く
+			mParentObj->mTransform->Quaternion(quaternion);
+		}
 		// 前方に移動
 		auto forward = mParentObj->mTransform->Forward() * mSpeed * 0.01f;
 		mParentObj->mTransform->Position(parentPosition - forward);
 	}
 	else {
+		// プレイヤーの捜索
 		mEnemyState = EnemyState::PlayerSearch;
 	}
 }
@@ -818,4 +854,81 @@ float Enemy::GetAnimationTime() {
 float Enemy::GetEnemyDeltaTime(float framerate) {
 	auto deltaTime = game->DeltaTime()->GetDeltaTime();
 	return deltaTime * framerate;
+}
+
+// コンテナに追加する関数です
+void Enemy::AddObjContainer() {
+	// 名前の追加
+	mNameContainer.push_back("forward");
+	mNameContainer.push_back("right");
+	mNameContainer.push_back("right");
+	mNameContainer.push_back("right");
+	mNameContainer.push_back("backward");
+	mNameContainer.push_back("left");
+	mNameContainer.push_back("left");
+	mNameContainer.push_back("left");
+	// 位置の追加
+	// コライダーで調整する
+	auto collider = gameObject->GetComponent<PhysXColliderComponent>();
+	auto spaceScale = XMVectorSet(
+		collider->GetScale().x + mObjSpace, 0.0f,
+		collider->GetScale().z + mObjSpace, 0.0f);
+	mPositionContainer.push_back(XMVectorSet(0.0f, 0.0f, -spaceScale.z, 0.0f));
+	mPositionContainer.push_back(XMVectorSet(-spaceScale.x, 0.0f, -spaceScale.z, 0.0f));
+	mPositionContainer.push_back(XMVectorSet(-spaceScale.x, 0.0f, 0.0f, 0.0f));
+	mPositionContainer.push_back(XMVectorSet(-spaceScale.x, 0.0f, spaceScale.z, 0.0f));
+	mPositionContainer.push_back(XMVectorSet(0.0f, 0.0f, spaceScale.z, 0.0f));
+	mPositionContainer.push_back(XMVectorSet(spaceScale.x, 0.0f, spaceScale.z, 0.0f));
+	mPositionContainer.push_back(XMVectorSet(spaceScale.x, 0.0f, 0.0f, 0.0f));
+	mPositionContainer.push_back(XMVectorSet(spaceScale.x, 0.0f, -spaceScale.z, 0.0f));
+}
+// 壁が前方にあるかを返します
+bool Enemy::IsWallHit() {
+	bool isHit = false;
+	// 子の壁捜索オブジェクト
+	auto children = gameObject->mTransform->Children();
+	// if文書きすぎ
+	for (auto i = children.begin(); i != children.end(); ++i) {
+		auto childrenObj = *i;
+		auto wallsearch = childrenObj->GetScript<WallSearch>();
+		if (wallsearch) {
+			if (wallsearch->IsWallHit()) {
+				isHit = true;
+				if (childrenObj->Name() == "forward")
+					mIsForwardHit = true;
+				else if (childrenObj->Name() == "right")
+					mIsRightHit = true;
+				else if (childrenObj->Name() == "left")
+					mIsLeftHit = true;
+			}
+		}
+	}
+	return isHit;
+}
+
+
+// 壁が前方にある場合に、どこに曲がるかを計算します
+float Enemy::WallHitRotate() {
+	auto radius = 0.0f;
+	// 角度を決める(てきとう)
+	if (!mIsForwardHit) radius = 0.0f;
+	else {
+		// 最初にランダム判定
+		auto random = GetRandom(0, 1);
+		if(random == 0)radius = 7.5f;
+		else radius = -7.5f;
+		// どこが当たったかで返す値を変える
+		if (mIsRightHit && mIsLeftHit)
+			radius = 180.0f;
+		else if (mIsRightHit)
+			radius = 7.5f;
+		else if (mIsLeftHit)
+			radius = -7.5f;
+	}
+	return radius;
+}
+
+// ランダム関数
+int Enemy::GetRandom(int min, int max) {
+	return min + (int)(rand() * (max - min + 1.0f) / (1.0f + RAND_MAX));
 }
