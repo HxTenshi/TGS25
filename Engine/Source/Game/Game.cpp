@@ -15,6 +15,8 @@
 
 #include "Engine/ModelConverter.h"
 
+#include "SettingObject\PhysxLayer.h"
+
 
 static std::stack<int> gIntPtrStack;
 
@@ -34,6 +36,8 @@ Game* mGame = NULL;
 Scene Game::m_Scene;
 DeltaTime* gpDeltaTime;
 SystemHelper Game::mSystemHelper;
+
+PhysxLayer* gPhysxLayer;
 
 #ifdef _ENGINE_MODE
 static bool gIsPlay;
@@ -123,6 +127,16 @@ Game::Game(){
 	mEngineRootObject->mTransform = mEngineRootObject->AddComponent<TransformComponent>();
 	mEngineRootObject->Initialize();
 	mEngineRootObject->Start();
+
+
+	auto o = new PhysxLayer();
+	o->mTransform = o->AddComponent<TransformComponent>();
+	o->Initialize();
+	o->Start();
+	Window::AddEngineTreeViewItem("PhysxLayer", (void*)o);
+	AddEngineObject(o);
+
+	gPhysxLayer = o;
 
 	mCamera.Initialize();
 	mSelectActor.Initialize();
@@ -505,6 +519,9 @@ DeltaTime* Game::GetDeltaTime(){
 System* Game::System(){
 	return &mSystemHelper;
 }
+std::vector<std::string>& Game::GetLayerNames(){
+	return gPhysxLayer->GetSelects();
+}
 void Game::RemovePhysXActor(PxActor* act){
 	return gpPhysX3Main->RemoveActor(act);
 }
@@ -523,6 +540,19 @@ Actor* Game::FindActor(Actor* actor){
 	}
 	return NULL;
 }
+Actor* Game::FindEngineActor(Actor* actor){
+
+#ifdef _ENGINE_MODE
+	
+	for (auto& act : mEngineRootObject->mTransform->Children()){
+		if (act == actor){
+			return act;
+		}
+	}
+#endif
+	return NULL;
+}
+
 
 Actor* Game::FindNameActor(const char* name){
 
