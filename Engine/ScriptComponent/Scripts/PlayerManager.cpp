@@ -48,15 +48,7 @@ void PlayerManager::Start()
 		mFadeOutObj = game->CreateActor("Assets/Fade");
 		game->AddObject(mFadeOutObj);
 	}
-	// 何も入力されていなかったらタイトルに戻るようにする
-	if (mNextStageName == "") mNextStageName = "Title";
-	// リスタートオブジェの生成
-	auto retryObj = game->CreateActor("Assets/RetrySceneObj");
-	game->AddObject(retryObj);
-	retryObj->mTransform->SetParent(gameObject);
-	auto retryScript = retryObj->GetScript<RetryScene>();
-	// リスタートするシーンの名前を入れる
-	retryScript->SetRetrySceneName(mNextStageName);
+	
 }
 
 //毎フレーム呼ばれます
@@ -230,7 +222,18 @@ void PlayerManager::GameClear()
 			mFadeOutScript->FadeOut(mFadeOutSecond);
 			// フェードアウト後シーン移動
 			auto sceneName = "./Assets/Scenes/RetryScene.scene";
-			if (mFadeOutScript->IsFadeOut()) game->LoadScene(sceneName);
+			if (mFadeOutScript->IsFadeOut()) {
+				// 何も入力されていなかったらタイトルに戻るようにする
+				if (mNextStageName == "") mNextStageName = "Title";
+				// リスタートオブジェの生成
+				auto retryObj = game->CreateActor("Assets/RetrySceneObj");
+				game->AddObject(retryObj);
+				retryObj->mTransform->SetParent(gameObject);
+				auto retryScript = retryObj->GetScript<RetryScene>();
+				// リスタートするシーンの名前を入れる
+				retryScript->SetRetrySceneName(mNextStageName);
+				game->LoadScene(sceneName);
+			}
 		}
 	}
 }
