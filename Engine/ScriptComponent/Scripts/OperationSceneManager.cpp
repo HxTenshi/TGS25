@@ -22,9 +22,7 @@ void OperationSceneManager::Update(){
 	fadeInScript->FadeIn(mFadeSecond);
 	if (!fadeInScript->IsFadeIn()) return;
 
-	if (Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS) ||
-		Input::Trigger(PAD_X_KeyCoord::Button_A) ||
-		Input::Trigger(KeyCoord::Key_H)) {
+	if (IsButtonDown()) {
 		mIsChangeScene = true;
 		auto sound = gameObject->GetComponent<SoundComponent>();
 		if (!sound) return;
@@ -63,4 +61,17 @@ void OperationSceneManager::OnCollideEnter(Actor* target){
 //コライダーとのロスト時に呼ばれます
 void OperationSceneManager::OnCollideExit(Actor* target){
 	(void)target;
+}
+
+// 指定のボタンが押されたかを返します
+bool OperationSceneManager::IsButtonDown() {
+	if (
+		(Input::Trigger(PAD_DS4_KeyCoord::Button_CROSS) ||
+			Input::Trigger(PAD_X_KeyCoord::Button_A) ||
+			Input::Trigger(KeyCoord::Key_H)) ||
+		(Input::Trigger(PAD_DS4_KeyCoord::Button_CIRCLE) ||
+			Input::Trigger(PAD_X_KeyCoord::Button_B) ||
+			Input::Trigger(KeyCoord::Key_SPACE)))
+		return true;
+	else return false;
 }
