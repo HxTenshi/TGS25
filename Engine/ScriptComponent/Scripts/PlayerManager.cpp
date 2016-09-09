@@ -15,6 +15,7 @@
 #include "SailBoard.h"
 // サウンドボックスのスクリプト
 #include "SoundBox.h"
+#include "RetryScene.h"
 #include"CCBoard.h"
 
 //生成時に呼ばれます（エディター中も呼ばれます）
@@ -47,8 +48,7 @@ void PlayerManager::Start()
 		mFadeOutObj = game->CreateActor("Assets/Fade");
 		game->AddObject(mFadeOutObj);
 	}
-	// 何も入力されていなかったらタイトルに戻るようにする
-	if (mNextStageName == "") mNextStageName = "Title";
+	
 }
 
 //毎フレーム呼ばれます
@@ -221,8 +221,19 @@ void PlayerManager::GameClear()
 			auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 			mFadeOutScript->FadeOut(mFadeOutSecond);
 			// フェードアウト後シーン移動
-			auto sceneName = "./Assets/Scenes/" + mNextStageName + ".scene";
-			if (mFadeOutScript->IsFadeOut()) game->LoadScene(mNextStageName);
+			auto sceneName = "./Assets/Scenes/RetryScene.scene";
+			if (mFadeOutScript->IsFadeOut()) {
+				// 何も入力されていなかったらタイトルに戻るようにする
+				if (mNextStageName == "") mNextStageName = "Title";
+				// リスタートオブジェの生成
+				auto retryObj = game->CreateActor("Assets/RetrySceneObj");
+				game->AddObject(retryObj);
+				retryObj->mTransform->SetParent(gameObject);
+				auto retryScript = retryObj->GetScript<RetryScene>();
+				// リスタートするシーンの名前を入れる
+				retryScript->SetRetrySceneName(mNextStageName);
+				game->LoadScene(sceneName);
+			}
 		}
 	}
 }

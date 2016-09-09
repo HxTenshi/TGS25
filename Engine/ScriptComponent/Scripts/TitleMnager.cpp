@@ -31,8 +31,8 @@ void TitleMnager::Initialize(){
 	mSelectNumberContainer.push_back("Stage01_Button");
 	mSelectNumberContainer.push_back("Stage02_Button");
 	mSelectNumberContainer.push_back("Stage03_Button");
-	mSelectNumberContainer.push_back("FastStage");
-	mSelectNumberContainer.push_back("Stage01");
+	mSelectNumberContainer.push_back("stage");
+	mSelectNumberContainer.push_back("stage01");
 	mSelectNumberContainer.push_back("Stage02");
 }
 
