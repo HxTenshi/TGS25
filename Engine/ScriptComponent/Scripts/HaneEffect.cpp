@@ -33,9 +33,9 @@ void HaneEffect::Update()
 	{
 		mPosition = XMVectorLerp(gameObject->mTransform->Position(), mSetPosition, mTimer);
 		gameObject->mTransform->Position(mPosition);
-		mTimer += game->DeltaTime()->GetDeltaTime() * 0.5f;
+		mTimer += game->DeltaTime()->GetNoScaleDeltaTime() * 0.5f;
 
-		if (XMVector3Equal(mPosition,mSetPosition))
+		if (mTimer >= 1)
 		{
 			mScale += (XMVectorSet(1, 1, 0, 0) * 20);
 			if (mScale.x > 200)
