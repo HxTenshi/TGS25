@@ -22,13 +22,16 @@
 void PlayerManager::Initialize()
 {
 	mPoint = -1;
+	mGameStartTime = 2.0f;
 	mFadeAlpha = 0.0f;
-	mStageNumberAlpha = 1.0f;
+	mStageNumberAlpha = mGameStartTime + 1.0f;
+	mGatherAlpha = mGameStartTime + 1.0f;
 	mAlpha = 0.5;
 	mFadeOutObj = nullptr;
 	mGameStart = false;
 	mIsWarning = false;
 	mIsWarningSign = false;
+	mIsFont = false;
 }
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
@@ -58,7 +61,7 @@ void PlayerManager::Update(){
 	{
 		GameStart();
 	}
-
+	if (mIsFont) FadeFontObj();
 
 	if (GameEnd())
 	{
@@ -160,12 +163,20 @@ bool PlayerManager::IsGameStart()
 void PlayerManager::GameStart()
 {
 	// ステージ名の表示
+	//CreateFontObj(mStageName, mStageNumberObj);
 	if (mStageNumberObj == nullptr) {
-		auto name = "Assets/UIPrefab/" + mStageName + ".json";
-		auto stageName = name.c_str();
+		auto objname = "Assets/UIPrefab/" + mStageName + ".json";
+		auto stageName = objname.c_str();
 		mStageNumberObj = game->CreateActor(stageName);
 		game->AddObject(mStageNumberObj);
 		mStageNumberObj->mTransform->SetParent(gameObject);
+		objname = "Assets/UIPrefab/RainbowGatherFont.json";
+		stageName = objname.c_str();
+		mGatherObj = game->CreateActor(stageName);
+		game->AddObject(mGatherObj);
+		mGatherObj->mTransform->SetParent(gameObject);
+		//CreateFontObj(mStageName, mStageNumberObj);
+		//CreateFontObj("RainbowGatherFont", mGatherObj);
 	}
 	mFadeOutObj = game->FindActor("Fade");
 	if (mFadeOutObj == nullptr) {
@@ -174,27 +185,11 @@ void PlayerManager::GameStart()
 	}
 	auto mFadeOutScript = mFadeOutObj->GetScript<Fade>();
 	mFadeOutScript->FadeIn(mFadeInSecond);
-	// ステージナンバーの透明処理
-	if (mFadeOutScript->GetFadeInAlpha() <= 0.3f) {
-		if(mFadeAlpha == 0.0f)
-			mFadeAlpha = mFadeOutScript->GetFadeInAlpha();
-		auto deltaTime = game->DeltaTime()->GetDeltaTime();
-		mStageNumberAlpha -= (1.0f / mFadeInSecond * deltaTime) / mFadeAlpha;
-	}
-	auto mate = mStageNumberObj->GetComponent<MaterialComponent>();
-	auto color = XMFLOAT4(1.0f, 1.0f, 1.0f, mStageNumberAlpha);
-	if (mate) mate->SetAlbedoColor(color);
-
-	if (mFadeOutScript->IsFadeIn())
-	{
-		game->DestroyObject(mFadeOutObj);
-		game->DestroyObject(mStageNumberObj);
-		mFadeOutObj = nullptr;
-		//auto startTex = game->CreateActor("Assets/UIPrefab/Start.json");
-		//game->AddObject(startTex);
+	if (mFadeOutScript->IsFadeIn()) {
 		// サウンドボックスの生成
 		StageSoundBox("start");
 		mGameStart = true;
+		mIsFont = true;
 	}
 }
 
@@ -310,6 +305,38 @@ void PlayerManager::PlayerSoundBox(const std::string name) {
 void PlayerManager::PlaySoundBox(Actor* soundBox, std::string name) {
 	auto soundBoxScript = soundBox->GetScript<SoundBox>();
 	soundBoxScript->SetSoundName(name);
+}
+
+// フォントの生成関数です
+void PlayerManager::CreateFontObj(const std::string name, Actor* obj) {
+	if (obj != nullptr) return;
+	auto objname = "Assets/UIPrefab/" + name + ".json";
+	auto stageName = objname.c_str();
+	obj = game->CreateActor(stageName);
+	game->AddObject(obj);
+	obj->mTransform->SetParent(gameObject);
+}
+
+void PlayerManager::FadeFontObj() {
+	// ステージナンバーの透明処理
+	auto deltaTime = game->DeltaTime()->GetDeltaTime();
+	mStageNumberAlpha -= mFadeInSecond * deltaTime;
+	mGatherAlpha -= mFadeInSecond * deltaTime;
+	auto stageNmuberMate = mStageNumberObj->GetComponent<MaterialComponent>();
+	auto stageNumberColor = XMFLOAT4(1.0f, 1.0f, 1.0f, mStageNumberAlpha);
+	if (stageNmuberMate) stageNmuberMate->SetAlbedoColor(stageNumberColor);
+	//mGatherObj
+	auto gatherMate = mGatherObj->GetComponent<MaterialComponent>();
+	auto gatherNumberColor = XMFLOAT4(1.0f, 1.0f, 1.0f, mGatherAlpha);
+	if (gatherMate) gatherMate->SetAlbedoColor(gatherNumberColor);
+	if (mStageNumberAlpha <= 0.0f)
+	{
+		game->DestroyObject(mStageNumberObj);
+		game->DestroyObject(mGatherObj);
+		game->DestroyObject(mFadeOutObj);
+		mFadeOutObj = nullptr;
+		mIsFont = false;
+	}
 }
 
 bool PlayerManager::IsClear()

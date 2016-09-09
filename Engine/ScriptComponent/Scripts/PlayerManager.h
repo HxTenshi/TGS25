@@ -23,6 +23,9 @@ public:
 	void PlayerSoundBox(const std::string name);
 	// 指定したサウンドボックスを再生します
 	void PlaySoundBox(Actor* soundBox, std::string name);
+	// フォントの生成関数です
+	void CreateFontObj(const std::string name, Actor* obj);
+	void FadeFontObj();
 	bool IsGameStart();
 
 private:
@@ -48,8 +51,10 @@ private:
 	float mFadeInSecond;
 	SERIALIZE
 	float mTitleChangeTime;
+	float mGameStartTime;
 	float mFadeAlpha;			// フェードの透明度
 	float mStageNumberAlpha;	// ステージナンバーの透明値
+	float mGatherAlpha;
 	// ステージ名
 	SERIALIZE
 	std::string mStageName;
@@ -57,8 +62,10 @@ private:
 	std::string mNextStageName;	// クリア時の次に移動するシーン名
 	bool mIsWarning;
 	bool mIsWarningSign;
+	bool mIsFont;
 	Actor* mFadeOutObj;
 	Actor* mStageNumberObj;
+	Actor* mGatherObj;
 	Actor* mStageSoundBox;
 	Actor* mPlayerSoundBox;
 };

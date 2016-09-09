@@ -24,6 +24,7 @@ public:
 
 private:
 	//メンバ変数
+	int mSetParentCount;
 	int mButtonCreateCount;		// ボタンカウント
 	int mPauseCount;			// ポーズの回数
 	SERIALIZE

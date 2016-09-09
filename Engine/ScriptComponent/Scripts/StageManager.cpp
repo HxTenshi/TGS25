@@ -13,6 +13,7 @@
 
 //生成時に呼ばれます（エディター中も呼ばれます）
 void StageManager::Initialize(){
+	mSetParentCount = 0;
 	mButtonCreateCount = 0;
 	mPauseCount = 0;
 	mChangeTime = 2.0f * 60.0f;
@@ -23,19 +24,17 @@ void StageManager::Initialize(){
 
 //initializeとupdateの前に呼ばれます（エディター中も呼ばれます）
 void StageManager::Start(){
-	// リスタートの名前が空ならば、移動さきをタイトルにする
-	if (mRetryScene == "") mRetryScene = "Title";
-	// リスタートオブジェの生成
-	auto retryObj = game->CreateActor("Assets/RetrySceneObj");
-	game->AddObject(retryObj);
-	retryObj->mTransform->SetParent(gameObject);
-	auto retryScript = retryObj->GetScript<RetryScene>();
-	// リスタートするシーンの名前を入れる
-	retryScript->SetRetrySceneName(mRetryScene);
+	
 }
 
 //毎フレーム呼ばれます
 void StageManager::Update(){
+	if (mSetParentCount == 0) {
+		// プレイヤーマネージャに持たせる
+		auto playerManagerObj = game->FindActor("PlayerManager");
+		gameObject->mTransform->SetParent(playerManagerObj);
+		mSetParentCount = 1;
+	}
 	// プレイヤーを探す
 	auto playerManager = game->FindActor("PlayerManager");
 	if (playerManager->Name() != "PlayerManager") return;
@@ -96,7 +95,19 @@ void StageManager::Update(){
 			game->DeltaTime()->SetTimeScale(1.0f);
 			// シーン遷移ON
 			if (mChangeTime <= mSceneChangeTimer) game->LoadScene("./Assets/Scenes/Title.scene");
-			else mCursorScript->OnChangeScene();
+			else {
+				// リスタートの名前が空ならば、移動さきをタイトルにする
+				if (mRetryScene == "") mRetryScene = "Title";
+				if (mCursorScript->GetButtonCount() == 2) mRetryScene = "Title";
+				// リスタートオブジェの生成
+				auto retryObj = game->CreateActor("Assets/RetrySceneObj");
+				game->AddObject(retryObj);
+				retryObj->mTransform->SetParent(gameObject);
+				auto retryScript = retryObj->GetScript<RetryScene>();
+				// リスタートするシーンの名前を入れる
+				retryScript->SetRetrySceneName(mRetryScene);
+				mCursorScript->OnChangeScene();
+			}
 		}
 	}
 }
@@ -147,7 +158,7 @@ void StageManager::createPause() {
 	mCursorScript->AddSceneContainer("NotMove");
 	// クレジット(未実装)
 	mCursorScript->AddSceneContainer("RetryScene");
-	mCursorScript->AddSceneContainer("Title");
+	mCursorScript->AddSceneContainer("RetryScene");
 	playPauseSE();
 	game->DeltaTime()->SetTimeScale(0.0f);
 	mSceneChangeTimer = 0.0f;
