@@ -543,7 +543,6 @@ Actor* Game::FindActor(Actor* actor){
 Actor* Game::FindEngineActor(Actor* actor){
 
 #ifdef _ENGINE_MODE
-	
 	for (auto& act : mEngineRootObject->mTransform->Children()){
 		if (act == actor){
 			return act;
